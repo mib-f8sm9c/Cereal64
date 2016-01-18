@@ -1,0 +1,130 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{F4DBB616-9F71-4593-AD2C-4BBE38561AF1}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Cereal64.Microcodes</RootNamespace>
+    <AssemblyName>Cereal64.Microcodes</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_Load_UCode.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_MoveMem.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_MoveWord.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_Mtx.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_GeometryMode.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_PopMtx.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_Texture.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_EndDL.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_DMA_IO.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_DL.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_Special_1.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_Special_2.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_Special_3.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_SetConvert.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_SetKeyGB.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_TextRectFlip.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_TextRect.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_SetOtherMode_H.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_SetOtherMode_L.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_SetScissor.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_RDPSetOtherMode.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_SetKeyR.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_SetPrimDepth.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_RDPFullSync.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_RDPTileSync.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_RDPPipeSync.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_RDPLoadSync.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_RDPHalf_1.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xE\F3DZEX_G_SPNoOp.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetTile.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetTImg.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetCImg.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetZImg.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetPrimColor.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetBlendColor.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetFogColor.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_FillRect.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_LoadTile.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_LoadBlock.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetFillColor.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetTileSize.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetEnvColor.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_LoadTLut.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_SetCombine.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\F3DZEXCommandFactory.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_Branch_Z.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_CullDL.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_ModifyVtx.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_NoOp.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_Quad.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0xF\F3DZEX_G_RDPHalf_2.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_TRI1.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_TRI2.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_Vtx.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\IF3DZEXCommand.cs" />
+    <Compile Include="F3DZEX\DataElements\F3DZEXCommandList.cs" />
+    <Compile Include="F3DZEX\DataElements\Texture.cs" />
+    <Compile Include="F3DZEX\DataElements\TextureConversion.cs" />
+    <Compile Include="F3DZEX\DataElements\Vertex.cs" />
+    <Compile Include="F3DZEX\DataElements\UnknownData.cs" />
+    <Compile Include="F3DZEX\DataElements\VertexCollection.cs" />
+    <Compile Include="F3DZEX\F3DZEXReader.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="F3DEX\" />
+    <Folder Include="F3DZEX\Controls\" />
+    <Folder Include="Fast3D\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{B6A46BAF-D012-40F7-8213-EE361B1BC75E}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Issues.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
