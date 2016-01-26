@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Cereal64.Common;
+using Cereal64.Common.Utils;
 
 namespace Cereal64.Common.UnitTests
 {

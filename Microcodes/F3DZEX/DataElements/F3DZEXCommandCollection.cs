@@ -8,13 +8,13 @@ using Cereal64.Common;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements
 {
-    public class F3DZEXCommandList : N64DataElement
+    public class F3DZEXCommandCollection : N64DataElement
     {
         private List<IF3DZEXCommand> _commands = new List<IF3DZEXCommand>();
 
         public ReadOnlyCollection<IF3DZEXCommand> Commands { get { return _commands.AsReadOnly(); } }
 
-        public F3DZEXCommandList(int index, byte[] rawBytes)
+        public F3DZEXCommandCollection(int index, byte[] rawBytes)
             : base(index, rawBytes)
         {
 
@@ -33,7 +33,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                 {
                     Array.Copy(value, i, bytes, 0, 0x8);
 
-                    IF3DZEXCommand command = F3DZEXCommandFactory.ReadCommand(Address.Offset + i, bytes);
+                    IF3DZEXCommand command = F3DZEXCommandFactory.ReadCommand(FileOffset + i, bytes);
                     if (command != null)
                         _commands.Add(command);
                 }

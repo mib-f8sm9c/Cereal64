@@ -96,12 +96,14 @@
     <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_TRI2.cs" />
     <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_Vtx.cs" />
     <Compile Include="F3DZEX\DataElements\Commands\IF3DZEXCommand.cs" />
-    <Compile Include="F3DZEX\DataElements\F3DZEXCommandList.cs" />
+    <Compile Include="F3DZEX\DataElements\Palette.cs" />
+    <Compile Include="F3DZEX\DataElements\F3DZEXCommandCollection.cs" />
     <Compile Include="F3DZEX\DataElements\Texture.cs" />
     <Compile Include="F3DZEX\DataElements\TextureConversion.cs" />
     <Compile Include="F3DZEX\DataElements\Vertex.cs" />
     <Compile Include="F3DZEX\DataElements\UnknownData.cs" />
     <Compile Include="F3DZEX\DataElements\VertexCollection.cs" />
+    <Compile Include="F3DZEX\F3DZEXContainer.cs" />
     <Compile Include="F3DZEX\F3DZEXReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

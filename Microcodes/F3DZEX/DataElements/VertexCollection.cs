@@ -36,7 +36,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                 for (int i = 0; i < value.Length - 0xF; i += 0x10)
                 {
                     Array.Copy(value, i, bytes, 0, 0x10);
-                    Vertex vtx = new Vertex(Address.Offset + i, bytes);
+                    Vertex vtx = new Vertex(FileOffset + i, bytes);
                     _vertices.Add(vtx);
                 }
             }

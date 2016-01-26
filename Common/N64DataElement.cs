@@ -7,17 +7,22 @@ namespace Cereal64.Common
 {
     public abstract class N64DataElement
     {
-        public N64Address Address;
+        //Address assigned by the DMAManager
+        public N64Address DMAAddress;
 
-        public N64DataElement(int address, byte[] rawData)
+        public int FileOffset;
+
+        public N64DataElement(int offset, byte[] rawData)
         {
-            Address = new N64Address(address);
+            //Address = new N64Address(address);
+            FileOffset = offset;
             RawData = rawData;
         }
 
         public abstract byte[] RawData { get; set; }
 
         public abstract int RawDataSize { get; }
-    }
 
+        public bool ContainsOffset(int offset) { return offset >= FileOffset && offset < FileOffset + RawDataSize; }
+    }
 }

@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Cereal64.Common
 {
-    public class N64Address
+    public struct N64Address
     {
         public byte Segment;
 

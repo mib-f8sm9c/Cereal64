@@ -38,6 +38,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Drawing" />
   </ItemGroup>
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
@@ -45,8 +46,14 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="F3DZEXTextureConversionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="F3DZEXCommandTests.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Common.csproj">
@@ -57,6 +64,33 @@
       <Project>{F4DBB616-9F71-4593-AD2C-4BBE38561AF1}</Project>
       <Name>Microcodes</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test_255And0Only.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test_255And0Only_BWOnly - Copy.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test_FullRange_BWOnly - Copy.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test_FullRange.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test_255And0Only_BWOnly.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Test_FullRange_BWOnly.bmp" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

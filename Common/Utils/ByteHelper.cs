@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Collections;
 
-namespace Cereal64.Common
+namespace Cereal64.Common.Utils
 {
     public enum Endianness
     {

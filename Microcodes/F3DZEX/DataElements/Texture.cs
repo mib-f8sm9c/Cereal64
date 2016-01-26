@@ -32,8 +32,11 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         public int Width;
         public int Height;
 
-        private Bitmap _image;
-        private byte[] _rawData;
+        public Palette ImagePalette;
+        private Bitmap Image;
+        //private byte[] _rawData;
+
+        private bool _initializing = true;
 
         public bool IsValidFormat
         {
@@ -68,51 +71,239 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         }
 
         public Texture(int index, byte[] bytes, ImageFormat format = ImageFormat.RGBA,
-            PixelInfo pixel = PixelInfo.Size_32b, int width = 0, int height = 0)
+            PixelInfo pixel = PixelInfo.Size_32b, int width = 0, int height = 0, Palette palette = null)
             : base(index, bytes)
         {
             Format = format;
             PixelSize = pixel;
             Width = width;
             Height = height;
+
+            ImagePalette = palette;
             
             //generate image
+            _initializing = false;
+            RawData = bytes;
         }
 
         public override byte[] RawData
         {
             get
             {
-                return _rawData;
+                return ConvertImage();
             }
             set
             {
-                _rawData = value;
+                if (_initializing) //Wait til more info (width, height) comes in
+                    return;
 
-                //Since default is RGBA 4b, the constructor will not set this
                 if (IsValidFormat)
                 {
                     //generate image
+                    GenerateImage(value);
                 }
             }
         }
 
-        public override int RawDataSize { get { return _rawData.Length; } }
-
-        public Bitmap Image
-        {
-            get
+        public override int RawDataSize 
+        { 
+            get 
             {
-                if (_image == null)
+                int length = 0;
+                switch (Format)
                 {
-                    //generate
+                    case ImageFormat.RGBA:
+                        switch (PixelSize)
+                        {
+                            case PixelInfo.Size_16b:
+
+                                break;
+                            case PixelInfo.Size_32b:
+
+                                break;
+                        }
+                        break;
+                    case ImageFormat.YUV:
+                        switch (PixelSize)
+                        {
+                            case PixelInfo.Size_16b:
+
+                                break;
+                        }
+                        break;
+                    case ImageFormat.CI:
+                        switch (PixelSize)
+                        {
+                            case PixelInfo.Size_4b:
+
+                                break;
+                            case PixelInfo.Size_8b:
+
+                                break;
+                        }
+                        break;
+                    case ImageFormat.IA:
+                        switch (PixelSize)
+                        {
+                            case PixelInfo.Size_4b:
+
+                                break;
+                            case PixelInfo.Size_8b:
+
+                                break;
+                            case PixelInfo.Size_16b:
+
+                                break;
+                        }
+                        break;
+                    case ImageFormat.I:
+                        switch (PixelSize)
+                        {
+                            case PixelInfo.Size_4b:
+
+                                break;
+                            case PixelInfo.Size_8b:
+
+                                break;
+                        }
+                        break;
                 }
-                return _image;
+                return length;
             }
-            set
+        }
+
+        private byte[] ConvertImage()
+        {
+            if (Image == null)
+                return new byte[0];
+
+            switch (Format)
             {
-                _image = value;
+                case ImageFormat.RGBA:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_16b:
+                            return TextureConversion.RGBA16ToBinary(Image);
+
+                        case PixelInfo.Size_32b:
+                            return TextureConversion.RGBA32ToBinary(Image);
+
+                    }
+                    break;
+                case ImageFormat.YUV:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_16b:
+                            return null;
+                            //return TextureConversion.YUV16ToBinary(_image);
+                    }
+                    break;
+                case ImageFormat.CI:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_4b:
+                            return TextureConversion.CI4ToBinary(Image, ImagePalette);
+
+                        case PixelInfo.Size_8b:
+                            return TextureConversion.CI8ToBinary(Image, ImagePalette);
+
+                    }
+                    break;
+                case ImageFormat.IA:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_4b:
+                            return TextureConversion.IA4ToBinary(Image);
+
+                        case PixelInfo.Size_8b:
+                            return TextureConversion.IA8ToBinary(Image);
+
+                        case PixelInfo.Size_16b:
+                            return TextureConversion.IA16ToBinary(Image);
+
+                    }
+                    break;
+                case ImageFormat.I:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_4b:
+                            return TextureConversion.I4ToBinary(Image);
+
+                        case PixelInfo.Size_8b:
+                            return TextureConversion.I8ToBinary(Image);
+
+                    }
+                    break;
             }
+
+            return null;
+        }
+
+        private Bitmap GenerateImage(byte[] bytes)
+        {
+            if (bytes == null)
+                return null;
+
+            switch (Format)
+            {
+                case ImageFormat.RGBA:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_16b:
+                            return TextureConversion.BinaryToRGBA16(bytes, Width, Height);
+
+                        case PixelInfo.Size_32b:
+                            return TextureConversion.BinaryToRGBA32(bytes, Width, Height);
+
+                    }
+                    break;
+                case ImageFormat.YUV:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_16b:
+                            return null;
+                            //return TextureConversion.BinaryToYUV16(bytes, Width, Height);
+                    }
+                    break;
+                case ImageFormat.CI:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_4b:
+                            return TextureConversion.BinaryToCI4(bytes, ImagePalette, Width, Height);
+
+                        case PixelInfo.Size_8b:
+                            return TextureConversion.BinaryToCI8(bytes, ImagePalette, Width, Height);
+
+                    }
+                    break;
+                case ImageFormat.IA:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_4b:
+                            return TextureConversion.BinaryToIA4(bytes, Width, Height);
+
+                        case PixelInfo.Size_8b:
+                            return TextureConversion.BinaryToIA8(bytes, Width, Height);
+
+                        case PixelInfo.Size_16b:
+                            return TextureConversion.BinaryToIA16(bytes, Width, Height);
+
+                    }
+                    break;
+                case ImageFormat.I:
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_4b:
+                            return TextureConversion.BinaryToI4(bytes, Width, Height);
+
+                        case PixelInfo.Size_8b:
+                            return TextureConversion.BinaryToI8(bytes, Width, Height);
+
+                    }
+                    break;
+            }
+
+            return null;
         }
     }
 }

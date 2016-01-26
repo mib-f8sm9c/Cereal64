@@ -42,7 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ByteHelper.cs" />
+    <Compile Include="DMAManager.cs" />
+    <Compile Include="IN64ElementContainer.cs" />
+    <Compile Include="RomProject.cs" />
+    <Compile Include="Utils\ByteHelper.cs" />
     <Compile Include="Controls\HexNumericUpDown.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -51,8 +54,10 @@
     </Compile>
     <Compile Include="N64Address.cs" />
     <Compile Include="N64DataElement.cs" />
-    <Compile Include="N64Sums.cs" />
+    <Compile Include="Utils\N64Sums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RomFile.cs" />
+    <Compile Include="UnknownData.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\HexNumericUpDown.resx">

@@ -31,7 +31,7 @@ using System.Collections.ObjectModel;
 
 
 
-namespace Cereal64.Common
+namespace Cereal64.Common.Utils
 {
     static public class N64Sums
     {
