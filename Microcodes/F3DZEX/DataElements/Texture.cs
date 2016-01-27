@@ -100,7 +100,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                 if (IsValidFormat)
                 {
                     //generate image
-                    GenerateImage(value);
+                    Image = GenerateImage(value);
                 }
             }
         }

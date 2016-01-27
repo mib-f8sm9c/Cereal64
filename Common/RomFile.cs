@@ -12,8 +12,8 @@ namespace Cereal64.Common
 
         public int FileID { get; set; }
 
-        public ReadOnlyCollection<N64DataElement> Elements { get { return _elements.AsReadOnly(); } }
-        private List<N64DataElement> _elements;
+        public ReadOnlyCollection<N64DataElement> Elements { get { return _elements.Elements; } }
+        private N64DataElementCollection _elements;
 
         public ReadOnlyCollection<IN64ElementContainer> ElementContainers { get { return _elementContainers.AsReadOnly(); } }
         private List<IN64ElementContainer> _elementContainers;
@@ -23,16 +23,14 @@ namespace Cereal64.Common
             FileName = fileName;
             FileID = fileID;
 
-            _elements = new List<N64DataElement>();
+            _elements = new N64DataElementCollection();
             _elementContainers = new List<IN64ElementContainer>();
         }
 
         public void AddElement(N64DataElement element)
         {
-            if (_elements.Contains(element))
+            if (!_elements.AddElement(element))
                 return;
-
-            _elements.Add(element);
 
             foreach (IN64ElementContainer container in _elementContainers)
             {
@@ -42,15 +40,7 @@ namespace Cereal64.Common
 
         public void RemoveElement(N64DataElement element)
         {
-            if (!_elements.Contains(element))
-                return;
-
-            _elements.Remove(element);
-
-            foreach (IN64ElementContainer container in _elementContainers)
-            {
-                container.RemoveElement(element);
-            }
+            _elements.RemoveElement(element);
         }
 
         public void AddElementContainer(IN64ElementContainer container)
@@ -61,7 +51,7 @@ namespace Cereal64.Common
             _elementContainers.Add(container);
 
             //Add prevoiusly existing elements
-            foreach (N64DataElement element in _elements)
+            foreach (N64DataElement element in _elements.Elements)
             {
                 container.AddElement(element);
             }
@@ -77,13 +67,7 @@ namespace Cereal64.Common
 
         public N64DataElement GetElementAt(int offset)
         {
-            for (int i = 0; i < _elements.Count; i++)
-            {
-                if (_elements[i].ContainsOffset(offset))
-                    return _elements[i];
-            }
-
-            return null;
+            return _elements.GetElementAt(offset);
         }
 
         //public byte[] GetAsBytes() { }

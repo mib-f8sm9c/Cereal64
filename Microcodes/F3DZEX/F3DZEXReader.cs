@@ -12,8 +12,8 @@ namespace Cereal64.Microcodes.F3DZEX
     {
         public List<Palette> Palettes = new List<Palette>();
         public List<Texture> Textures = new List<Texture>();
-        public List<VertexCollection> Vertices = new List<VertexCollection>();
-        public List<F3DZEXCommandCollection> Commands = new List<F3DZEXCommandCollection>();
+        public List<Vertex> Vertices = new List<Vertex>();
+        public List<IF3DZEXCommand> Commands = new List<IF3DZEXCommand>();
     }
 
     public static class F3DZEXReader
@@ -39,7 +39,7 @@ namespace Cereal64.Microcodes.F3DZEX
                 if (f3Command == null)
                     break;
 
-                //package.Commands.Add(f3Command);
+                package.Commands.Add(f3Command);
                 ParseCommand(f3Command);
 
                 offset += 8;

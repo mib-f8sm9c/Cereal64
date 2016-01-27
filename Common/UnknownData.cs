@@ -3,20 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Cereal64.Common.F3DZEX.DataElements
+namespace Cereal64.Common
 {
+    //UnknownData is a special Element which allows for users to overwrite it in the N64DataElementCollection.
+    // Essentially when first reading a file, all data will be tagged Unknown, and when it becomes known the user
+    // can add in the specific type of data (texture, F3D Command, etc.) on top of the Unknown data, and
+    // N64DataElementCollection will automatically manipulate the data to make it work.
     public class UnknownData : N64DataElement
     {
         //Use a list to make adding/removing data easier
         private List<byte> _rawData;
 
         //Need this so it can split 
-        private RomFile _parent;
+        //private RomFile _parent;
 
-        public UnknownData(RomFile parent, int index, byte[] rawData)
+        public UnknownData(/*RomFile parent, */int index, byte[] rawData)
             : base(index, rawData)
         {
-            _parent = parent;
+            //_parent = parent;
         }
 
         public override byte[] RawData
@@ -33,9 +37,19 @@ namespace Cereal64.Common.F3DZEX.DataElements
 
         public override int RawDataSize { get { return _rawData.Count; } }
 
-        //public byte[] RemoveData(int offset, int length)
+        //Permanently drop some data. Not used currently
+        //public bool Shorten(int fileOffset, int length)
         //{
-        //    if(offset < this.Address.Offset || offset > _rawData.
+        //    int startOffset = fileOffset - FileOffset;
+        //    int endOffset = _rawData.Count - (startOffset + length);
+
+        //    if (startOffset < 0 || endOffset < 0 ||
+        //        startOffset + endOffset > _rawData.Count)
+        //        return false;
+
+        //    _rawData.RemoveRange(startOffset + length, endOffset);
+        //    _rawData.RemoveRange(0, startOffset);
+        //    return true;
         //}
     }
 }

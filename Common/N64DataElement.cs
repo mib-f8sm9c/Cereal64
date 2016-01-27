@@ -8,7 +8,7 @@ namespace Cereal64.Common
     public abstract class N64DataElement
     {
         //Address assigned by the DMAManager
-        public N64Address DMAAddress;
+        //public N64Address DMAAddress;
 
         public int FileOffset;
 

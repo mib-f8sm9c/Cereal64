@@ -72,16 +72,7 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Test.bmp" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Test_255And0Only.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Test_255And0Only_BWOnly - Copy.bmp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Test_FullRange_BWOnly - Copy.bmp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Test_FullRange.bmp" />

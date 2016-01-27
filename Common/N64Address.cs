@@ -5,6 +5,8 @@ using System.Text;
 
 namespace Cereal64.Common
 {
+    //To do: Delete this, I don't need it with the way DMAManager is implemented
+
     public struct N64Address
     {
         public byte Segment;

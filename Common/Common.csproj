@@ -42,8 +42,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="N64DataElementCollection.cs" />
     <Compile Include="DMAManager.cs" />
     <Compile Include="IN64ElementContainer.cs" />
+    <Compile Include="LockedData.cs" />
     <Compile Include="RomProject.cs" />
     <Compile Include="Utils\ByteHelper.cs" />
     <Compile Include="Controls\HexNumericUpDown.cs">

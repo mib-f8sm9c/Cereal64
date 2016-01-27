@@ -32,10 +32,14 @@ namespace Cereal64.Common
         public ReadOnlyCollection<RomFile> Files { get { return _files.AsReadOnly(); } }
         private List<RomFile> _files;
 
+        private List<DMAProfile> _dmaProfiles;
+
         private RomProject()
         {
             _files = new List<RomFile>();
             ProjectName = "New Rom Project";
+
+            _dmaProfiles = new List<DMAProfile>();
         }
     }
 }
