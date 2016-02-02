@@ -4,26 +4,60 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_Texture : N64DataElement, IF3DZEXCommand
     {
-        public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_TEXTURE; } }
+        //To do: reduce 'on' to a bool
 
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
+        public F3DZEXCommandID CommandID
+        { get { return F3DZEXCommandID.F3DZEX_G_TEXTURE; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_TEXTURE"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Enables tile descriptor, sets its scaling factor and mipmap levels"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Enables tile descriptor, sets its scaling factor and mipmap levels";
 
-        public byte Level;
-        public byte Tile;
-        public byte TurnOn;
-        public ushort ScaleS;
-        public ushort ScaleT;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Maximum number of mipmap levels aside from the first"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Level { get; set; }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Tile descriptor number"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Tile { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Decides whether to turn the given texture on or off "),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte TurnOn { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Scaling factor for the S-axis (horizontal)"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort ScaleS { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Scaling factor for the T-axis (vertical)"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort ScaleT { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_Texture(int index, byte[] rawBytes)

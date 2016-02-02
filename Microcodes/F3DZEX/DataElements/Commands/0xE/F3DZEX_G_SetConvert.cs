@@ -4,22 +4,63 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_SetConvert : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_SETCONVERT; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_SETCONVERT; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_SETCONVERT"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Set conversion factors for YUV to RGB conversion"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Set conversion factors for YUV to RGB conversion";
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("K0 term of conversion matrix"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort K0 { get; set; }
 
-        public ushort K0, K1, K2, K3, K4, K5;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("K1 term of conversion matrix"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort K1 { get; set; }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("K2 term of conversion matrix"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort K2 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("K3 term of conversion matrix"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort K3 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("K4 term of conversion matrix"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort K4 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("K5 term of conversion matrix"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort K5 { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_SetConvert(int index, byte[] rawBytes)

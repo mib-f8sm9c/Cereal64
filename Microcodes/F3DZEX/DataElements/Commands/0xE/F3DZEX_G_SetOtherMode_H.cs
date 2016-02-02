@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
@@ -25,20 +26,42 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             G_MDSFT_COLORDITHER = 0X16,
             G_MDSFT_PIPELINE = 0X17,
         }
-
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_SETOTHERMODE_H; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_SETOTHERMODE_H; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_SETOTHERMODE_H"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Configure higher half of RDP Other Modes"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Configure higher half of RDP Other Modes";
 
-        public HMode Shift;
-        public ushort Length;
-        public uint Data;  //Enumeration available here
-
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Amount data is shifted by, or number of LSb of mode bits to be changed")]
+        public HMode Shift { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Size of data affected, in bits"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort Length { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("New bit settings to be applied"),
+        TypeConverter(typeof(UInt32HexTypeConverter))]
+        public uint Data { get; set; } //Enumeration available here
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_SetOtherMode_H(int index, byte[] rawBytes)

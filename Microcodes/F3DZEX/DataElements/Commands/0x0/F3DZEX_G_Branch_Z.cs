@@ -4,24 +4,50 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_Branch_Z : N64DataElement, IF3DZEXCommand
     {
-        public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_BRANCH_Z; } }
+        // NOTE: THIS COMMAND FOLLOWS AN E1 COMMAND
 
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
+        public F3DZEXCommandID CommandID
+        { get { return F3DZEXCommandID.F3DZEX_G_BRANCH_Z; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_BRANCH_Z"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Branch to another display list if vertex is close enough to screen"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Branch to another display list if vertex is close enough to screen";
 
-        public ushort BufferIndex1;
-        public ushort BufferIndex2;
-        public uint ZVal;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of vertex to test"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort BufferIndex1 { get; set; }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of vertex to test"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort BufferIndex2 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Z value to test against"),
+        TypeConverter(typeof(UInt32HexTypeConverter))]
+        public uint ZVal { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_Branch_Z(int index, byte[] rawBytes)

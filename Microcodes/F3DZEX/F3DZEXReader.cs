@@ -53,7 +53,7 @@ namespace Cereal64.Microcodes.F3DZEX
             //Here handle extra command things (like if it's referencing textures and such)
             switch (command.CommandID)
             {
-                case F3DZEXCommandID.G_NOOP: //don't actually use this one
+                case F3DZEXCommandID.F3DZEX_G_NOOP: //don't actually use this one
 
                     break;
             }

@@ -4,23 +4,43 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_CullDL : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_CULLDL; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_CULLDL; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_CULLDL"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "End display list if object is offscreen"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "End display list if object is offscreen";
 
-        public ushort BufferIndexStart;
-        public ushort BufferIndexEnd;
-
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of first vertex for bounding volume"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort BufferIndexStart { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of last vertex for bounding volume"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort BufferIndexEnd { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_CullDL(int index, byte[] rawBytes)

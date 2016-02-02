@@ -4,23 +4,45 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_Load_UCode : N64DataElement, IF3DZEXCommand
     {
-        public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_LOAD_UCODE; } }
+        //NOTE: THIS CODE FOLLOWS A E1 COMMAND AND NEEDS IT TO FUNCTION
 
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
+        public F3DZEXCommandID CommandID
+        { get { return F3DZEXCommandID.F3DZEX_G_LOAD_UCODE; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_LOAD_UCODE"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Jump or \"call\" another display list"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Jump or \"call\" another display list";
 
-        public ushort DSize;
-        public uint TStart;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Size of data section"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort DSize { get; set; }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Start of text section"),
+        TypeConverter(typeof(UInt32HexTypeConverter))]
+        public uint TStart { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_Load_UCode(int index, byte[] rawBytes)

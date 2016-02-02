@@ -4,20 +4,12 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_MoveMem : N64DataElement, IF3DZEXCommand
     {
-        public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_MOVEMEM; } }
-
-        public string CommandName
-        { get { return "G_MOVEMEM"; } }
-
-        public string CommandDesc //Copied from CloudModding
-        { get { return "Change block of memory in DMEM"; } }
-
         public enum G_MV_INDEX
         {
             G_MV_MMTX = 0x02,
@@ -28,11 +20,46 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             G_MV_MATRIX = 0x0E
         }
 
-        public byte Size;
-        public byte Offset;
-        public G_MV_INDEX MemoryIndex;
-        public uint MemAddress;
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
+        public F3DZEXCommandID CommandID
+        { get { return F3DZEXCommandID.F3DZEX_G_MOVEMEM; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
+        public string CommandName
+        { get { return "G_MOVEMEM"; } }
+        
+        [BrowsableAttribute(false)]
+        public string CommandDesc //Copied from CloudModding
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Change block of memory in DMEM";
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Size in bytes of memory to be moved"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Size { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Offset from indexed base address"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Offset { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Index into table of DMEM addresses")]
+        public G_MV_INDEX MemoryIndex { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("RAM address of memory"),
+        TypeConverter(typeof(UInt32HexTypeConverter))]
+        public uint MemAddress { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_MoveMem(int index, byte[] rawBytes)

@@ -4,27 +4,63 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_SetKeyGB : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_SETKEYGB; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_SETKEYGB; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_SETKEYGB"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Set green and blue components of chroma key"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Set green and blue components of chroma key";
 
-        public ushort WidthG;
-        public ushort WidthB;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Scaled width of half the key window for green"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort WidthG; //Actually 4.8 float
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Scaled width of half the key window for blue"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort WidthB; //Actually 4.8 float
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Intensity of active key for green"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
         public byte CenterG;
-        public byte ScaleG;
-        public byte CenterB;
-        public byte ScaleB;
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Reciprocal of size of soft edge, normalized to 0..0xFF, for green"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte ScaleG;
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Intensity of active key for blue"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte CenterB;
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Reciprocal of size of soft edge, normalized to 0..0xFF, for blue"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte ScaleB;
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_SetKeyGB(int index, byte[] rawBytes)

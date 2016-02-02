@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
@@ -20,24 +21,88 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             G_TX_WRAP = 0x00,
             G_TX_CLAMP = 0x02
         }
-
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_SETTILE; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_SETTILE; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_SETTILE"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Set various parameters of a tile descriptor"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Set various parameters of a tile descriptor";
+            
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Sets color format")]
+        public Texture.ImageFormat Format { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Sets bit size of pixel")]
+        public Texture.PixelInfo PixelSize { get; set; }
+            
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Number of 64-bit values per row"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort Line { get; set; }
 
-        public Texture.ImageFormat Format;
-        public Texture.PixelInfo PixelSize;
-        public ushort Line, TMem;
-        public byte Tile, Palette;
-        public TextureMirrorSetting CMTMirror, CMSMirror;
-        public TextureWrapSetting CMTWrap, CMSWrap;
-        public byte MaskT, ShiftT, MaskS, ShiftS;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Offset of texture in TMEM"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort TMem { get; set; }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute(" Tile descriptor being modified "),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Tile { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Which palette to use for colors (if relevant)"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Palette { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Mirror flag for the T axis")]
+        public TextureMirrorSetting CMTMirror { get; set; }
+            
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Mirror flag for the S axis")]
+        public TextureMirrorSetting CMSMirror { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Clamp flag for the S axis")]
+        public TextureWrapSetting CMTWrap { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Clamp flag for the T axis")]
+        public TextureWrapSetting CMSWrap { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Sets how much of T axis is shown before wrapping")]
+        public byte MaskT { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Sets the amount to shift T axis values after perspective division")]
+        public byte ShiftT { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Sets how much of S axis is shown before wrapping")]
+        public byte MaskS { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Sets the amount to shift S axis values after perspective division")]
+        public byte ShiftS { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_SetTile(int index, byte[] rawBytes)

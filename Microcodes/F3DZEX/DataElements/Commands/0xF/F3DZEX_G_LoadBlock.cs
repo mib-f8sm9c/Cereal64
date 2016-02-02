@@ -4,24 +4,54 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_LoadBlock : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_LOADBLOCK; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_LOADBLOCK; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_LOADBLOCK"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Load texture into TMEM as a continuous stream"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Load texture into TMEM as a continuous stream";
+            
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Upper-left corner of texture to load, S-axis")]
+        public ushort ULS { get; set; } //10.2 fixed point
 
-        public ushort ULS, ULT;
-        public byte Tile;
-        public ushort Texels, DLT;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Upper-left corner of texture to load, T-axis")]
+        public ushort ULT { get; set; } //10.2 fixed point
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Tile descriptor to load into"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Tile { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Number of texels to load to TMEM, minus one")]
+        public ushort Texels { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Change in T-axis per scanline")]
+        public ushort DXT { get; set; } //1.11 fixed point
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_LoadBlock(int index, byte[] rawBytes)
@@ -38,7 +68,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
                                 ((uint)ULT) & 0x0FFF);
                 uint secondHalf = (uint)(((((uint)Tile) & 0x0F) << 24) |
                                 ((((uint)Texels) & 0x0FFF) << 12) |
-                                ((uint)DLT) & 0x0FFF);
+                                ((uint)DXT) & 0x0FFF);
                 return ByteHelper.CombineIntoBytes(firstHalf, secondHalf);
             }
             set
@@ -51,7 +81,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
                 ULT = (ushort)(ByteHelper.ReadUShort(value, 2) & 0x0FFF);
                 Tile = (byte)(ByteHelper.ReadByte(value, 4) & 0x0F);
                 Texels = (ushort)(ByteHelper.ReadUShort(value, 5) >> 4);
-                DLT = (ushort)(ByteHelper.ReadUShort(value, 6) & 0x0FFF);
+                DXT = (ushort)(ByteHelper.ReadUShort(value, 6) & 0x0FFF);
 
                 IsValid = true;
             }

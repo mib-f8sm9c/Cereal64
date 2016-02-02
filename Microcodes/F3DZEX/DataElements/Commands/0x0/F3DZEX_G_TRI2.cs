@@ -4,28 +4,63 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_Tri2 : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_TRI2; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_TRI2; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_TRI2"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Draw two triangles"; } }
-
-        public byte Vertex1;
-        public byte Vertex2;
-        public byte Vertex3;
-
-        public byte Vertex4;
-        public byte Vertex5;
-        public byte Vertex6;
-
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Draw two triangles";
+            
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of first vertex of the first triangle"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Vertex1 { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of second vertex of the first triangle"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Vertex2 { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of third vertex of the first triangle"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Vertex3 { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of first vertex of the second triangle"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Vertex4 { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of second vertex of the second triangle"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Vertex5 { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of third vertex of the second triangle"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Vertex6 { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_Tri2(int index, byte[] rawBytes)

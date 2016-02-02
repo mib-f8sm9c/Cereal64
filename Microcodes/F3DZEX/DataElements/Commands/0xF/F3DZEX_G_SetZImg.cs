@@ -4,22 +4,38 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_SetZImg : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_SETZIMG; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_SETZIMG; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_SETZIMG"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Set location of depth buffer"; } }
-
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Set location of depth buffer";
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Address for the depth buffer"),
+        TypeConverter(typeof(UInt32HexTypeConverter))]
         public uint ImageAddress;
-
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_SetZImg(int index, byte[] rawBytes)

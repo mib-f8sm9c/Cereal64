@@ -4,11 +4,16 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_ModifyVtx : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public enum OverwriteType
         {
             G_MWO_POINT_RGBA = 0x10,
@@ -16,20 +21,39 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             G_MWO_POINT_XYSCREEN = 0x18,
             G_MWO_POINT_ZSCREEN = 0x1C
         }
-
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_MODIFYVTX; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_MODIFYVTX; } }
+        
+        [BrowsableAttribute(false)]
         public string CommandName
         { get { return "G_MODIFYVTX"; } }
 
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Modifies a portion of vertex attributes in RSP "; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Modifies a portion of vertex attributes in RSP";
 
-        public OverwriteType Type;
-        public ushort TargetBufferIndex;
-        public uint NewValue;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Enumerated set of values specifying what to change")]
+        public OverwriteType Type { get; set; }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of vertex to modify"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort TargetBufferIndex { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("New value to insert"),
+        TypeConverter(typeof(UInt32HexTypeConverter))]
+        public uint NewValue { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_ModifyVtx(int index, byte[] rawBytes)

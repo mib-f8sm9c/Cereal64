@@ -4,25 +4,50 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_DMA_IO : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_DMA_IO; } }
+        { get { return F3DZEXCommandID.F3DZEX_G_DMA_IO; } }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_DMA_IO"; } }
 
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "DMA transfer between main RAM and RCP DMEM (or IMEM)"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "DMA transfer between main RAM and RCP DMEM (or IMEM)";
 
-        public byte Flag;
-        public ushort DMem;
-        public ushort Size;
-        public uint DRam;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("If false, DMEM/IMEM -> DRAM. If true, DRAM -> DMEM/IMEM.")]
+        public bool Flag { get; set; }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Address in DMEM/IMEM(?)")]
+        public ushort DMem { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("(Presumably) size of data to transfer"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort Size { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("DRAM address "),
+        TypeConverter(typeof(UInt32HexTypeConverter))]
+        public uint DRam { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_DMA_IO(int index, byte[] rawBytes)
@@ -35,7 +60,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             get
             {
                 uint firstHalf = (uint)(((uint)CommandID) << 24 |
-                                ((uint)Flag) << 23 |
+                                ((uint)(Flag ? 1 : 0)) << 23 |
                                 (((uint)DMem / 8) & 0x3FF) << 13 |
                                 (uint)(Size - 1));
                 return ByteHelper.CombineIntoBytes(firstHalf, DRam);
@@ -45,7 +70,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
                 IsValid = false;
 
                 if (value.Length < 8 || value[0] != (byte)CommandID) return;
-                Flag = (byte)((ByteHelper.ReadByte(value, 1) >> 7) & 0x01);
+                Flag = ((ByteHelper.ReadByte(value, 1) >> 7) & 0x01) == 0x01;
                 DMem = (ushort)(((ByteHelper.ReadUShort(value, 1) >> 5) & 0x03FF) * 8);
                 Size = (ushort)((ByteHelper.ReadUShort(value, 2) & 0xFFF) + 1);
                 DRam = ByteHelper.ReadUInt(value, 4);

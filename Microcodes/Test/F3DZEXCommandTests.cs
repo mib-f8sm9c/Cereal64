@@ -28,6 +28,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //00FFFFFF 12345678
             testVal = new byte[] { 0x00, 0xFF, 0xFF, 0xFF, 0x12, 0x34, 0x56, 0x78 };
@@ -38,6 +39,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0x01
@@ -53,6 +55,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //01F1CF02 12345678
             testVal = new byte[] { 0x01, 0xF1, 0xCF, 0x02, 0x12, 0x34, 0x56, 0x78 };
@@ -63,6 +66,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0x02
@@ -78,6 +82,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0x03
@@ -93,6 +98,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //03FF1C1C FFFF2E2E
             testVal = new byte[] { 0x03, 0xFF, 0x1C, 0x1C, 0xFF, 0xFF, 0x2E, 0x2E };
@@ -103,6 +109,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0x04
@@ -118,6 +125,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0x05
@@ -133,6 +141,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //053A3C3E FFFFFFFF
             testVal = new byte[] { 0x05, 0x3A, 0x3C, 0x3E, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -143,6 +152,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0x06
@@ -158,6 +168,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //063A3C3E FF24282C
             testVal = new byte[] { 0x06, 0x3A, 0x3C, 0x3E, 0xFF, 0x24, 0x28, 0x2C };
@@ -168,6 +179,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0x07
@@ -183,6 +195,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //073A3C3E FF3A3E2C
             testVal = new byte[] { 0x07, 0x3A, 0x3C, 0x3E, 0xFF, 0x3A, 0x3E, 0x2C };
@@ -193,6 +206,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         #endregion
@@ -212,6 +226,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xD4
@@ -227,6 +242,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xD5
@@ -242,6 +258,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xD6
@@ -257,6 +274,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //D6143C1C 12345678
             testVal = new byte[] { 0xD6, 0x14, 0x3C, 0x1C, 0x12, 0x34, 0x56, 0x78 };
@@ -267,6 +285,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xD7
@@ -282,6 +301,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //D7FF1B01 12345678
             testVal = new byte[] { 0xD7, 0xFF, 0x1B, 0x01, 0x12, 0x34, 0x56, 0x78 };
@@ -292,6 +312,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xD8
@@ -307,6 +328,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //D8FFFFFF 12345601
             testVal = new byte[] { 0xD8, 0xFF, 0xFF, 0xFF, 0x12, 0x34, 0x56, 0x01 };
@@ -317,6 +339,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xD9
@@ -332,6 +355,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xDA
@@ -347,6 +371,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //DAFFFF07 789ABCDE
             testVal = new byte[] { 0xDA, 0xFF, 0xFF, 0x07, 0x78, 0x9A, 0xBC, 0xDE };
@@ -357,6 +382,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xDB
@@ -372,6 +398,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xDC
@@ -387,6 +414,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xDD
@@ -402,6 +430,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //DDFF3456 789ABCDE
             testVal = new byte[] { 0xDD, 0xFF, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE };
@@ -412,6 +441,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xDE
@@ -427,9 +457,10 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //DE01FFFF 789ABCDE
-            testVal = new byte[] { 0xDA, 0xFF, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE };
+            testVal = new byte[] { 0xDE, 0xFF, 0x34, 0x56, 0x78, 0x9A, 0xBC, 0xDE };
 
             cmd.RawData = testVal;
 
@@ -437,6 +468,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         //0xDF
@@ -452,6 +484,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(testVal.Length, outVal.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(testVal, outVal));
+            Assert.IsTrue(cmd.IsValid);
 
             //DFFFFFFF FFFFFFFF
             testVal = new byte[] { 0xDF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
@@ -462,6 +495,7 @@ namespace Cereal64.Microcodes.UnitTests
 
             Assert.AreEqual(outVal.Length, outVal2.Length);
             Assert.IsTrue(Enumerable.SequenceEqual(outVal, outVal2));
+            Assert.IsTrue(cmd.IsValid);
         }
 
         #endregion

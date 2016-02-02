@@ -5,10 +5,14 @@ using System.Text;
 
 namespace Cereal64.Common
 {
-    //UnknownData is a special Element which allows for users to overwrite it in the N64DataElementCollection.
-    // Essentially when first reading a file, all data will be tagged Unknown, and when it becomes known the user
-    // can add in the specific type of data (texture, F3D Command, etc.) on top of the Unknown data, and
-    // N64DataElementCollection will automatically manipulate the data to make it work.
+    /// <summary>
+    /// UnknownData is a special Element which allows for users to overwrite it in the N64DataElementCollection.
+    /// 
+    /// Essentially when first reading a file, all data will be tagged Unknown,
+    /// and when it becomes known the user can add in the specific type of data
+    /// (texture, F3D Command, etc.) on top of the Unknown data, and
+    /// N64DataElementCollection will automatically manipulate the data to make it work.
+    /// </summary>
     public class UnknownData : N64DataElement
     {
         //Use a list to make adding/removing data easier

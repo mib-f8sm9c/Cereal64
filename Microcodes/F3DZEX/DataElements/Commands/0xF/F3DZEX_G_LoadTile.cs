@@ -4,24 +4,54 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_LoadTile : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_LOADTILE; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_LOADTILE; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_LOADTILE"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Set dimensions of texture"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Set dimensions of texture";
+            
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Upper-left corner of texture to load, S-axis")]
+        public ushort ULS { get; set; } //10.2 fixed point
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Upper-left corner of texture to load, T-axis")]
+        public ushort ULT { get; set; } //10.2 fixed point
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Tile descriptor to load into"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Tile { get; set; }
 
-        public ushort ULS, ULT;
-        public byte Tile;
-        public ushort LRS, LRT;
-
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Lower-right corner of texture to load, S-axis")]
+        public ushort LRS { get; set; } //10.2 fixed point
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Lower-right corner of texture to load, T-axis")]
+        public ushort LRT { get; set; } //10.2 fixed point
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_LoadTile(int index, byte[] rawBytes)

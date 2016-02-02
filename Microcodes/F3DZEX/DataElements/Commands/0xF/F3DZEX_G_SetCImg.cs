@@ -4,25 +4,50 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_SetCImg : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_SETCIMG; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_SETCIMG; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_SETCIMG"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Set location of color buffer"; } }
-
-        public Texture.ImageFormat Format;
-        public Texture.PixelInfo PixelSize;
-        public ushort Width;
-        public uint ImageAddress;
-
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Set location of color buffer";
+            
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Format of color buffer to be pointed to")]
+        public Texture.ImageFormat Format { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Bit size of pixels in color buffer to be pointed to")]
+        public Texture.PixelInfo PixelSize { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Width of the color buffer")]
+        public ushort Width { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("RAM address of color buffer"),
+        TypeConverter(typeof(UInt32HexTypeConverter))]
+        public uint ImageAddress { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_SetCImg(int index, byte[] rawBytes)

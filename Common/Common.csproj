@@ -42,6 +42,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Controls\HexEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\HexEditor.designer.cs">
+      <DependentUpon>HexEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="IN64DataElement.cs" />
     <Compile Include="N64DataElementCollection.cs" />
     <Compile Include="DMAManager.cs" />
     <Compile Include="IN64ElementContainer.cs" />
@@ -56,12 +63,16 @@
     </Compile>
     <Compile Include="N64Address.cs" />
     <Compile Include="N64DataElement.cs" />
+    <Compile Include="Utils\HexDataConverter.cs" />
     <Compile Include="Utils\N64Sums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RomFile.cs" />
     <Compile Include="UnknownData.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Controls\HexEditor.resx">
+      <DependentUpon>HexEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Controls\HexNumericUpDown.resx">
       <DependentUpon>HexNumericUpDown.cs</DependentUpon>
     </EmbeddedResource>

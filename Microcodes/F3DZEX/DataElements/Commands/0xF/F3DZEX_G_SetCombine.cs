@@ -4,22 +4,113 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_SetCombine : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_SETCOMBINE; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_SETCOMBINE; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_SETCOMBINE"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Set color combiner parameters"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Set color combiner parameters";
+            
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Color 'a' value, first cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte a0 { get; set; }
 
-        public byte a0, c0, Aa0, Ac0, a1, c1, b0, b1, Aa1, Ac1, d0, Ab0, Ad0, d1, Ab1, Ad1;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Color 'c' value, first cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte c0 { get; set; }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Alpha 'a' value, first cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte Aa0 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Alpha 'c' value, first cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte Ac0 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Color 'a' value, second cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte a1 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Color 'c' value, second cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte c1 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Color 'b' value, first cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte b0 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Color 'b' value, second cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte b1 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Alpha 'a' value, second cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte Aa1 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Alpha 'c' value, second cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte Ac1 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Color 'd' value, first cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte d0 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Alpha 'b' value, first cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte Ab0 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Alpha d' value, first cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte Ad0 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Color 'd' value, second cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte d1 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Alpha 'b' value, second cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte Ab1 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Alpha 'd' value, second cycle"),
+        TypeConverter(typeof(ByteArrayHexTypeConverter))]
+        public byte Ad1 { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_SetCombine(int index, byte[] rawBytes)

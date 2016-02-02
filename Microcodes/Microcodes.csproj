@@ -34,6 +34,7 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,6 +42,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="F3DZEX\Controls\F3DZEXEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="F3DZEX\Controls\F3DZEXEditor.Designer.cs">
+      <DependentUpon>F3DZEXEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_Load_UCode.cs" />
     <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_MoveMem.cs" />
     <Compile Include="F3DZEX\DataElements\Commands\0xD\F3DZEX_G_MoveWord.cs" />
@@ -95,6 +102,7 @@
     <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_TRI1.cs" />
     <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_TRI2.cs" />
     <Compile Include="F3DZEX\DataElements\Commands\0x0\F3DZEX_G_Vtx.cs" />
+    <Compile Include="F3DZEX\DataElements\Commands\F3DZEXTypeConverter.cs" />
     <Compile Include="F3DZEX\DataElements\Commands\IF3DZEXCommand.cs" />
     <Compile Include="F3DZEX\DataElements\Palette.cs" />
     <Compile Include="F3DZEX\DataElements\F3DZEXCommandCollection.cs" />
@@ -109,7 +117,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="F3DEX\" />
-    <Folder Include="F3DZEX\Controls\" />
     <Folder Include="Fast3D\" />
   </ItemGroup>
   <ItemGroup>
@@ -120,6 +127,11 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Issues.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="F3DZEX\Controls\F3DZEXEditor.resx">
+      <DependentUpon>F3DZEXEditor.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

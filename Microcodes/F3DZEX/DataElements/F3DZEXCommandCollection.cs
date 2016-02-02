@@ -20,6 +20,12 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
 
         }
 
+        public F3DZEXCommandCollection(int index, List<IF3DZEXCommand> commands)
+            : base (index, null)
+        {
+            _commands = commands;
+        }
+
         public override byte[] RawData 
         { 
             get
@@ -28,6 +34,9 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             }
             set
             {
+                if (value == null) //Use null to allow for different constructor
+                    return;
+
                 byte[] bytes = new byte[0x8];
                 for (int i = 0; i < value.Length - 0x7; i += 0x8)
                 {

@@ -41,5 +41,16 @@ namespace Cereal64.Common
 
             _dmaProfiles = new List<DMAProfile>();
         }
+
+        public void AddRomFile(RomFile file)
+        {
+            _files.Add(file);
+        }
+
+        public void RemoveRomFile(RomFile file)
+        {
+            if (_files.Contains(file))
+                _files.Remove(file);
+        }
     }
 }

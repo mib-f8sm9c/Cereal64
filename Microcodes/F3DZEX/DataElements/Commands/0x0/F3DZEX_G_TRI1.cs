@@ -4,24 +4,48 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     public class F3DZEX_G_Tri1 : N64DataElement, IF3DZEXCommand
     {
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DZEXIDTypeConverter))]
         public F3DZEXCommandID CommandID
-        { get { return F3DZEXCommandID.G_TRI1; } }
-
+        { get { return F3DZEXCommandID.F3DZEX_G_TRI1; } }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
         public string CommandName
         { get { return "G_TRI1"; } }
-
+        
+        [BrowsableAttribute(false)]
         public string CommandDesc //Copied from CloudModding
-        { get { return "Draw a triangle"; } }
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Draw a triangle";
 
-        public byte Vertex1;
-        public byte Vertex2;
-        public byte Vertex3;
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of first vertex of the triangle"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Vertex1 { get; set; }
 
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of second vertex of the triangle"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Vertex2 { get; set; }
+
+        [CategoryAttribute("F3DZEX Settings"),
+        DescriptionAttribute("Vertex buffer index of third vertex of the triangle"),
+        TypeConverter(typeof(ByteHexTypeConverter))]
+        public byte Vertex3 { get; set; }
+        
+        [CategoryAttribute("F3DZEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
         public bool IsValid { get; private set; }
 
         public F3DZEX_G_Tri1(int index, byte[] rawBytes)
