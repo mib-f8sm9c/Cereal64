@@ -13,7 +13,7 @@ namespace Cereal64.Common
     ///  
     /// Pretty simple concept, look to RomFile to see how it is used
     /// </summary>
-    public interface IN64ElementContainer
+    public interface IN64ElementContainer : ITreeNodeElement
     {
         /// <summary>
         /// Called whenever the parent RomFile adds an element. It's up to

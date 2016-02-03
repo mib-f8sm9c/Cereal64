@@ -5,6 +5,7 @@ using System.Text;
 using Cereal64.Common;
 using System.Collections.ObjectModel;
 using Cereal64.Microcodes.F3DZEX.DataElements;
+using System.Windows.Forms;
 
 namespace Cereal64.Microcodes.F3DZEX
 {
@@ -54,5 +55,20 @@ namespace Cereal64.Microcodes.F3DZEX
                 _vertices.Remove((VertexCollection)element);
         }
 
+        public TreeNode GetAsTreeNode()
+        {
+            TreeNode F3DZEXOverallNode = new TreeNode();
+            F3DZEXOverallNode.Text = "F3DZEX Related Elements";
+
+            //Palettes
+
+            //Textures
+
+            //Commands
+
+            //Vertices
+
+            return F3DZEXOverallNode;
+        }
     }
 }

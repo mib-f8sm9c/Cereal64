@@ -3,12 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using System.Xml.Linq;
+using System.Windows.Forms;
 
 namespace Cereal64.Common
 {
     public class RomFile : IN64ElementContainer
     {
+        //TO DO: Add an Unsorted IContainer to hold elements that didn't get sorted into existing containers
+
+        private const string ROMFILE = "RomFile";
+        private const string FILEID = "FileId";
+        private const string N64ELEMENTS = "N64Elements";
+
         public string FileName { get; set; }
+
+        public string RelativeFilePath { get; set; } //Relative to the project file
 
         public int FileID { get; set; }
 
@@ -32,15 +42,27 @@ namespace Cereal64.Common
             if (!_elements.AddElement(element))
                 return;
 
-            foreach (IN64ElementContainer container in _elementContainers)
+            if(_elementContainers.Count != 0)
             {
-                container.AddElement(element);
+                bool foundContainer = false;
+                foreach (IN64ElementContainer container in _elementContainers)
+                {
+                    container.AddElement(element);
+                    foundContainer = true;
+                }
+
+                if (!foundContainer)
+                {
+                    //Toss it into the misc container
+                }
             }
         }
 
         public void RemoveElement(N64DataElement element)
         {
             _elements.RemoveElement(element);
+
+            //TO DO: Add container search for elements
         }
 
         public void AddElementContainer(IN64ElementContainer container)
@@ -71,5 +93,45 @@ namespace Cereal64.Common
         }
 
         //public byte[] GetAsBytes() { }
+
+        public XElement GetAsXML()
+        {
+            XElement xml = new XElement(ROMFILE);
+            xml.Add(new XAttribute(FILEID, FileID));
+
+            //handle saving all the data here
+            XElement elements = new XElement(N64ELEMENTS);
+            foreach (N64DataElement element in _elements.Elements)
+            {
+                elements.Add(element.GetAsXML());
+            }
+
+            return xml;
+        }
+
+        public TreeNode GetAsTreeNode()
+        {
+            TreeNode RomFileNode = new TreeNode();
+            RomFileNode.Text = string.Format("File {0}", this.FileID);
+
+            if (_elementContainers.Count == 0)
+            {
+                //Just display all elements
+                TreeNode elements = new TreeNode();
+                foreach (N64DataElement element in _elements.Elements)
+                {
+                    //elements.Nodes.Add(element.GetAsTreeNode());
+                }
+
+                RomFileNode.Nodes.Add(elements);
+            }
+            else
+            {
+                foreach (IN64ElementContainer container in _elementContainers)
+                    RomFileNode.Nodes.Add(container.GetAsTreeNode());
+            }
+
+            return RomFileNode;
+        }
     }
 }

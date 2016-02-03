@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using System.Xml.Linq;
+using System.Windows.Forms;
 
 namespace Cereal64.Common
 {
@@ -149,15 +151,24 @@ namespace Cereal64.Common
 
     }
 
-    public class DMAProfile
+    public class DMAProfile : IXMLSerializable, ITreeNodeElement
     {
+        private const string DMAPROFILE = "DmaProfile";
+        private const string RAMSEGMENTS = "RamSegments";
+        private const string PROFILENAME = "ProfileName";
+        private const string TAGINFO = "TagInfo";
+        private const string SEGMENT = "Segment";
+        private const string SEGMENTNUM = "SegmentNum";
+
         public Dictionary<byte, List<DMASegment>> RAMSegments;
         public string ProfileName;
+        public string TagInfo;
 
         public DMAProfile(string name)
         {
             ProfileName = name;
             RAMSegments = new Dictionary<byte, List<DMASegment>>();
+            TagInfo = string.Empty;
         }
 
         public bool AddDMASegment(byte segment, DMASegment dma)
@@ -192,16 +203,73 @@ namespace Cereal64.Common
 
             return true;
         }
+
+        public XElement GetAsXML()
+        {
+            XElement xml = new XElement(DMAPROFILE);
+
+            xml.Add(new XAttribute(PROFILENAME, ProfileName));
+            xml.Add(new XAttribute(TAGINFO, TagInfo));
+
+            foreach (byte segment in RAMSegments.Keys)
+            {
+                XElement seg = new XElement(SEGMENT);
+                seg.Add(new XAttribute(SEGMENTNUM, segment));
+                foreach(DMASegment dmaSeg in RAMSegments[segment])
+                    xml.Add(dmaSeg.GetAsXML());
+            }
+
+            return xml;
+        }
+
+        public TreeNode GetAsTreeNode()
+        {
+            TreeNode node = new TreeNode();
+
+            //To do: finish this
+
+            return node;
+        }
     }
 
-    public struct DMASegment
+    public struct DMASegment : IXMLSerializable, ITreeNodeElement
     {
+        private const string DMASEGMENT = "DmaSegment";
+        private const string FILEID = "FileId";
+        private const string FILESTARTOFFSET = "FileStartOffset";
+        private const string FILEENDOFFSET = "FileEndOffset";
+        private const string RAMSTARTOFFSET = "RamStartOffset";
+        private const string TAGINFO = "TagInfo";
+
         public RomFile File;
         public int FileStartOffset;
         public int FileEndOffset; //Exclusive
         public int RAMStartOffset;
+        public string TagInfo;
 
         public int RAMEndOffset //Exclusive
         { get { return RAMStartOffset + FileEndOffset - FileStartOffset; } }
+
+        public XElement GetAsXML()
+        {
+            XElement xml = new XElement(DMASEGMENT);
+
+            xml.Add(new XAttribute(FILEID, File.FileID));
+            xml.Add(new XAttribute(FILESTARTOFFSET, FileStartOffset));
+            xml.Add(new XAttribute(FILEENDOFFSET, FileEndOffset));
+            xml.Add(new XAttribute(RAMSTARTOFFSET, RAMStartOffset));
+            xml.Add(new XAttribute(TAGINFO, TagInfo));
+
+            return xml;
+        }
+
+        public TreeNode GetAsTreeNode()
+        {
+            TreeNode node = new TreeNode();
+
+            //To do: finish this
+
+            return node;
+        }
     }
 }

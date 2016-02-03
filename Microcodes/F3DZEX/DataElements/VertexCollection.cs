@@ -18,6 +18,11 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         {
         }
 
+        public VertexCollection(int index, List<Vertex> vertices)
+            : base (index, null)
+        {
+            _vertices = vertices;
+        }
 
         public override byte[] RawData
         {
