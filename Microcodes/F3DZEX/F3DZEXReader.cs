@@ -24,7 +24,7 @@ namespace Cereal64.Microcodes.F3DZEX
             List<Palette> palettes = new List<Palette>();
             List<Texture> textures = new List<Texture>();
             List<Vertex> vertices = new List<Vertex>();
-            List<IF3DZEXCommand> commands = new List<IF3DZEXCommand>();
+            List<F3DZEXCommand> commands = new List<F3DZEXCommand>();
 
             F3DZEXReaderPackage package = new F3DZEXReaderPackage();
 
@@ -40,7 +40,7 @@ namespace Cereal64.Microcodes.F3DZEX
                 //read the command
                 Array.Copy(data, offset, command, 0, 8);
 
-                IF3DZEXCommand f3Command =  F3DZEXCommandFactory.ReadCommand(offset, command);
+                F3DZEXCommand f3Command =  F3DZEXCommandFactory.ReadCommand(offset, command);
                 if (f3Command == null)
                     break;
 
@@ -48,6 +48,9 @@ namespace Cereal64.Microcodes.F3DZEX
                 ParseCommand(f3Command);
 
                 offset += 8;
+
+                if (f3Command is F3DZEX_G_EndDL)
+                    break;
             }
 
             //Sort what needs to be sorted
@@ -102,12 +105,16 @@ namespace Cereal64.Microcodes.F3DZEX
             return package;
         }
 
-        private static void ParseCommand(IF3DZEXCommand command)
+        private static void ParseCommand(F3DZEXCommand command)
         {
             //Here handle extra command things (like if it's referencing textures and such)
             switch (command.CommandID)
             {
                 case F3DZEXCommandID.F3DZEX_G_NOOP: //don't actually use this one
+
+                    break;
+                case F3DZEXCommandID.F3DZEX_G_VTX:
+                    //Need to laod in the vertex data here
 
                     break;
             }

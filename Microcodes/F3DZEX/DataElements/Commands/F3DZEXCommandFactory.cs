@@ -64,7 +64,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
     public static class F3DZEXCommandFactory
     {
-        public static IF3DZEXCommand ReadCommand(int index, byte[] bytes)
+        public static F3DZEXCommand ReadCommand(int index, byte[] bytes)
         {
             if (bytes.Length < 0x8)
                 return null;

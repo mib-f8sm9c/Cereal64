@@ -49,15 +49,17 @@
     <Compile Include="Controls\HexEditor.designer.cs">
       <DependentUpon>HexEditor.cs</DependentUpon>
     </Compile>
-    <Compile Include="IN64DataElement.cs" />
+    <Compile Include="DataElements\N64ElementContainerFactory.cs" />
     <Compile Include="ITreeNodeElement.cs" />
     <Compile Include="IXMLSerializable.cs" />
-    <Compile Include="N64DataElementCollection.cs" />
-    <Compile Include="DMAManager.cs" />
-    <Compile Include="IN64ElementContainer.cs" />
-    <Compile Include="LockedData.cs" />
-    <Compile Include="RomProject.cs" />
-    <Compile Include="UserDefinedRomInfo.cs" />
+    <Compile Include="DataElements\N64DataElementCollection.cs" />
+    <Compile Include="Rom\DmaManager.cs" />
+    <Compile Include="DataElements\IN64ElementContainer.cs" />
+    <Compile Include="DataElements\LockedData.cs" />
+    <Compile Include="DataElements\MiscN64ElementContainer.cs" />
+    <Compile Include="DataElements\N64DataElementFactory.cs" />
+    <Compile Include="Rom\RomProject.cs" />
+    <Compile Include="Rom\UserDefinedRomInfo.cs" />
     <Compile Include="Utils\ByteHelper.cs" />
     <Compile Include="Controls\HexNumericUpDown.cs">
       <SubType>UserControl</SubType>
@@ -65,13 +67,14 @@
     <Compile Include="Controls\HexNumericUpDown.Designer.cs">
       <DependentUpon>HexNumericUpDown.cs</DependentUpon>
     </Compile>
-    <Compile Include="N64Address.cs" />
-    <Compile Include="N64DataElement.cs" />
+    <Compile Include="Rom\DmaAddress.cs" />
+    <Compile Include="DataElements\N64DataElement.cs" />
     <Compile Include="Utils\HexDataConverter.cs" />
     <Compile Include="Utils\N64Sums.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RomFile.cs" />
-    <Compile Include="UnknownData.cs" />
+    <Compile Include="Rom\RomFile.cs" />
+    <Compile Include="DataElements\UnknownData.cs" />
+    <Compile Include="Utils\QFixedPointInteger.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\HexEditor.resx">
@@ -81,6 +84,7 @@
       <DependentUpon>HexNumericUpDown.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

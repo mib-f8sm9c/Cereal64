@@ -5,26 +5,28 @@ using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
 using System.ComponentModel;
+using Cereal64.Common.DataElements;
+using Cereal64.Common.Rom;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
-    public class F3DZEX_G_Vtx : N64DataElement, IF3DZEXCommand
+    public class F3DZEX_G_Vtx : F3DZEXCommand
     {
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute(_commandDesc),
         TypeConverter(typeof(F3DZEXIDTypeConverter))]
-        public F3DZEXCommandID CommandID
+        public override F3DZEXCommandID CommandID
         { get { return F3DZEXCommandID.F3DZEX_G_VTX; } }
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute(_commandDesc)]
-        public string CommandName
+        public override string CommandName
         { get { return "G_VTX"; } }
         
         [BrowsableAttribute(false)]
-        public string CommandDesc //Copied from CloudModding
+        public override string CommandDesc //Copied from CloudModding
         { get { return _commandDesc; } }
         private const string _commandDesc = "Loads vertices to RSP";
         
@@ -39,14 +41,13 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         public byte TargetBufferIndex { get; set; } //Cloud Modding suggests subtracting VertexCount from this
 
         [CategoryAttribute("F3DZEX Settings"),
-        DescriptionAttribute("Address of vertices"),
-        TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint VertexSourceAddress { get; set; }
+        DescriptionAttribute("Address of vertices")]
+        public DmaAddress VertexSourceAddress { get; set; }
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute("True if the command was loaded without errors")]
-        public bool IsValid { get; private set; }
+        public override bool IsValid { get; protected set; }
 
         public F3DZEX_G_Vtx(int index, byte[] rawBytes)
             : base (index, rawBytes)
@@ -60,7 +61,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
                 uint firstHalf = (uint)(((uint)CommandID) << 24 |
                                 ((uint)VertexCount) << 12 |
                                 (byte)(((TargetBufferIndex) & 0x7F) * 2));
-                return ByteHelper.CombineIntoBytes(firstHalf, VertexSourceAddress);
+                return ByteHelper.CombineIntoBytes(firstHalf, VertexSourceAddress.GetAsUInt());
             }
             set
             {
@@ -69,7 +70,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
                 if (value.Length < 8 || value[0] != (byte)CommandID) return;
                 VertexCount = (byte)(ByteHelper.ReadUShort(value, 1) >> 4);
                 TargetBufferIndex = (byte)(ByteHelper.ReadByte(value, 3) / 2);
-                VertexSourceAddress = ByteHelper.ReadUInt(value, 4);
+                VertexSourceAddress = new DmaAddress(ByteHelper.ReadUInt(value, 4));
 
                 IsValid = true;
             }

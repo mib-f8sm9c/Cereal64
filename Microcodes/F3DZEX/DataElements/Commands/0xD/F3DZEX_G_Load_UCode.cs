@@ -5,10 +5,11 @@ using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
 using System.ComponentModel;
+using Cereal64.Common.DataElements;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
-    public class F3DZEX_G_Load_UCode : N64DataElement, IF3DZEXCommand
+    public class F3DZEX_G_Load_UCode : F3DZEXCommand
     {
         //NOTE: THIS CODE FOLLOWS A E1 COMMAND AND NEEDS IT TO FUNCTION
 
@@ -16,17 +17,17 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         ReadOnlyAttribute(true),
         DescriptionAttribute(_commandDesc),
         TypeConverter(typeof(F3DZEXIDTypeConverter))]
-        public F3DZEXCommandID CommandID
+        public override F3DZEXCommandID CommandID
         { get { return F3DZEXCommandID.F3DZEX_G_LOAD_UCODE; } }
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute(_commandDesc)]
-        public string CommandName
+        public override string CommandName
         { get { return "G_LOAD_UCODE"; } }
         
         [BrowsableAttribute(false)]
-        public string CommandDesc //Copied from CloudModding
+        public override string CommandDesc //Copied from CloudModding
         { get { return _commandDesc; } }
         private const string _commandDesc = "Jump or \"call\" another display list";
 
@@ -43,7 +44,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute("True if the command was loaded without errors")]
-        public bool IsValid { get; private set; }
+        public override bool IsValid { get; protected set; }
 
         public F3DZEX_G_Load_UCode(int index, byte[] rawBytes)
             : base (index, rawBytes)

@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using Cereal64.Common;
+using Cereal64.Common.DataElements;
+using System.Xml.Linq;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements
 {
@@ -68,6 +70,12 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                 }
                 return false;
             }
+        }
+
+        public Texture(XElement xml, byte[] fileData)
+            : base(xml, fileData)
+        {
+            //More information needed to be saved/loaded
         }
 
         public Texture(int index, byte[] bytes, ImageFormat format = ImageFormat.RGBA,

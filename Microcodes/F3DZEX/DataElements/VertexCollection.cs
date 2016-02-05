@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
 using Cereal64.Common;
+using Cereal64.Common.DataElements;
+using System.Xml.Linq;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements
 {
@@ -12,6 +14,11 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         private List<Vertex> _vertices = new List<Vertex>();
 
         public ReadOnlyCollection<Vertex> Vertices { get { return _vertices.AsReadOnly(); } }
+
+        public VertexCollection(XElement xml, byte[] fileData)
+            : base(xml, fileData)
+        {
+        }
 
         public VertexCollection(int index, byte[] bytes)
             : base(index, bytes)

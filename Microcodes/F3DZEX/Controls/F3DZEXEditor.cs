@@ -42,7 +42,7 @@ namespace Cereal64.Microcodes.F3DZEX.Controls
             if (_commands == null)
                 return;
 
-            foreach (IF3DZEXCommand command in _commands.Commands)
+            foreach (F3DZEXCommand command in _commands.Commands)
             {
                 lbCommands.Items.Add(command);
             }
@@ -50,9 +50,9 @@ namespace Cereal64.Microcodes.F3DZEX.Controls
 
         private void lbCommands_Format(object sender, ListControlConvertEventArgs e)
         {
-            IF3DZEXCommand command = e.ListItem as IF3DZEXCommand;
+            F3DZEXCommand command = e.ListItem as F3DZEXCommand;
 
-            e.Value = string.Format("{0}: {1}", string.Format("{0:X2}", (int)(e.ListItem as IF3DZEXCommand).CommandID), command.CommandID);
+            e.Value = string.Format("{0}: {1}", string.Format("{0:X2}", (int)(e.ListItem as F3DZEXCommand).CommandID), command.CommandID);
         }
 
         private void lbCommands_SelectedIndexChanged(object sender, EventArgs e)

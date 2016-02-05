@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using Cereal64.Common.DataElements;
+using System.Xml.Linq;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements
 {
@@ -13,6 +15,11 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         public short S, T;
         public sbyte R, G, B; //Can represent X, Y, and Z for vertex normals
         public byte A;
+
+        public Vertex(XElement xml, byte[] fileData)
+            : base(xml, fileData)
+        {
+        }
 
         public Vertex(int index, byte[] rawData)
             : base(index, rawData)
