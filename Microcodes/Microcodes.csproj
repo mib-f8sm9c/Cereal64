@@ -110,7 +110,6 @@
     <Compile Include="F3DZEX\DataElements\TextureConversion.cs" />
     <Compile Include="F3DZEX\DataElements\Vertex.cs" />
     <Compile Include="F3DZEX\DataElements\VertexCollection.cs" />
-    <Compile Include="F3DZEX\Dictionary.cs" />
     <Compile Include="F3DZEX\F3DZEXContainer.cs" />
     <Compile Include="F3DZEX\F3DZEXReader.cs" />
     <Compile Include="F3DZEX\DataElements\TMem.cs" />
