@@ -47,6 +47,7 @@
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ByteHelperTests.cs" />
+    <Compile Include="QShortTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common.csproj">

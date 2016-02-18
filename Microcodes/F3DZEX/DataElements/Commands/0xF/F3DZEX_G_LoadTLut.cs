@@ -35,8 +35,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         public byte Tile { get; set; }
 
         [CategoryAttribute("F3DZEX Settings"),
-        DescriptionAttribute("Number of colors to load minus one")]
-        public ushort Count;
+        DescriptionAttribute("Number of colors to load")]
+        public ushort Count { get; set; }
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
@@ -53,7 +53,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             get
             {
                 return ByteHelper.CombineIntoBytes((byte)CommandID, (byte)0x00, (byte)0x00, (byte)0x00,
-                    (byte)(Tile & 0x0F), (ushort)(((Count & 0x3FF) * 4) << 4), (byte)0x00);
+                    (byte)(Tile & 0x0F), (ushort)((((Count - 1) & 0x3FF) * 4) << 4), (byte)0x00);
             }
             set
             {
@@ -61,7 +61,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
                 if (value.Length < 8 || value[0] != (byte)CommandID) return;
                 Tile = (byte)(ByteHelper.ReadByte(value, 4) & 0x0F);
-                Count = (ushort)((ByteHelper.ReadUShort(value, 5) >> 4) / 4);
+                Count = (ushort)(((ByteHelper.ReadUShort(value, 5) >> 4) / 4) + 1);
 
                 IsValid = true;
             }

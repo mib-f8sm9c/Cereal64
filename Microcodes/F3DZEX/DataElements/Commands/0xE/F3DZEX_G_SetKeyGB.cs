@@ -30,14 +30,12 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         private const string _commandDesc = "Set green and blue components of chroma key";
 
         [CategoryAttribute("F3DZEX Settings"),
-        DescriptionAttribute("Scaled width of half the key window for green"),
-        TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort WidthG; //Actually 4.8 float
+        DescriptionAttribute("Scaled width of half the key window for green")]
+        public qushort WidthG; //Actually 4.8 float
 
         [CategoryAttribute("F3DZEX Settings"),
-        DescriptionAttribute("Scaled width of half the key window for blue"),
-        TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort WidthB; //Actually 4.8 float
+        DescriptionAttribute("Scaled width of half the key window for blue")]
+        public qushort WidthB; //Actually 4.8 float
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Intensity of active key for green"),
@@ -74,8 +72,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             get
             {
                 uint firstHalf = (uint)(((uint)CommandID) << 24 |
-                                ((((uint)WidthG) & 0x0FFF) << 12) |
-                                (((uint)WidthB) & 0x0FFF));
+                                ((((uint)WidthG.RawValue) & 0x0FFF) << 12) |
+                                (((uint)WidthB.RawValue) & 0x0FFF));
                 return ByteHelper.CombineIntoBytes(firstHalf, 
                     CenterG, ScaleG, CenterB, ScaleB);
             }
@@ -85,8 +83,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
                 if (value.Length < 8 || value[0] != (byte)CommandID) return;
 
-                WidthG = (ushort)((ByteHelper.ReadUShort(value, 1) >> 4) & 0x0FFF);
-                WidthB = (ushort)(ByteHelper.ReadUShort(value, 2) & 0x0FFF);
+                WidthG = new qushort("4.8", (ushort)((ByteHelper.ReadUShort(value, 1) >> 4) & 0x0FFF));
+                WidthB = new qushort("4.8", (ushort)(ByteHelper.ReadUShort(value, 2) & 0x0FFF));
 
                 CenterG = ByteHelper.ReadByte(value, 4);
                 ScaleG = ByteHelper.ReadByte(value, 5);

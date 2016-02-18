@@ -25,6 +25,8 @@ namespace Cereal64.Common.Rom
 
         public int FileID { get; set; }
 
+        public int FileLength { get; set; }
+
         public ReadOnlyCollection<N64DataElement> Elements { get { return _elements.Elements; } }
         private N64DataElementCollection _elements;
 
@@ -256,6 +258,7 @@ namespace Cereal64.Common.Rom
                 _miscElementContainer.AddElement(data);
         }
 
+        //To do: Find a way to cache this so we don't spend a huge amount of space always creaing new data
         public byte[] GetAsBytes()
         {
             byte [] bytes;

@@ -76,6 +76,11 @@ namespace Cereal64.Common.Rom
             _files.Add(file);
         }
 
+        public void AddDmaProfile(DmaProfile profile)
+        {
+            _dmaProfiles.Add(profile);
+        }
+
         public void RemoveRomFile(RomFile file)
         {
             if (_files.Contains(file))
@@ -114,16 +119,16 @@ namespace Cereal64.Common.Rom
             //Start up the monster here boyo
             XElement projectElement = XElement.Load(romProjectNode.CreateNavigator().ReadSubtree());
 
-            RomProject newProj = new RomProject();
-            newProj.ProjectName = projectElement.Attribute(PROJECTNAME).Value;
-            newProj.ProjectPath = Path.GetDirectoryName(filePath);
+            _instance = new RomProject();
+            _instance.ProjectName = projectElement.Attribute(PROJECTNAME).Value;
+            _instance.ProjectPath = Path.GetDirectoryName(filePath);
 
             foreach (XElement element in projectElement.Elements())
             {
                 if (element.Name == UserDefinedRomInfo.USERDEFINEDINFO)
                 {
                     //Handle loading the user info
-                    newProj.RomInfo = new UserDefinedRomInfo(element);
+                    _instance.RomInfo = new UserDefinedRomInfo(element);
                 }
                 else if (element.Name == ROMFILES)
                 {
@@ -142,7 +147,7 @@ namespace Cereal64.Common.Rom
                         byte[] data = File.ReadAllBytes(fileP);
 
                         //Pass into the file using XElement
-                        newProj.AddRomFile(new RomFile(fileElement, data));
+                        _instance.AddRomFile(new RomFile(fileElement, data));
                     }
                 }
                 else if (element.Name == DMAPROFILES)
@@ -150,13 +155,14 @@ namespace Cereal64.Common.Rom
                     foreach (XElement profileElement in element.Elements())
                     {
                         //Load the profiles
+                        _instance._dmaProfiles.Add(new DmaProfile(profileElement));
                     }
                 }
             }
 
-            _instance = newProj;
-            //NOTE: The XML Serialization needs to be expanded so that anyone can subscribe their own N64DataElement types and be able to
-            //       load them correctly. UGH
+            DmaManager.Instance.ClearDMAProfilers();
+            foreach (DmaProfile profile in _instance._dmaProfiles)
+                DmaManager.Instance.AddNewDmaProfile(profile);
         }
 
         public bool FindRamOffset(DmaAddress address, out RomFile file, out int fileOffset)
@@ -164,7 +170,17 @@ namespace Cereal64.Common.Rom
             file = null;
             fileOffset = 0;
 
-            //To do: fill this in
+            if (!DmaManager.Instance.SelectedDmaProfile.RamSegments.ContainsKey(address.Segment))
+                return false;
+            foreach (DmaSegment segment in DmaManager.Instance.SelectedDmaProfile.RamSegments[address.Segment])
+            {
+                if (address.Offset >= segment.RamStartOffset && address.Offset < segment.RamEndOffset)
+                {
+                    file = segment.File;
+                    fileOffset = address.Offset - segment.RamStartOffset;
+                    return true;
+                }
+            }
 
             return false;
         }

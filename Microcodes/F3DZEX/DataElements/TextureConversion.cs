@@ -141,15 +141,15 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         #region CI
 
         //4b, 8b
-        public static Bitmap BinaryToCI4(byte[] imgData, Palette palette, int width, int height)
+        public static Bitmap BinaryToCI4(byte[] imgData, Palette palette, int paletteIndex, int width, int height)
         {
             //Pixel size is 1/2 byte
             if (width / 2 * height != imgData.Length)
                 return null;
 
-            if (palette.Colors.Length < 16)
+            if (palette == null || palette.Colors.Length < 16)
                 return null;
-
+            
             Bitmap bmp = new Bitmap(width, height);
 
             for (int i = 0; i < width; i += 2)
@@ -162,8 +162,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                     byte CI1 = (byte)(CI >> 4);
                     byte CI2 = (byte)(CI & 0x0F);
 
-                    bmp.SetPixel(i, j, palette.Colors[CI1]);
-                    bmp.SetPixel(i + 1, j, palette.Colors[CI2]);
+                    bmp.SetPixel(i, j, palette.Colors[CI1 + 16 * paletteIndex]);
+                    bmp.SetPixel(i + 1, j, palette.Colors[CI2 + 16 * paletteIndex]);
 
                 }
             }
@@ -171,14 +171,14 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             return bmp;
         }
 
-        public static byte[] CI4ToBinary(Bitmap bmp, Palette palette)
+        public static byte[] CI4ToBinary(Bitmap bmp, Palette palette, int paletteIndex)
         {
             //Pixel size is 1/2 bytes
 
             if (bmp == null)
                 return null;
 
-            if (palette.Colors.Length < 16)
+            if (palette == null || palette.Colors.Length < 16)
                 return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height / 2];
@@ -186,7 +186,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             int[] paletteIDs = new int[16];
             for(int k = 0; k < 16; k++)
             {
-                paletteIDs[k] = palette.Colors[k].ToArgb();
+                paletteIDs[k] = palette.Colors[k + 16 * paletteIndex].ToArgb();
             }
 
             for (int i = 0; i < bmp.Width; i+=2)
@@ -222,7 +222,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             if (width * height != imgData.Length)
                 return null;
 
-            if (palette.Colors.Length < 256)
+            if (palette == null || palette.Colors.Length < 256)
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
@@ -249,10 +249,10 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             if (bmp == null)
                 return null;
 
-            if (palette.Colors.Length < 256)
+            if (palette == null || palette.Colors.Length < 256)
                 return null;
 
-            byte[] imgData = new byte[bmp.Width * bmp.Height / 2];
+            byte[] imgData = new byte[bmp.Width * bmp.Height];
 
             int[] paletteIDs = new int[256];
             for (int k = 0; k < 256; k++)
@@ -575,8 +575,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         {
             //Color size is 2 bytes
 
-            if (count != 16 && count != 256)
-                return null;
+            //if (count != 16 && count != 256)
+            //    return null;
 
             Color[] colors = new Color[count];
 
@@ -587,7 +587,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
 
                 R = (byte)Math.Round(((((ushort)ByteHelper.ReadByte(imgData, index)) >> 3) & 0x1F) * 255.0 / 31.0);
                 G = (byte)Math.Round(((((ushort)ByteHelper.ReadUShort(imgData, index)) >> 6) & 0x1F) * 255.0 / 31.0);
-                B = (byte)Math.Round(((((ushort)ByteHelper.ReadByte(imgData, index + 1)) >> 3) & 0x1F) * 255.0 / 31.0);
+                B = (byte)Math.Round(((((ushort)ByteHelper.ReadByte(imgData, index + 1)) >> 1) & 0x1F) * 255.0 / 31.0);
                 A = (byte)((ByteHelper.ReadByte(imgData, index + 1) & 0x01) * 0xFF);
 
                 colors[i] = Color.FromArgb(A, R, G, B);
@@ -600,8 +600,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         {
             //Pixel size is 2 bytes
 
-            if (colors.Length != 16 && colors.Length != 256)
-                return null;
+            //if (colors.Length != 16 && colors.Length != 256)
+            //    return null;
 
             byte[] paletteData = new byte[colors.Length * 2];
 

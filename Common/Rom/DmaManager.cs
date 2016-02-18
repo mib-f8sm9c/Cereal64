@@ -32,7 +32,7 @@ namespace Cereal64.Common.Rom
         public ReadOnlyCollection<DmaProfile> DMAProfiles { get { return _dmaProfiles.AsReadOnly(); } }
         private List<DmaProfile> _dmaProfiles;
 
-        public DmaProfile SelectedDmaProfile;
+        public DmaProfile SelectedDmaProfile { get { return DMAProfiles[0]; } }
 
         private DmaManager()
         {
@@ -164,6 +164,38 @@ namespace Cereal64.Common.Rom
         public string ProfileName;
         public string TagInfo;
 
+        public DmaProfile(XElement xml)
+        {
+            XAttribute att = xml.Attribute(PROFILENAME);
+            if (att != null)
+                ProfileName = att.Value;
+
+            att = xml.Attribute(TAGINFO);
+            if (att != null)
+                TagInfo = att.Value;
+
+            RamSegments = new Dictionary<byte, List<DmaSegment>>();
+
+            foreach (XElement segment in xml.Elements())
+            {
+                if (segment.Name == SEGMENT)
+                {
+                    byte segNum = byte.Parse(segment.Attribute(SEGMENTNUM).Value);
+
+                    if(!RamSegments.ContainsKey(segNum))
+                        RamSegments.Add(segNum, new List<DmaSegment>());
+
+                    foreach (XElement dmaXml in segment.Elements())
+                    {
+                        int id = int.Parse(dmaXml.Attribute(DmaSegment.FILEID).Value);
+                        RomFile file = RomProject.Instance.Files.FirstOrDefault(f => f.FileID == id);
+                        if(file != null)
+                            RamSegments[segNum].Add(new DmaSegment(file, dmaXml));
+                    }
+                }
+            }
+        }
+
         public DmaProfile(string name)
         {
             ProfileName = name;
@@ -216,7 +248,8 @@ namespace Cereal64.Common.Rom
                 XElement seg = new XElement(SEGMENT);
                 seg.Add(new XAttribute(SEGMENTNUM, segment));
                 foreach(DmaSegment dmaSeg in RamSegments[segment])
-                    xml.Add(dmaSeg.GetAsXML());
+                    seg.Add(dmaSeg.GetAsXML());
+                xml.Add(seg);
             }
 
             return xml;
@@ -245,21 +278,33 @@ namespace Cereal64.Common.Rom
     public struct DmaSegment : IXMLSerializable
     {
         private const string DMASEGMENT = "DmaSegment";
-        private const string FILEID = "FileId";
+        public const string FILEID = "FileId";
         private const string FILESTARTOFFSET = "FileStartOffset";
         private const string FILEENDOFFSET = "FileEndOffset";
         private const string RAMSTARTOFFSET = "RamStartOffset";
+        private const string RAMSEGMENT = "RamSegment";
         private const string TAGINFO = "TagInfo";
 
         public RomFile File;
         public int FileStartOffset;
         public int FileEndOffset; //Exclusive
         public int RamStartOffset;
+        public byte RamSegment; //Duplicate data, but I think it's important
         public string TagInfo;
 
         public int RamEndOffset //Exclusive
         { get { return RamStartOffset + FileEndOffset - FileStartOffset; } }
 
+        public DmaSegment(RomFile file, XElement xml)
+        {
+            File = file;
+            FileStartOffset = int.Parse(xml.Attribute(FILESTARTOFFSET).Value);
+            FileEndOffset = int.Parse(xml.Attribute(FILEENDOFFSET).Value);
+            RamStartOffset = int.Parse(xml.Attribute(RAMSTARTOFFSET).Value);
+            RamSegment = byte.Parse(xml.Attribute(RAMSEGMENT).Value);
+            TagInfo = xml.Attribute(TAGINFO).Value;
+        }
+        
         public XElement GetAsXML()
         {
             XElement xml = new XElement(DMASEGMENT);
@@ -268,6 +313,7 @@ namespace Cereal64.Common.Rom
             xml.Add(new XAttribute(FILESTARTOFFSET, FileStartOffset));
             xml.Add(new XAttribute(FILEENDOFFSET, FileEndOffset));
             xml.Add(new XAttribute(RAMSTARTOFFSET, RamStartOffset));
+            xml.Add(new XAttribute(RAMSEGMENT, RamSegment));
             xml.Add(new XAttribute(TAGINFO, TagInfo));
 
             return xml;

@@ -31,11 +31,11 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner of texture to load, S-axis")]
-        public ushort ULS { get; set; } //10.2 fixed point
+        public qushort ULS { get; set; } //10.2 fixed point
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner of texture to load, T-axis")]
-        public ushort ULT { get; set; } //10.2 fixed point
+        public qushort ULT { get; set; } //10.2 fixed point
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Tile descriptor to load into"),
@@ -43,12 +43,12 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         public byte Tile { get; set; }
 
         [CategoryAttribute("F3DZEX Settings"),
-        DescriptionAttribute("Number of texels to load to TMEM, minus one")]
+        DescriptionAttribute("Number of texels to load to TMEM")]
         public ushort Texels { get; set; }
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Change in T-axis per scanline")]
-        public ushort DXT { get; set; } //1.11 fixed point
+        public qushort DXT { get; set; } //1.11 fixed point
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
@@ -65,11 +65,11 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             get
             {
                 uint firstHalf = (uint)(((uint)CommandID) << 24 |
-                                ((((uint)ULS) & 0x0FFF) << 12) |
-                                ((uint)ULT) & 0x0FFF);
+                                ((((uint)ULS.RawValue) & 0x0FFF) << 12) |
+                                ((uint)ULT.RawValue) & 0x0FFF);
                 uint secondHalf = (uint)(((((uint)Tile) & 0x0F) << 24) |
-                                ((((uint)Texels) & 0x0FFF) << 12) |
-                                ((uint)DXT) & 0x0FFF);
+                                ((((uint)Texels - 1) & 0x0FFF) << 12) |
+                                ((uint)DXT.RawValue) & 0x0FFF);
                 return ByteHelper.CombineIntoBytes(firstHalf, secondHalf);
             }
             set
@@ -78,11 +78,11 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
                 if (value.Length < 8 || value[0] != (byte)CommandID) return;
 
-                ULS = (ushort)(ByteHelper.ReadUShort(value, 1) >> 4);
-                ULT = (ushort)(ByteHelper.ReadUShort(value, 2) & 0x0FFF);
+                ULS = new qushort("10.2", (ushort)(ByteHelper.ReadUShort(value, 1) >> 4));
+                ULT = new qushort("10.2", (ushort)(ByteHelper.ReadUShort(value, 2) & 0x0FFF));
                 Tile = (byte)(ByteHelper.ReadByte(value, 4) & 0x0F);
-                Texels = (ushort)(ByteHelper.ReadUShort(value, 5) >> 4);
-                DXT = (ushort)(ByteHelper.ReadUShort(value, 6) & 0x0FFF);
+                Texels = (ushort)((ByteHelper.ReadUShort(value, 5) >> 4) + 1);
+                DXT = new qushort("1.11", (ushort)(ByteHelper.ReadUShort(value, 6) & 0x0FFF));
 
                 IsValid = true;
             }

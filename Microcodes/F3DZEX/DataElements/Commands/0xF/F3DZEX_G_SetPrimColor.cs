@@ -31,14 +31,12 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         private const string _commandDesc = "Set primitive color register";
             
         [CategoryAttribute("F3DZEX Settings"),
-        DescriptionAttribute("Minimum possible LOD value (clamped to this at minimum)"),
-        TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte MinLevel { get; set; }
+        DescriptionAttribute("Minimum possible LOD value (clamped to this at minimum)")]
+        public qushort MinLevel { get; set; }
         
         [CategoryAttribute("F3DZEX Settings"),
-        DescriptionAttribute("Primitive LOD fraction for mipmap filtering"),
-        TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte LodFrac { get; set; }
+        DescriptionAttribute("Primitive LOD fraction for mipmap filtering")]
+        public qushort LodFrac { get; set; }
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Primitive color to be set")]
@@ -58,7 +56,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         {
             get
             {
-                return ByteHelper.CombineIntoBytes((byte)CommandID, (byte)0x00, MinLevel, LodFrac,
+                return ByteHelper.CombineIntoBytes((byte)CommandID, (byte)0x00, (byte)MinLevel.RawValue, (byte)LodFrac.RawValue,
                     PrimitiveColor.R, PrimitiveColor.G, PrimitiveColor.B, PrimitiveColor.A);
             }
             set
@@ -66,8 +64,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
                 IsValid = false;
 
                 if (value.Length < 8 || value[0] != (byte)CommandID) return;
-                MinLevel = ByteHelper.ReadByte(value, 2);
-                LodFrac = ByteHelper.ReadByte(value, 3);
+                MinLevel = new qushort("0.8", ByteHelper.ReadByte(value, 2));
+                LodFrac = new qushort("0.8", ByteHelper.ReadByte(value, 3));
                 byte R = ByteHelper.ReadByte(value, 4);
                 byte G = ByteHelper.ReadByte(value, 5);
                 byte B = ByteHelper.ReadByte(value, 6);

@@ -30,9 +30,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         private const string _commandDesc = "Set red component of chroma key";
         
         [CategoryAttribute("F3DZEX Settings"),
-        DescriptionAttribute("Scaled width of half the key window for blue"),
-        TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort WidthR { get; set; } //THIS IS AN UNSIGNED FIXED POINT 4.8 NUBMER
+        DescriptionAttribute("Scaled width of half the key window for blue")]
+        public qushort WidthR { get; set; }
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Intensity of active key for red"),
@@ -59,7 +58,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             get
             {
                 return ByteHelper.CombineIntoBytes((byte)CommandID, (byte)0x00, (byte)0x00, (byte)0x00,
-                    (ushort)(WidthR & 0x0FFF), CenterR, ScaleR);
+                    (ushort)(WidthR.RawValue & 0x0FFF), CenterR, ScaleR);
             }
             set
             {
@@ -67,7 +66,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
                 if (value.Length < 8 || value[0] != (byte)CommandID) return;
 
-                WidthR = (ushort)(ByteHelper.ReadUShort(value, 4) & 0x0FFF);
+                WidthR = new qushort("4.8", (ushort)(ByteHelper.ReadUShort(value, 4) & 0x0FFF));
                 CenterR = ByteHelper.ReadByte(value, 6);
                 ScaleR = ByteHelper.ReadByte(value, 7);
 

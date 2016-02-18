@@ -34,7 +34,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             }
             set
             {
-                if (value.Length == 32 || value.Length == 512) //Need either of these to be valid
+                //if (value.Length == 32 || value.Length == 512) //Need either of these to be valid
                 {
                     Colors = TextureConversion.BinaryToPalette(value, value.Length / 2);
                 }

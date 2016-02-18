@@ -74,7 +74,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Rom\RomFile.cs" />
     <Compile Include="DataElements\UnknownData.cs" />
-    <Compile Include="Utils\QFixedPointInteger.cs" />
+    <Compile Include="Utils\QFixedPoint.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\HexEditor.resx">

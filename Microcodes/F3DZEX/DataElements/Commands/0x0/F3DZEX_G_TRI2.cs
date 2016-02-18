@@ -58,7 +58,10 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         DescriptionAttribute("Vertex buffer index of third vertex of the second triangle"),
         TypeConverter(typeof(ByteHexTypeConverter))]
         public byte Vertex6 { get; set; }
-        
+
+        [BrowsableAttribute(false)]
+        public Texture TextureReference { get; set; } // TO DO: ADD THE VERTEX REFERENCES
+
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute("True if the command was loaded without errors")]

@@ -35,7 +35,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         public int Height;
 
         public Palette ImagePalette;
-        private Bitmap Image;
+        public int PaletteIndex; //Used for CI4b
+        public Bitmap Image { get; private set; }
         //private byte[] _rawData;
 
         private bool _initializing = true;
@@ -79,7 +80,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         }
 
         public Texture(int index, byte[] bytes, ImageFormat format = ImageFormat.RGBA,
-            PixelInfo pixel = PixelInfo.Size_32b, int width = 0, int height = 0, Palette palette = null)
+            PixelInfo pixel = PixelInfo.Size_32b, int width = 0, int height = 0, Palette palette = null,
+            int paletteIndex = 0)
             : base(index, bytes)
         {
             Format = format;
@@ -88,6 +90,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             Height = height;
 
             ImagePalette = palette;
+            PaletteIndex = paletteIndex;
             
             //generate image
             _initializing = false;
@@ -118,64 +121,25 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             get 
             {
                 int length = 0;
-                switch (Format)
+
+                if (Image != null)
                 {
-                    case ImageFormat.RGBA:
-                        switch (PixelSize)
-                        {
-                            case PixelInfo.Size_16b:
+                    length = Image.Width * Image.Height;
 
-                                break;
-                            case PixelInfo.Size_32b:
-
-                                break;
-                        }
-                        break;
-                    case ImageFormat.YUV:
-                        switch (PixelSize)
-                        {
-                            case PixelInfo.Size_16b:
-
-                                break;
-                        }
-                        break;
-                    case ImageFormat.CI:
-                        switch (PixelSize)
-                        {
-                            case PixelInfo.Size_4b:
-
-                                break;
-                            case PixelInfo.Size_8b:
-
-                                break;
-                        }
-                        break;
-                    case ImageFormat.IA:
-                        switch (PixelSize)
-                        {
-                            case PixelInfo.Size_4b:
-
-                                break;
-                            case PixelInfo.Size_8b:
-
-                                break;
-                            case PixelInfo.Size_16b:
-
-                                break;
-                        }
-                        break;
-                    case ImageFormat.I:
-                        switch (PixelSize)
-                        {
-                            case PixelInfo.Size_4b:
-
-                                break;
-                            case PixelInfo.Size_8b:
-
-                                break;
-                        }
-                        break;
+                    switch (PixelSize)
+                    {
+                        case PixelInfo.Size_4b:
+                            length /= 2;
+                            break;
+                        case PixelInfo.Size_16b:
+                            length *= 2;
+                            break;
+                        case PixelInfo.Size_32b:
+                            length *= 4;
+                            break;
+                    }
                 }
+
                 return length;
             }
         }
@@ -210,7 +174,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                     switch (PixelSize)
                     {
                         case PixelInfo.Size_4b:
-                            return TextureConversion.CI4ToBinary(Image, ImagePalette);
+                            return TextureConversion.CI4ToBinary(Image, ImagePalette, PaletteIndex);
 
                         case PixelInfo.Size_8b:
                             return TextureConversion.CI8ToBinary(Image, ImagePalette);
@@ -277,7 +241,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                     switch (PixelSize)
                     {
                         case PixelInfo.Size_4b:
-                            return TextureConversion.BinaryToCI4(bytes, ImagePalette, Width, Height);
+                            return TextureConversion.BinaryToCI4(bytes, ImagePalette, PaletteIndex, Width, Height);
 
                         case PixelInfo.Size_8b:
                             return TextureConversion.BinaryToCI8(bytes, ImagePalette, Width, Height);

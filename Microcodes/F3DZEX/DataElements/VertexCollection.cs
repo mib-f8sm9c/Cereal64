@@ -36,7 +36,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             get
             {
                 byte[] rawBytes = new byte[RawDataSize];
-                for (int i = 0; i < rawBytes.Length; i++)
+                for (int i = 0; i < _vertices.Count; i++)
                 {
                     Array.Copy(_vertices[i].RawData, 0, rawBytes, i * 0x10, 0x10);
                 }
@@ -44,6 +44,9 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             }
             set
             {
+                if (value == null)
+                    return;
+
                 byte[] bytes = new byte[0x10];
                 for (int i = 0; i < value.Length - 0xF; i += 0x10)
                 {

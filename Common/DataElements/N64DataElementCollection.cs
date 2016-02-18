@@ -90,13 +90,14 @@ namespace Cereal64.Common.DataElements
                     int endingIndex = indexToAdd;
                     for (; endingIndex < _elements.Count - 1; endingIndex++)
                     {
-                        //Only unknown data may be split
-                        if (!(_elements[endingIndex + 1] is UnknownData))
-                            return false;
-
+                        //If it doesn't run into this next data element, then it stops before it. Break out of the loop
                         if (!_elements[endingIndex + 1].ContainsOffset(endOffset) &&
                             !element.ContainsOffset(_elements[endingIndex + 1].FileOffset))
                             break;
+
+                        //Only unknown data may be split
+                        if (!(_elements[endingIndex + 1] is UnknownData))
+                            return false;
                     }
 
                     //Step two: determine how to split the start/ends.
@@ -129,7 +130,7 @@ namespace Cereal64.Common.DataElements
                     if (endUnknownLeftOver)
                     {
                         byte[] unknownData = new byte[_elements[endingIndex].FileOffset + _elements[endingIndex].RawDataSize - (endOffset + 1)];
-                        Array.Copy(_elements[endingIndex].RawData, endOffset + 1, unknownData, 0, (_elements[endingIndex].RawDataSize - (endOffset + 1)));
+                        Array.Copy(_elements[endingIndex].RawData, (endOffset + 1) - _elements[endingIndex].FileOffset, unknownData, 0, unknownData.Length);
 
                         UnknownData newData = new UnknownData(endOffset + 1, unknownData);
                         _elements.Insert(endingIndex + 1, newData);

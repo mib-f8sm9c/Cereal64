@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Cereal64.Common.Utils;
 using System.ComponentModel;
+using Cereal64.Common.DataElements;
 
 namespace Cereal64.Common.Rom
 {
@@ -20,6 +21,11 @@ namespace Cereal64.Common.Rom
         DescriptionAttribute("Offset of address from start of Ram segment"),
         TypeConverter(typeof(Int32HexTypeConverter))]
         public int Offset { get; set; }
+
+        [CategoryAttribute("Dma Address"),
+        DescriptionAttribute("Referenced data element (if found)"),
+        TypeConverter(typeof(Int32HexTypeConverter))]
+        public N64DataElement ReferenceElement { get; set; }
 
         public DmaAddress(byte segment, int offset)
             : this()
