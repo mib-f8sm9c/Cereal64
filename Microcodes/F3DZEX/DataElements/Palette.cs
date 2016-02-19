@@ -6,6 +6,7 @@ using System.Drawing;
 using Cereal64.Common;
 using Cereal64.Common.DataElements;
 using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements
 {
@@ -13,7 +14,10 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
 
     public class Palette : N64DataElement
     {
-        public Color[] Colors;
+        [CategoryAttribute("Palette Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("All colors used in the palette")]
+        public Color[] Colors { get; set; }
 
         public Palette(XElement xml, byte[] fileData)
             : base(xml, fileData)
@@ -23,7 +27,6 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         public Palette(int index, byte[] bytes)
             : base(index, bytes)
         {
-            //generate palette
         }
 
         public override byte[] RawData

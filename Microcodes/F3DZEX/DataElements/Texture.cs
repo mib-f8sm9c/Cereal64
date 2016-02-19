@@ -6,11 +6,19 @@ using System.Drawing;
 using Cereal64.Common;
 using Cereal64.Common.DataElements;
 using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements
 {
     public class Texture : N64DataElement
     {
+        private const string FORMAT = "Format";
+        private const string PIXEL_SIZE = "PixelSize";
+        private const string WIDTH = "Width";
+        private const string HEIGHT = "Height";
+        private const string IMAGE_PALETTE = "ImagePalette";
+        private const string PALETTE_INDEX = "PaletteIndex";
+
         public enum ImageFormat
         {
             RGBA = 0,
@@ -28,19 +36,53 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             Size_32b
         }
 
-        public ImageFormat Format;
-        public PixelInfo PixelSize;
+        [CategoryAttribute("Texture Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("Format of the texture")]
+        public ImageFormat Format { get; set; }
 
-        public int Width;
-        public int Height;
+        [CategoryAttribute("Texture Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("Size in bits of each pixel of the texture")]
+        public PixelInfo PixelSize { get; set; }
 
-        public Palette ImagePalette;
-        public int PaletteIndex; //Used for CI4b
+        [CategoryAttribute("Texture Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("Width in pixels of the texture")]
+        public int Width { get; set; }
+
+        [CategoryAttribute("Texture Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("Height in pixels of the texture")]
+        public int Height { get; set; }
+
+        [CategoryAttribute("Texture Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("Palette used for texture (available only for format CI)")]
+        public Palette ImagePalette
+        {
+            get { return _imagePalette; }
+            set { _imagePalette = value; if (_unconvertedData != null) RawData = _unconvertedData; } //Try reloading the data if it failed previously
+        }
+        private Palette _imagePalette;
+
+        [CategoryAttribute("Texture Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("Height in pixels of the texture")]
+        public int PaletteIndex { get; set; } //Used for CI4b
+
+        [CategoryAttribute("Texture Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("Texture in final bitmap form")]
         public Bitmap Image { get; private set; }
-        //private byte[] _rawData;
 
         private bool _initializing = true;
+        public Guid MatchedPaletteGUID; //Used to link the palette to the texture
+        private byte[] _unconvertedData;
 
+        [CategoryAttribute("Texture Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the texture pixel size/format are in an N64-compatible state")]
         public bool IsValidFormat
         {
             get
@@ -77,6 +119,22 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             : base(xml, fileData)
         {
             //More information needed to be saved/loaded
+            Format = (ImageFormat)Enum.Parse(typeof(ImageFormat), xml.Attribute(FORMAT).Value);
+            PixelSize = (PixelInfo)Enum.Parse(typeof(PixelInfo), xml.Attribute(PIXEL_SIZE).Value);
+            Width = int.Parse(xml.Attribute(WIDTH).Value);
+            Height = int.Parse(xml.Attribute(HEIGHT).Value);
+
+            XAttribute att = xml.Attribute(IMAGE_PALETTE);
+            if (att != null)
+                MatchedPaletteGUID = new Guid(att.Value);
+            else
+                MatchedPaletteGUID = Guid.Empty;
+
+            PaletteIndex = int.Parse(xml.Attribute(PALETTE_INDEX).Value);
+
+            //generate image
+            _initializing = false;
+            RawData = _unconvertedData;
         }
 
         public Texture(int index, byte[] bytes, ImageFormat format = ImageFormat.RGBA,
@@ -106,12 +164,24 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             set
             {
                 if (_initializing) //Wait til more info (width, height) comes in
+                {
+                    _unconvertedData = value;
                     return;
+                }
 
                 if (IsValidFormat)
                 {
                     //generate image
                     Image = GenerateImage(value);
+
+                    if(Image == null)
+                        _unconvertedData = value;
+                    else
+                        _unconvertedData = null;
+                }
+                else
+                {
+                    _unconvertedData = value; //Save for later
                 }
             }
         }
@@ -142,6 +212,22 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
 
                 return length;
             }
+        }
+
+        public override XElement GetAsXML()
+        {
+            XElement baseElement = base.GetAsXML();
+
+            baseElement.Add(new XAttribute(FORMAT, Format));
+            baseElement.Add(new XAttribute(PIXEL_SIZE, PixelSize));
+            baseElement.Add(new XAttribute(WIDTH, Width));
+            baseElement.Add(new XAttribute(HEIGHT, Height));
+            
+            if(ImagePalette != null)
+                baseElement.Add(new XAttribute(IMAGE_PALETTE, ImagePalette.GUID.ToString()));
+            baseElement.Add(new XAttribute(PALETTE_INDEX, PaletteIndex));
+
+            return baseElement;
         }
 
         private byte[] ConvertImage()

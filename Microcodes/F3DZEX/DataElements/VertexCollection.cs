@@ -6,13 +6,18 @@ using System.Collections.ObjectModel;
 using Cereal64.Common;
 using Cereal64.Common.DataElements;
 using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements
 {
     public class VertexCollection : N64DataElement
     {
         private List<Vertex> _vertices = new List<Vertex>();
-
+        
+        [CategoryAttribute("Vertex Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("Collection of consecutive vertices"),
+        TypeConverter(typeof(CollectionConverter))]
         public ReadOnlyCollection<Vertex> Vertices { get { return _vertices.AsReadOnly(); } }
 
         public VertexCollection(XElement xml, byte[] fileData)

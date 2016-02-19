@@ -8,6 +8,8 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Xml;
 using System.IO;
+using Ionic.Zlib;
+using Ionic.Zip;
 
 namespace Cereal64.Common.Rom
 {
@@ -93,10 +95,14 @@ namespace Cereal64.Common.Rom
             XElement xml = Instance.GetAsXML();
 
             //Save to location
-            using (XmlTextWriter writer = new XmlTextWriter(filePath, Encoding.ASCII))
+            using (var fs = File.Create(filePath))
             {
-                writer.Formatting = Formatting.Indented;
-                xml.Save(writer);
+                using (ZipOutputStream s = new ZipOutputStream(fs))
+                {
+                    s.PutNextEntry("ProjectInfo");
+                    byte[] bytes = Encoding.ASCII.GetBytes(xml.ToString());
+                    s.Write(bytes, 0, bytes.Length);
+                }
             }
 
             //Change the project path (???)
@@ -105,25 +111,31 @@ namespace Cereal64.Common.Rom
 
         public static void Load(string filePath)
         {
-            //Load file
-            XmlDocument doc = new XmlDocument();
+            //XmlDocument doc = new XmlDocument();
+            XElement romProjectNode = null;
 
-            doc.Load(filePath);
+            using (ZipFile zip = ZipFile.Read(filePath))
+            {
+                foreach (ZipEntry e in zip)
+                {
+                    if(e.FileName == "ProjectInfo")
+                    {
+                        MemoryStream projectStream = new MemoryStream();
+                        e.Extract(projectStream);
+                        romProjectNode = XElement.Parse(Encoding.ASCII.GetString(projectStream.ToArray()));
+                    }
+                }
+            }
 
-            //Load into each part
-            XmlElement romProjectNode = doc.DocumentElement;//. GetElementById(ROMPROJECT);
             if (romProjectNode == null)
                 return;
 
-
             //Start up the monster here boyo
-            XElement projectElement = XElement.Load(romProjectNode.CreateNavigator().ReadSubtree());
-
             _instance = new RomProject();
-            _instance.ProjectName = projectElement.Attribute(PROJECTNAME).Value;
+            _instance.ProjectName = romProjectNode.Attribute(PROJECTNAME).Value;
             _instance.ProjectPath = Path.GetDirectoryName(filePath);
 
-            foreach (XElement element in projectElement.Elements())
+            foreach (XElement element in romProjectNode.Elements())
             {
                 if (element.Name == UserDefinedRomInfo.USERDEFINEDINFO)
                 {
@@ -157,6 +169,15 @@ namespace Cereal64.Common.Rom
                         //Load the profiles
                         _instance._dmaProfiles.Add(new DmaProfile(profileElement));
                     }
+                }
+            }
+
+            //Handle in-element references
+            foreach (RomFile file in _instance._files)
+            {
+                foreach (DataElements.IN64ElementContainer container in file.ElementContainers)
+                {
+                    container.LoadReferencesFromGUID();
                 }
             }
 

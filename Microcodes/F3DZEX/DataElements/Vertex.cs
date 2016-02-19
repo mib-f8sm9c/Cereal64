@@ -6,15 +6,39 @@ using Cereal64.Common;
 using Cereal64.Common.Utils;
 using Cereal64.Common.DataElements;
 using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace Cereal64.Microcodes.F3DZEX.DataElements
 {
     public class Vertex : N64DataElement
     {
-        public short X, Y, Z;
-        public short S, T;
-        public sbyte R, G, B; //Can represent X, Y, and Z for vertex normals
-        public byte A;
+        [CategoryAttribute("Vertex Settings"),
+        DescriptionAttribute("X coordinate of the vertex")]
+        public short X { get; set; }
+        [CategoryAttribute("Vertex Settings"),
+        DescriptionAttribute("Y coordinate of the vertex")]
+        public short Y { get; set; }
+        [CategoryAttribute("Vertex Settings"),
+        DescriptionAttribute("Z coordinate of the vertex")]
+        public short Z { get; set; }
+        [CategoryAttribute("Vertex Settings"),
+        DescriptionAttribute("X coordinate of the texture")]
+        public short S { get; set; }
+        [CategoryAttribute("Vertex Settings"),
+        DescriptionAttribute("Y coordinate of the vertex")]
+        public short T { get; set; }
+        [CategoryAttribute("Vertex Settings"),
+        DescriptionAttribute("Red color component of the vertex (also can be X coordinate of the vertex normal)")]
+        public sbyte R { get; set; }
+        [CategoryAttribute("Vertex Settings"),
+        DescriptionAttribute("Green color component of the vertex (also can be Y coordinate of the vertex normal)")]
+        public sbyte G { get; set; }
+        [CategoryAttribute("Vertex Settings"),
+        DescriptionAttribute("Blue color component of the vertex (also can be Z coordinate of the vertex normal)")]
+        public sbyte B { get; set; }
+        [CategoryAttribute("Vertex Settings"),
+        DescriptionAttribute("Alpha color component of the vertex")]
+        public byte A { get; set; }
 
         public Vertex(XElement xml, byte[] fileData)
             : base(xml, fileData)

@@ -32,5 +32,13 @@ namespace Cereal64.Common.DataElements
         /// <param name="element">N64DataElement removed from parent RomFile</param>
         /// <returns>True if element was removed from the container</returns>
         bool RemoveElement(N64DataElement element);
+
+        /// <summary>
+        /// Called to go through the elements in the container and apply any
+        ///  object references that haven't been made yet. Used when loading
+        ///  a file from XML and you have only the GUID of the reference element,
+        ///  not its actual reference.
+        /// </summary>
+        void LoadReferencesFromGUID();
     }
 }

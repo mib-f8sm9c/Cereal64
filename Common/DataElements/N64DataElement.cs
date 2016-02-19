@@ -17,12 +17,16 @@ namespace Cereal64.Common.DataElements
         public const string FILEOFFSET = "FileOffset";
         public const string LENGTH = "Length";
         private const string TAGINFO = "TagInfo";
+        private const string GUID_STRING = "Guid";
 
         [CategoryAttribute("N64 Element"),
         ReadOnlyAttribute(true),
         DescriptionAttribute("Offset within the RomFile"),
         TypeConverter(typeof(Int32HexTypeConverter))]
         public int FileOffset { get; set; }
+
+        [Browsable(false)]
+        public Guid GUID { get; set; }
 
         public N64DataElement(XElement xml, byte[] fileData)
         {
@@ -48,6 +52,12 @@ namespace Cereal64.Common.DataElements
                 UserTag = att.Value;
             else
                 UserTag = string.Empty;
+
+            att = xml.Attribute(GUID_STRING);
+            if (att != null)
+                GUID = new Guid(att.Value);
+            else
+                GUID = Guid.NewGuid();
         }
 
         public N64DataElement(int offset, byte[] rawData)
@@ -55,6 +65,7 @@ namespace Cereal64.Common.DataElements
             FileOffset = offset;
             RawData = rawData;
             UserTag = string.Empty;
+            GUID = Guid.NewGuid();
         }
 
         [CategoryAttribute("N64 Element"),
@@ -75,13 +86,14 @@ namespace Cereal64.Common.DataElements
         DescriptionAttribute("User defined tag string")]
         public string UserTag { get; set; }
 
-        public XElement GetAsXML()
+        public virtual XElement GetAsXML()
         {
             XElement xml = new XElement(this.GetType().ToString()); //Can derive actual type from name with N64DataElementFactory
 
             xml.Add(new XAttribute(FILEOFFSET, FileOffset));
             xml.Add(new XAttribute(LENGTH, RawDataSize));
             xml.Add(new XAttribute(TAGINFO, UserTag));
+            xml.Add(new XAttribute(GUID_STRING, GUID.ToString()));
 
             return xml;
         }
