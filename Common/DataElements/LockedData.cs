@@ -7,7 +7,10 @@ using System.Xml.Linq;
 
 namespace Cereal64.Common.DataElements
 {
-    //Same as UnknownData, but specified by user so it can't be overwritten/changed
+    /// <summary>
+    /// LockedData is similar to UnknownData as it stores data whose function is not yet known.
+    /// However Unknown data may be overwritten and split up, whereas LockedData is 
+    /// </summary>
     public class LockedData : N64DataElement
     {
         private List<byte> _rawData;

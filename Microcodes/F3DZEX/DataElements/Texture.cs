@@ -174,7 +174,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                     //generate image
                     Image = GenerateImage(value);
 
-                    if(Image == null)
+                    if(Image == null) //Catch if it failed
                         _unconvertedData = value;
                     else
                         _unconvertedData = null;

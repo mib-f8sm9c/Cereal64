@@ -84,7 +84,7 @@ namespace Cereal64.Common.DataElements
             if (insideElement)
             {
                 //Determine if we can overwrite unknown data with known data
-                if (_elements[indexToAdd] is UnknownData && overwriteUnknownData)
+                if (_elements[indexToAdd] is UnknownData && overwriteUnknownData && !((UnknownData)_elements[indexToAdd]).Locked)
                 {
                     //Step one: determine how many elements this new one spans
                     int endingIndex = indexToAdd;
@@ -95,8 +95,8 @@ namespace Cereal64.Common.DataElements
                             !element.ContainsOffset(_elements[endingIndex + 1].FileOffset))
                             break;
 
-                        //Only unknown data may be split
-                        if (!(_elements[endingIndex + 1] is UnknownData))
+                        //Only unlocked unknown data may be split
+                        if (!(_elements[endingIndex + 1] is UnknownData) || ((UnknownData)_elements[indexToAdd]).Locked)
                             return false;
                     }
 

@@ -171,15 +171,17 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             return bmp;
         }
 
-        public static byte[] CI4ToBinary(Bitmap bmp, Palette palette, int paletteIndex)
+        public static byte[] CI4ToBinary(Bitmap bmp, Palette palette, int paletteIndex, bool generateNewPalette = false)
         {
             //Pixel size is 1/2 bytes
-
             if (bmp == null)
                 return null;
 
             if (palette == null || palette.Colors.Length < 16)
                 return null;
+
+            if (generateNewPalette)
+                GenerateNewPalette(palette, bmp, 16);
 
             byte[] imgData = new byte[bmp.Width * bmp.Height / 2];
 
@@ -198,16 +200,59 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                     Color pixel = bmp.GetPixel(i, j);
                     int pixelID = pixel.ToArgb();
 
-                    byte index1 = 0x00;
-                    if (paletteIDs.Contains(pixelID))
-                        index1 = (byte)paletteIDs.First(p => p == pixelID);
+                    int index1 = -1;
+                    byte closestIndex = 0;
+                    double closestDist = double.MaxValue;
+                    for (byte p = 0; p < paletteIDs.Length; p++)
+                    {
+                        if (paletteIDs[p] == pixelID)
+                        {
+                            index1 = p;
+                            break;
+                        }
+                        else
+                        {
+                            //Get the dist to the color, and keep track of which is the best representation
+                            double dist = pixel.ColorDistanceFrom(palette.Colors[p + 16 * paletteIndex]);
+
+                            if (dist < closestDist)
+                            {
+                                closestDist = dist;
+                                closestIndex = p;
+                            }
+                        }
+                    }
+                    if (index1 == -1)
+                        index1 = closestIndex;
 
                     pixel = bmp.GetPixel(i + 1, j);
                     pixelID = pixel.ToArgb();
 
-                    byte index2 = 0x00;
-                    if (paletteIDs.Contains(pixelID))
-                        index2 = (byte)paletteIDs.First(p => p == pixelID);
+                    int index2 = -1;
+                    closestIndex = 0;
+                    closestDist = double.MaxValue;
+                    for (byte p = 0; p < paletteIDs.Length; p++)
+                    {
+                        
+                        if (paletteIDs[p] == pixelID)
+                        {
+                            index2 = p;
+                            break;
+                        }
+                        else
+                        {
+                            //Get the dist to the color, and keep track of which is the best representation
+                            double dist = pixel.ColorDistanceFrom(palette.Colors[p + 16 * paletteIndex]);
+
+                            if (dist < closestDist)
+                            {
+                                closestDist = dist;
+                                closestIndex = p;
+                            }
+                        }
+                    }
+                    if (index2 == -1)
+                        index2 = closestIndex;
 
                     ByteHelper.WriteByte((byte)((index1 << 4) | index2), imgData, index);
                 }
@@ -270,8 +315,14 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                     int pixelID = pixel.ToArgb();
 
                     byte palIndex = 0x00;
-                    if (paletteIDs.Contains(pixelID))
-                        palIndex = (byte)paletteIDs.First(p => p == pixelID);
+                    for (byte p = 0; p < paletteIDs.Length; p++)
+                    {
+                        if (paletteIDs[p] == pixelID)
+                        {
+                            palIndex = p;
+                            break;
+                        }
+                    }
 
                     ByteHelper.WriteByte(palIndex, imgData, index);
                 }
@@ -571,6 +622,58 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
 
         #region Palette
 
+        private static void GenerateNewPalette(Palette palette, Bitmap image, int colorCount)
+        {
+            //This can take a long time (not optimized), so be careful
+            List<Color> colors = new List<Color>();
+
+            for (int j = 0; j < image.Height; j++)
+            {
+                for (int i = 0; i < image.Width; i++)
+                {
+                    if (!colors.Contains(image.GetPixel(i, j)))
+                        colors.Add(image.GetPixel(i, j));
+                }
+            }
+
+            //Now that we have a huge list of colors, let's start going through them rapidly
+            //List<double> minDist = new List<double>();
+            //foreach (Color color in colors)
+            //    minDist.Add(double.MaxValue);
+
+            //while (colors.Count > colorCount)
+            //{
+            //    for (int i = 0; i < colors.Count; i++)
+            //    {
+            //        for (int j = i + 1; j < colors.Count; j++)
+            //        {
+            //            double dist = colors[i].ColorDistanceFrom(colors[j]);
+            //            if (dist < minDist[i])
+            //                minDist[i] = dist;
+            //        }
+            //    }
+
+            //    //Find smallest one, clear it out
+            //    double minvalue = minDist.Min();
+            //    int removeIndex = minDist.IndexOf(minvalue);
+            //    colors.RemoveAt(removeIndex);
+            //    minDist.RemoveAt(removeIndex);
+
+            //    //start over
+            //    for (int i = 0; i < minDist.Count; i++)
+            //        minDist[i] = double.MaxValue;
+            //}
+
+            PaletteMedianCutAnalyzer analyzer = new PaletteMedianCutAnalyzer();
+            foreach (Color color in colors)
+                analyzer.AddColor(color);
+
+            //Now make the new palette
+            byte[] newData = PaletteToBinary(analyzer.GetPalette(16));
+
+            palette.RawData = newData;
+        }
+
         public static Color[] BinaryToPalette(byte[] imgData, int count)
         {
             //Color size is 2 bytes
@@ -625,6 +728,259 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             return paletteData;
         }
 
+        public static double ColorDistanceFrom(this Color color, Color comparisonColor)
+        {
+            double dist = Math.Pow(color.R - comparisonColor.R, 2) +
+                                    Math.Pow(color.G - comparisonColor.G, 2) +
+                                     Math.Pow(color.B - comparisonColor.B, 2);
+
+            if ((color.A == 0 && comparisonColor.A != 0) ||
+                (color.A != 0 && comparisonColor.A == 0))
+                    dist += 1000000000; //Just make it a worst choice if alphas don't line up
+
+            return dist;
+        }
+
         #endregion
+    }
+
+    public class PaletteMedianCutAnalyzer
+    {
+        private byte _minRed, _maxRed, _minBlue, _maxBlue, _minGreen, _maxGreen;
+        private List<Color> _opaqueColors, _transparentColors;
+
+        public PaletteMedianCutAnalyzer()
+        {
+            _minRed = 0xFF;
+            _minBlue = 0xFF;
+            _minGreen = 0xFF;
+
+            _maxRed = 0x00;
+            _maxBlue = 0x00;
+            _maxGreen = 0x00;
+
+            _opaqueColors = new List<Color>();
+            _transparentColors = new List<Color>();
+        }
+
+        public void AddColor(Color color)
+        {
+            if (color.A == 0)
+            {
+                //Add to transparent
+                if (!_transparentColors.Contains(color))
+                    _transparentColors.Add(color);
+            }
+            else
+            {
+                if (!_opaqueColors.Contains(color))
+                {
+                    _opaqueColors.Add(color);
+                    _minRed = (byte)Math.Min(color.R, _minRed);
+                    _minGreen = (byte)Math.Min(color.G, _minGreen);
+                    _minBlue = (byte)Math.Min(color.B, _minBlue);
+
+                    _maxRed = (byte)Math.Min(color.R, _maxRed);
+                    _maxGreen = (byte)Math.Min(color.G, _maxGreen);
+                    _maxBlue = (byte)Math.Min(color.B, _maxBlue);
+                }
+            }
+        }
+
+        public Color[] GetPalette(int paletteSize)
+        {
+            Color[] colors = new Color[paletteSize];
+
+            ColorBox[] boxes = new ColorBox[paletteSize];
+
+            int boxIndex = 0;
+            ColorBox box;
+            int startIndex = 0;
+
+            if (_transparentColors.Count > 0)
+            {
+                box = new ColorBox(0);
+                foreach (Color color in _transparentColors)
+                    box.Colors.Add(color);
+                box.ShrinkToFit();
+                boxes[boxIndex] = box;
+                boxIndex++;
+                startIndex++;
+            }
+
+            //Handle the rest of the boxes
+            box = new ColorBox(0);
+            foreach (Color color in _opaqueColors)
+                box.Colors.Add(color);
+            box.ShrinkToFit();
+            boxes[boxIndex] = box;
+            boxIndex++;
+            while (boxIndex < paletteSize)
+            {
+                byte longestEdge = 0;
+                int longestIndex = startIndex;
+                for (int i = startIndex; i < boxIndex; i++)
+                {
+                    if (boxes[i].LongestSide > longestEdge)
+                    {
+                        longestEdge = boxes[i].LongestSide;
+                        longestIndex = i;
+                    }
+                }
+
+                Tuple<ColorBox, ColorBox> newBoxes = boxes[longestIndex].SplitBox();
+
+                boxes[longestIndex] = newBoxes.Item1;
+                boxes[boxIndex] = newBoxes.Item2;
+
+                boxIndex++;
+            }
+
+            for (int i = 0; i < boxes.Length; i++)
+                colors[i] = boxes[i].GetCentroidColor();
+
+            return colors;
+        }
+
+        private struct ColorBox
+        {
+            public byte MinRed;
+            public byte MaxRed;
+            public byte MinBlue;
+            public byte MaxBlue;
+            public byte MinGreen;
+            public byte MaxGreen;
+
+            public List<Color> Colors;
+
+            public ColorBox(int nothing = 0)
+            {
+                MinRed = 0x00;
+                MinBlue = 0x00;
+                MinGreen = 0x00;
+
+                MaxRed = 0xFF;
+                MaxGreen = 0xFF;
+                MaxBlue = 0xFF;
+
+                Colors = new List<Color>();
+            }
+
+            public ColorBox(byte minR, byte maxR, byte minB, byte maxB, byte minG, byte maxG)
+            {
+                MinRed = minR;
+                MinBlue = minB;
+                MinGreen = minG;
+
+                MaxRed = maxR;
+                MaxGreen = maxG;
+                MaxBlue = maxB;
+
+                Colors = new List<Color>();
+            }
+
+            public bool CanContainColor(Color color)
+            {
+                if (color.R < MinRed || color.R > MaxRed)
+                    return false;
+                if (color.B < MinBlue || color.B > MaxBlue)
+                    return false;
+                if (color.G < MinGreen || color.G > MaxGreen)
+                    return false;
+
+                return true;
+            }
+
+            public byte LongestSide
+            {
+                get
+                {
+                    return (byte)Math.Max(Math.Max(MaxRed - MinRed, MaxGreen - MinGreen), MaxBlue - MinBlue);
+                }
+            }
+
+            public Tuple<ColorBox, ColorBox> SplitBox()
+            {
+                byte redLength = (byte)(MaxRed - MinRed);
+                byte blueLength = (byte)(MaxBlue - MinBlue);
+                byte greenLength = (byte)(MaxGreen - MinGreen);
+
+                ColorBox cb1, cb2;
+
+                if (redLength >= blueLength && redLength >= greenLength)
+                {
+                    cb1 = new ColorBox(MinRed, (byte)(MinRed + (redLength / 2)), MinBlue, MaxBlue, MinGreen, MaxGreen);
+                    cb2 = new ColorBox((byte)(MinRed + (redLength / 2)), MaxRed, MinBlue, MaxBlue, MinGreen, MaxGreen);
+                }
+                if (blueLength >= redLength && blueLength >= greenLength)
+                {
+                    cb1 = new ColorBox(MinRed, MaxRed, MinBlue, (byte)(MinBlue + (blueLength / 2)), MinGreen, MaxGreen);
+                    cb2 = new ColorBox(MinRed, MaxRed, (byte)(MinBlue + (blueLength / 2)), MaxBlue, MinGreen, MaxGreen);
+                }
+                else
+                {
+                    cb1 = new ColorBox(MinRed, MaxRed, MinBlue, MaxBlue, MinGreen, (byte)(MinGreen + (greenLength / 2)));
+                    cb2 = new ColorBox(MinRed, MaxRed, MinBlue, MaxBlue, (byte)(MinGreen + (greenLength / 2)), MaxGreen);
+                }
+
+                foreach (Color color in Colors)
+                {
+                    if (cb1.CanContainColor(color))
+                        cb1.Colors.Add(color);
+                    else
+                        cb2.Colors.Add(color);
+                }
+
+                cb1.ShrinkToFit();
+                cb2.ShrinkToFit();
+
+                return new Tuple<ColorBox, ColorBox>(cb1, cb2);
+            }
+
+            public Color GetCentroidColor()
+            {
+                int red = 0, blue = 0, green = 0, alpha = 0;
+                foreach (Color color in Colors)
+                {
+                    red += color.R;
+                    green += color.G;
+                    blue += color.B;
+                    alpha += color.A;
+                }
+
+                if (Colors.Count > 0)
+                {
+                    red = (int)Math.Round(red / (double)Colors.Count);
+                    blue = (int)Math.Round(blue / (double)Colors.Count);
+                    green = (int)Math.Round(green / (double)Colors.Count);
+                    alpha = alpha > 0 ? 255 : 0;
+                }
+
+                return Color.FromArgb(alpha, red, green, blue);
+            }
+
+            public void ShrinkToFit()
+            {
+                //Compress the box
+                MinRed = 0xFF;
+                MinGreen = 0xFF;
+                MinBlue = 0xFF;
+
+                MaxRed = 0x00;
+                MaxGreen = 0x00;
+                MaxBlue = 0x00;
+
+                foreach (Color color in Colors)
+                {
+                    MinRed = (byte)Math.Min(color.R, MinRed);
+                    MinGreen = (byte)Math.Min(color.G, MinGreen);
+                    MinBlue = (byte)Math.Min(color.B, MinBlue);
+
+                    MaxRed = (byte)Math.Max(color.R, MaxRed);
+                    MaxGreen = (byte)Math.Max(color.G, MaxGreen);
+                    MaxBlue = (byte)Math.Max(color.B, MaxBlue);
+                }
+            }
+        }
     }
 }

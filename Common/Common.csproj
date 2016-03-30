@@ -52,13 +52,18 @@
     <Compile Include="Controls\HexEditor.designer.cs">
       <DependentUpon>HexEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\N64DataElementVisualizer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\N64DataElementVisualizer.Designer.cs">
+      <DependentUpon>N64DataElementVisualizer.cs</DependentUpon>
+    </Compile>
     <Compile Include="DataElements\N64ElementContainerFactory.cs" />
     <Compile Include="ITreeNodeElement.cs" />
     <Compile Include="IXMLSerializable.cs" />
     <Compile Include="DataElements\N64DataElementCollection.cs" />
     <Compile Include="Rom\DmaManager.cs" />
     <Compile Include="DataElements\IN64ElementContainer.cs" />
-    <Compile Include="DataElements\LockedData.cs" />
     <Compile Include="DataElements\MiscN64ElementContainer.cs" />
     <Compile Include="DataElements\N64DataElementFactory.cs" />
     <Compile Include="Rom\RomProject.cs" />
@@ -85,6 +90,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\HexNumericUpDown.resx">
       <DependentUpon>HexNumericUpDown.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\N64DataElementVisualizer.resx">
+      <DependentUpon>N64DataElementVisualizer.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

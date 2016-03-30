@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
+using System.ComponentModel;
 
 namespace Cereal64.Common.DataElements
 {
@@ -17,12 +18,20 @@ namespace Cereal64.Common.DataElements
     /// </summary>
     public class UnknownData : N64DataElement
     {
-        //Use a list to make adding/removing data easier
+        private const string LOCKED = "Locked";
+
         private List<byte> _rawData;
+
+        [CategoryAttribute("Element Settings"),
+        DescriptionAttribute("When locked, known data found inside the UnknownData may not extract itself as a new N64Element")]
+        public bool Locked { get; set; }
 
         public UnknownData(XElement xml, byte[] fileData)
             : base(xml, fileData)
         {
+            XAttribute att = xml.Attribute(LOCKED);
+            if (att != null)
+                Locked = bool.Parse(att.Value);
         }
 
         public UnknownData(int index, byte[] rawData)
@@ -53,5 +62,13 @@ namespace Cereal64.Common.DataElements
 
             return node;
         }
+
+        public override XElement GetAsXML()
+        {
+            XElement element = base.GetAsXML();
+            element.Add(new XAttribute(LOCKED, Locked));
+            return element;
+        }
+
     }
 }

@@ -31,8 +31,13 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="OpenTK, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL" />
+    <Reference Include="OpenTK.Compatibility, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL" />
+    <Reference Include="OpenTK.GLControl, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -40,20 +45,38 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Data\IGraphicsCollection.cs" />
+    <Compile Include="Data\IGraphicsElement.cs" />
+    <Compile Include="Data\OpenGL\VO64GraphicsCollection.cs" />
+    <Compile Include="Data\OpenGL\VO64GraphicsElement.cs" />
+    <Compile Include="Data\OpenGL\VO64SimpleVertex.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Visualization\OpenGL\Cameras\NewCamera.cs" />
+    <Compile Include="Visualization\OpenGL\Cameras\NullCamera.cs" />
+    <Compile Include="Visualization\OpenGL\Cameras\ICamera.cs" />
+    <Compile Include="Visualization\OpenGL\Cameras\OldCamera.cs" />
+    <Compile Include="Visualization\OpenGL\OpenGLControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Visualization\OpenGL\OpenGLControl.designer.cs">
+      <DependentUpon>OpenGLControl.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Conversion\DaeFile\" />
     <Folder Include="Conversion\ObjFile\" />
     <Folder Include="Conversion\Xml\" />
-    <Folder Include="Data\" />
-    <Folder Include="Visualization\OpenGL\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{B6A46BAF-D012-40F7-8213-EE361B1BC75E}</Project>
       <Name>Common</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Visualization\OpenGL\OpenGLControl.resx">
+      <DependentUpon>OpenGLControl.cs</DependentUpon>
+    </EmbeddedResource>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

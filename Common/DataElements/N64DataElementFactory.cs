@@ -16,8 +16,7 @@ namespace Cereal64.Common.DataElements
     public static class N64DataElementFactory
     {
         //Default the element types to the ones that exist in Common
-        private static Dictionary<string, Type> _elementTypes = new Dictionary<string, Type>() { 
-            { typeof(LockedData).ToString(), typeof(LockedData) }, 
+        private static Dictionary<string, Type> _elementTypes = new Dictionary<string, Type>() {
             { typeof(UnknownData).ToString(), typeof(UnknownData) } };
 
         public static void AddN64ElementsFromAssembly(Assembly assembly)
