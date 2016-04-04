@@ -60,7 +60,26 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         public byte Vertex6 { get; set; }
 
         [BrowsableAttribute(false)]
-        public Texture TextureReference { get; set; } // TO DO: ADD THE VERTEX REFERENCES
+        public Texture TextureReference { get; set; }
+
+        [BrowsableAttribute(false)]
+        public Vertex Vertex1Reference { get; set; }
+
+        [BrowsableAttribute(false)]
+        public Vertex Vertex2Reference { get; set; }
+
+        [BrowsableAttribute(false)]
+        public Vertex Vertex3Reference { get; set; }
+
+        [BrowsableAttribute(false)]
+        public Vertex Vertex4Reference { get; set; }
+
+        [BrowsableAttribute(false)]
+        public Vertex Vertex5Reference { get; set; }
+
+        [BrowsableAttribute(false)]
+        public Vertex Vertex6Reference { get; set; }
+
 
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

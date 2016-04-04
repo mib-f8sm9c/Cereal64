@@ -22,7 +22,7 @@ namespace VisObj64.Visualization.OpenGL
         public ICamera Camera
         {
             get { return _camera; }
-            set { if(_camera != null) _camera.CameraUpdated -= CameraUpdated; _camera = value; _camera.CameraUpdated += CameraUpdated; }
+            set { if (_camera != null) _camera.CameraUpdated -= Camera_CameraUpdated; _camera = value; _camera.CameraUpdated += Camera_CameraUpdated; }
         }
         private ICamera _camera;
 
@@ -49,19 +49,21 @@ namespace VisObj64.Visualization.OpenGL
 
         private void Camera_CameraUpdated(object sender, EventArgs e)
         {
-            _glDisplay.Invalidate();//gl_DrawScene();
+            //Repaint the contrl
+            _glDisplay.Invalidate();
+            _glDisplay.Update();
         }
 
         private void glDisplay_Load(object sender, EventArgs e)
         {
-            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime) return;
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime || DesignMode) return;
             
             MakeCurrent();
 
             //If there are unitialized-related errors, it's probably setting this too early
             SetupViewport();
 
-            TestMethod();
+            //TestMethod();
         }
 
         private void TestMethod()
@@ -71,11 +73,13 @@ namespace VisObj64.Visualization.OpenGL
             VO64GraphicsElement element = VO64GraphicsElement.CreateNewElement();
 
             element.AddVertex(new VO64SimpleVertex(-0.5f, 0.5f, 0f, 0.0f, 0.0f, -0.5f, 0.5f, 0f));
-            element.AddVertex(new VO64SimpleVertex(-0.5f, -0.5f, 0f, 0.0f, 1.0f, -0.5f, -0.5f, 1f));
-            element.AddVertex(new VO64SimpleVertex(0.5f, -0.5f, 0f, 1.0f, 1.0f, 0.5f, -0.5f, 1f));
-            element.AddVertex(new VO64SimpleVertex(0.5f, 0.5f, 0f, 1.0f, 0.0f, 0.5f, 0.5f, 0f));
+            element.AddVertex(new VO64SimpleVertex(-0.5f, -0.5f, 0f, 0.0f, 2.0f, -0.5f, -0.5f, 1f));
+            element.AddVertex(new VO64SimpleVertex(0.5f, -0.5f, 0f, 2.0f, 2.0f, 0.5f, -0.5f, 1f));
+            element.AddVertex(new VO64SimpleVertex(0.5f, 0.5f, 0f, 2.0f, 0.0f, 0.5f, 0.5f, 0f));
             element.AddTriangle(new VO64SimpleTriangle(0, 1, 2));
             element.AddTriangle(new VO64SimpleTriangle(2, 3, 0));
+
+            element.SetTexture(new VO64SimpleTexture((Bitmap)Bitmap.FromFile("test.bmp"), TextureWrapMode.MirroredRepeat, TextureWrapMode.MirroredRepeat));
 
             collection.Add(element);
             this.GraphicsCollections.Add(collection);
@@ -113,6 +117,7 @@ namespace VisObj64.Visualization.OpenGL
                 MakeCurrent();
 
                 _glDisplay.Invalidate();
+                _glDisplay.Update();
             }
 
             //Redraw
@@ -194,11 +199,6 @@ namespace VisObj64.Visualization.OpenGL
             //Any camera code or interaction code goes here
             Camera.OnMouseMove(e);
 
-        }
-
-        private void CameraUpdated(object sender, EventArgs e)
-        {
-            //Update the screen
         }
 
         #region draw.c functions

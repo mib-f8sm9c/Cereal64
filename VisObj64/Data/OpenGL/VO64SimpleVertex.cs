@@ -8,23 +8,30 @@ using OpenTK.Graphics.OpenGL;
 namespace Cereal64.VisObj64.Data.OpenGL
 {
     [StructLayout(LayoutKind.Sequential)]
-    public struct VO64SimpleVertex
+    public struct VO64SimpleVertex : IVO64Vertex
     {
-        float V1, V2, V3;
-        float T1, T2;
-        float N1, N2, N3;
+        public float X { get; set; }
+        public float Y { get; set; }
+        public float Z { get; set; }
 
-        public VO64SimpleVertex(float v1, float v2, float v3, float t1, float t2, float n1, float n2, float n3)
+        public float U { get; set; }
+        public float V { get; set; }
+
+        public float NX { get; set; }
+        public float NY { get; set; }
+        public float NZ { get; set; }
+
+        public VO64SimpleVertex(float x, float y, float z, float u, float v, float nx, float ny, float nz)
             : this()
         {
-            V1 = v1;
-            V2 = v2;
-            V3 = v3;
-            T1 = t1;
-            T2 = t2;
-            N1 = n1;
-            N2 = n2;
-            N3 = n3;
+            X = x;
+            Y = y;
+            Z = z;
+            U = u;
+            V = v;
+            NX = nx;
+            NY = ny;
+            NZ = nz;
         }
 
         public static void SetOpenGLVertexFormat()
@@ -45,27 +52,10 @@ namespace Cereal64.VisObj64.Data.OpenGL
                 return sizeof(float) * 8;
             }
         }
-    }
 
-    [StructLayout(LayoutKind.Sequential)]
-    public struct VO64SimpleTriangle
-    {
-        private ushort T1, T2, T3;
-
-        public VO64SimpleTriangle(ushort t1, ushort t2, ushort t3)
-            : this()
+        public VO64SimpleVertex GetAsSimpleVertex()
         {
-            T1 = t1;
-            T2 = t2;
-            T3 = t3;
-        }
-
-        public static byte Size
-        {
-            get
-            {
-                return sizeof(ushort) * 3;
-            }
+            return this;
         }
     }
 }

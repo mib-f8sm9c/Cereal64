@@ -36,6 +36,8 @@ namespace Cereal64.Microcodes.F3DZEX
         private static Dictionary<RomFile, List<Vertex>> _foundVertices = new Dictionary<RomFile,List<Vertex>>();
         private static Dictionary<RomFile, List<F3DZEXCommand>> _foundCommands = new Dictionary<RomFile,List<F3DZEXCommand>>();
 
+        private static List<Vertex> _vertexBuffer = new List<Vertex>();
+
         //public static 
         public static F3DZEXReaderPackage ReadF3DZEXAt(RomFile file, int offset)
         {
@@ -44,6 +46,10 @@ namespace Cereal64.Microcodes.F3DZEX
             _foundVertices.Clear();
             _foundCommands.Clear();
             _currentTexture = null;
+
+            _vertexBuffer.Clear();
+            for (int i = 0; i < 32; i++)
+                _vertexBuffer.Add(null);
 
             byte[] data = file.GetAsBytes();
 
@@ -262,7 +268,6 @@ namespace Cereal64.Microcodes.F3DZEX
                     TMEM.LoadTLutIntoTMem(_lastLoadTLut);
                     break;
                 case F3DZEXCommandID.F3DZEX_G_VTX:
-                    //Need to load in the vertex data here
                     F3DZEX_G_Vtx vtx = (F3DZEX_G_Vtx)command;
 
                     RomFile file;
@@ -283,6 +288,8 @@ namespace Cereal64.Microcodes.F3DZEX
                             vertices.Add(vertex);
 
                             offset += 0x10;
+
+                            _vertexBuffer[i + vtx.TargetBufferIndex] = vertex;
                         }
 
                         if (!_foundVertices.ContainsKey(file))
@@ -338,11 +345,24 @@ namespace Cereal64.Microcodes.F3DZEX
                     {
                         F3DZEX_G_Tri1 tri = (F3DZEX_G_Tri1)command;
                         tri.TextureReference = _currentTexture;
+
+                        tri.Vertex1Reference = _vertexBuffer[tri.Vertex1];
+                        tri.Vertex2Reference = _vertexBuffer[tri.Vertex2];
+                        tri.Vertex3Reference = _vertexBuffer[tri.Vertex3];
                     }
                     else if (command.CommandID == F3DZEXCommandID.F3DZEX_G_TRI2)
                     {
                         F3DZEX_G_Tri2 tri = (F3DZEX_G_Tri2)command;
                         tri.TextureReference = _currentTexture;
+
+
+                        tri.Vertex1Reference = _vertexBuffer[tri.Vertex1];
+                        tri.Vertex2Reference = _vertexBuffer[tri.Vertex2];
+                        tri.Vertex3Reference = _vertexBuffer[tri.Vertex3];
+                        tri.Vertex4Reference = _vertexBuffer[tri.Vertex4];
+                        tri.Vertex5Reference = _vertexBuffer[tri.Vertex5];
+                        tri.Vertex6Reference = _vertexBuffer[tri.Vertex6];
+
                     }
 
                     break;

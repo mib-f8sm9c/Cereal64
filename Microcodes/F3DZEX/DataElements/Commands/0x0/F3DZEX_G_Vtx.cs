@@ -60,7 +60,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             {
                 uint firstHalf = (uint)(((uint)CommandID) << 24 |
                                 ((uint)VertexCount) << 12 |
-                                (byte)(((TargetBufferIndex) & 0x7F) * 2));
+                                (byte)(((TargetBufferIndex + VertexCount) & 0x7F) * 2));
                 return ByteHelper.CombineIntoBytes(firstHalf, VertexSourceAddress.GetAsUInt());
             }
             set
@@ -69,7 +69,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
                 if (value.Length < 8 || value[0] != (byte)CommandID) return;
                 VertexCount = (byte)(ByteHelper.ReadUShort(value, 1) >> 4);
-                TargetBufferIndex = (byte)(ByteHelper.ReadByte(value, 3) / 2);
+                TargetBufferIndex = (byte)(ByteHelper.ReadByte(value, 3) / 2 - VertexCount);
                 VertexSourceAddress = new DmaAddress(ByteHelper.ReadUInt(value, 4));
 
                 IsValid = true;

@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 
 namespace Cereal64.VisObj64.Data.OpenGL
 {
-    public class VO64GraphicsCollection : IGraphicsCollection
+    public class VO64GraphicsCollection
     {
         public ReadOnlyCollection<VO64GraphicsElement> Elements
         {

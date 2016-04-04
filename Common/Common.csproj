@@ -58,6 +58,7 @@
     <Compile Include="Controls\N64DataElementVisualizer.Designer.cs">
       <DependentUpon>N64DataElementVisualizer.cs</DependentUpon>
     </Compile>
+    <Compile Include="DataElements\IN64ElementReference.cs" />
     <Compile Include="DataElements\N64ElementContainerFactory.cs" />
     <Compile Include="ITreeNodeElement.cs" />
     <Compile Include="IXMLSerializable.cs" />

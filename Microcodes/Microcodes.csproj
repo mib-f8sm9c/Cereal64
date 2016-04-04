@@ -116,7 +116,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="F3DEX\" />
+    <Folder Include="F3DZEX\F3DEX\" />
     <Folder Include="Fast3D\" />
   </ItemGroup>
   <ItemGroup>
