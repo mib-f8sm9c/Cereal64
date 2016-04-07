@@ -21,12 +21,12 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
         private static Dictionary<Guid, F3DZEXTriangleWrapper> _triangleWrappers = new Dictionary<Guid, F3DZEXTriangleWrapper>();
         private static Dictionary<Guid, F3DZEXTriangleWrapper> _triangle2Wrappers = new Dictionary<Guid, F3DZEXTriangleWrapper>();
 
-        public static F3DZEXTextureWrapper GetTextureWrapper(Texture texture, F3DZEX_G_SetTile command)
+        public static F3DZEXTextureWrapper GetTextureWrapper(Texture texture, F3DZEX_G_SetTile command, F3DZEX_G_Texture textureCommand)
         {
             if (_textureWrappers.ContainsKey(texture.GUID))
                 return _textureWrappers[texture.GUID];
 
-            F3DZEXTextureWrapper wrapper = new F3DZEXTextureWrapper(texture, command);
+            F3DZEXTextureWrapper wrapper = new F3DZEXTextureWrapper(texture, command, textureCommand);
             _textureWrappers.Add(texture.GUID, wrapper);
 
             return wrapper;

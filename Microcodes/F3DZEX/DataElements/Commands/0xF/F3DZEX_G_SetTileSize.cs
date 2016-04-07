@@ -31,24 +31,29 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner of texture to load, S-axis")]
-        public qushort ULS { get; set; } //10.2 Format
+        public qushort ULS { get { return _uls; } set { _uls = value; Updated(); } } //10.2 Format
+        private qushort _uls;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner of texture to load, T-axis")]
-        public qushort ULT { get; set; } //10.2 Format
+        public qushort ULT { get { return _ult; } set { _ult = value; Updated(); } } //10.2 Format
+        private qushort _ult;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Tile descriptor to modify"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Tile { get; set; }
+        public byte Tile { get { return _tile; } set { _tile = value; Updated(); } }
+        private byte _tile;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Lower-right corner of texture to load, S-axis")]
-        public qushort LRS { get; set; }  //10.2 Format
+        public qushort LRS { get { return _lrs; } set { _lrs = value; Updated(); } }  //10.2 Format
+        private qushort _lrs;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Lower-right corner of texture to load, T-axis")]
-        public qushort LRT { get; set; } //10.2 Format
+        public qushort LRT { get { return _lrt; } set { _lrt = value; Updated(); } } //10.2 Format
+        private qushort _lrt;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

@@ -42,21 +42,25 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Size in bytes of memory to be moved"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Size { get; set; }
+        public byte Size { get { return _size; } set { _size = value; Updated(); } }
+        private byte _size;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Offset from indexed base address"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Offset { get; set; }
+        public byte Offset { get { return _offset; } set { _offset = value; Updated(); } }
+        private byte _offset;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Index into table of DMEM addresses")]
-        public G_MV_INDEX MemoryIndex { get; set; }
+        public G_MV_INDEX MemoryIndex { get { return _memoryIndex; } set { _memoryIndex = value; Updated(); } }
+        private G_MV_INDEX _memoryIndex;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("RAM address of memory"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint MemAddress { get; set; }
+        public uint MemAddress { get { return _memAddress; } set { _memAddress = value; Updated(); } }
+        private uint _memAddress;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

@@ -32,7 +32,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Value for low word"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint WordLow;
+        public uint WordLow { get { return _wordLow; } set { _wordLow = value; Updated(); } }
+        private uint _wordLow;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

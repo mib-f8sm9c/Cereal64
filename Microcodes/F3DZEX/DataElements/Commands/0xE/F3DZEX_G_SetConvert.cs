@@ -32,32 +32,38 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("K0 term of conversion matrix"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort K0 { get; set; }
+        public ushort K0 { get { return _k0; } set { _k0 = value; Updated(); } }
+        private ushort _k0;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("K1 term of conversion matrix"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort K1 { get; set; }
+        public ushort K1 { get { return _k1; } set { _k1 = value; Updated(); } }
+        private ushort _k1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("K2 term of conversion matrix"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort K2 { get; set; }
+        public ushort K2 { get { return _k2; } set { _k2 = value; Updated(); } }
+        private ushort _k2;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("K3 term of conversion matrix"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort K3 { get; set; }
+        public ushort K3 { get { return _k3; } set { _k3 = value; Updated(); } }
+        private ushort _k3;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("K4 term of conversion matrix"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort K4 { get; set; }
+        public ushort K4 { get { return _k4; } set { _k4 = value; Updated(); } }
+        private ushort _k4;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("K5 term of conversion matrix"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort K5 { get; set; }
+        public ushort K5 { get { return _k5; } set { _k5 = value; Updated(); } }
+        private ushort _k5;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

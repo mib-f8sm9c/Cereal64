@@ -32,7 +32,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Address for the depth buffer")]
-        public DmaAddress ImageAddress;
+        public DmaAddress ImageAddress { get { return _imageAddress; } set { _imageAddress = value; Updated(); } }
+        private DmaAddress _imageAddress;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

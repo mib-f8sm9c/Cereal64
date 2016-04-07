@@ -32,7 +32,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Fill value for use in fill mode"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint Color; //Can be different formats, so for now, keep as a uint
+        public uint Color { get { return _color; } set { _color = value; Updated(); } } //Can be different formats, so for now, keep as a uint
+        private uint _color;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

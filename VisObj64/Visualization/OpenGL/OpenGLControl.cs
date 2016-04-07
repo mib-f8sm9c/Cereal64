@@ -258,7 +258,7 @@ namespace VisObj64.Visualization.OpenGL
 	        GL.Enable(EnableCap.Normalize);
 
 	        GL.Disable(EnableCap.CullFace);
-	        GL.CullFace(CullFaceMode.Back);
+	        //GL.CullFace(CullFaceMode.FrontAndBack);
 
 	        GL.Enable(EnableCap.Blend);
 	        GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);

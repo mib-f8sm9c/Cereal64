@@ -32,7 +32,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Tag number"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint Tag { get; set; }
+        public uint Tag { get { return _tag; } set { _tag = value; Updated(); } }
+        private uint _tag;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

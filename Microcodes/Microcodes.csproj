@@ -42,6 +42,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="F3DEX\DataElements\Commands\F3DEXCommandFactory.cs" />
     <Compile Include="F3DZEX\Controls\F3DZEXEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -116,7 +117,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="F3DZEX\F3DEX\" />
+    <Folder Include="F3DEX\Controls\" />
+    <Folder Include="F3DEX\DataElements\Commands\0x0\" />
+    <Folder Include="F3DEX\DataElements\Commands\0xD\" />
+    <Folder Include="F3DEX\DataElements\Commands\0xE\" />
+    <Folder Include="F3DEX\DataElements\Commands\0xF\" />
     <Folder Include="Fast3D\" />
   </ItemGroup>
   <ItemGroup>

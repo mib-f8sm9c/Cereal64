@@ -32,82 +32,98 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color 'a' value, first cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte a0 { get; set; }
+        public byte a0 { get { return _a0; } set { _a0 = value; Updated(); } }
+        private byte _a0;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color 'c' value, first cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte c0 { get; set; }
+        public byte c0 { get { return _c0; } set { _c0 = value; Updated(); } }
+        private byte _c0;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Alpha 'a' value, first cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte Aa0 { get; set; }
+        public byte Aa0 { get { return _aa0; } set { _aa0 = value; Updated(); } }
+        private byte _aa0;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Alpha 'c' value, first cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte Ac0 { get; set; }
+        public byte Ac0 { get { return _ac0; } set { _ac0 = value; Updated(); } }
+        private byte _ac0;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color 'a' value, second cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte a1 { get; set; }
+        public byte a1 { get { return _a1; } set { _a1 = value; Updated(); } }
+        private byte _a1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color 'c' value, second cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte c1 { get; set; }
+        public byte c1 { get { return _c1; } set { _c1 = value; Updated(); } }
+        private byte _c1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color 'b' value, first cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte b0 { get; set; }
+        public byte b0 { get { return _b0; } set { _b0 = value; Updated(); } }
+        private byte _b0;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color 'b' value, second cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte b1 { get; set; }
+        public byte b1 { get { return _b1; } set { _b1 = value; Updated(); } }
+        private byte _b1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Alpha 'a' value, second cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte Aa1 { get; set; }
+        public byte Aa1 { get { return _aa1; } set { _aa1 = value; Updated(); } }
+        private byte _aa1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Alpha 'c' value, second cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte Ac1 { get; set; }
+        public byte Ac1 { get { return _ac1; } set { _ac1 = value; Updated(); } }
+        private byte _ac1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color 'd' value, first cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte d0 { get; set; }
+        public byte d0 { get { return _d0; } set { _d0 = value; Updated(); } }
+        private byte _d0;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Alpha 'b' value, first cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte Ab0 { get; set; }
+        public byte Ab0 { get { return _ab0; } set { _ab0 = value; Updated(); } }
+        private byte _ab0;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Alpha d' value, first cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte Ad0 { get; set; }
+        public byte Ad0 { get { return _ad0; } set { _ad0 = value; Updated(); } }
+        private byte _ad0;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color 'd' value, second cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte d1 { get; set; }
+        public byte d1 { get { return _d1; } set { _d1 = value; Updated(); } }
+        private byte _d1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Alpha 'b' value, second cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte Ab1 { get; set; }
+        public byte Ab1 { get { return _ab1; } set { _ab1 = value; Updated(); } }
+        private byte _ab1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Alpha 'd' value, second cycle"),
         TypeConverter(typeof(ByteArrayHexTypeConverter))]
-        public byte Ad1 { get; set; }
+        public byte Ad1 { get { return _ad1; } set { _ad1 = value; Updated(); } }
+        private byte _ad1;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

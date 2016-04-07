@@ -32,17 +32,20 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Unknown"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Unknown1 { get; set; }
+        public byte Unknown1 { get { return _unknown1; } set { _unknown1 = value; Updated(); } }
+        private byte _unknown1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Unknown"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort Unknown2 { get; set; }
+        public ushort Unknown2 { get { return _unknown2; } set { _unknown2 = value; Updated(); } }
+        private ushort _unknown2;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Unknown"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint Unknown3 { get; set; }
+        public uint Unknown3 { get { return _unknown3; } set { _unknown3 = value; Updated(); } }
+        private uint _unknown3;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

@@ -32,7 +32,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color of fog to be set")]
-        public Color FogColor { get; set; }
+        public Color FogColor { get { return _fogColor; } set { _fogColor = value; Updated(); } }
+        private Color _fogColor;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

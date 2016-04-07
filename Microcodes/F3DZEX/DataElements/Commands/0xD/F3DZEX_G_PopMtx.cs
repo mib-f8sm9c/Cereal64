@@ -31,7 +31,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("The number of matrices to pop")]
-        public uint Num { get; set; }
+        public uint Num { get { return _num; } set { _num = value; Updated(); } }
+        private uint _num;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

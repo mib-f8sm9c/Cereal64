@@ -38,18 +38,21 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Amount data is shifted by, or number of LSb of mode bits to be changed")]
-        public LMode Shift { get; set; }
+        public LMode Shift { get { return _shift; } set { _shift = value; Updated(); } }
+        private LMode _shift;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Size of data affected, in bits"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort Length { get; set; }
+        public ushort Length { get { return _length; } set { _length = value; Updated(); } }
+        private ushort _length;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("New bit settings to be applied"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint Data { get; set; }  //Enumeration available here
-        
+        public uint Data { get { return _data; } set { _data = value; Updated(); } }  //Enumeration available here
+        private uint _data;
+
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute("True if the command was loaded without errors")]

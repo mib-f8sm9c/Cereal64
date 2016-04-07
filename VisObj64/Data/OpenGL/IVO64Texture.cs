@@ -13,6 +13,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
         TextureWrapMode WrapS { get; set; }
         TextureWrapMode WrapT { get; set; }
+        
 
         VO64SimpleTexture GetAsSimpleTexture();
     }

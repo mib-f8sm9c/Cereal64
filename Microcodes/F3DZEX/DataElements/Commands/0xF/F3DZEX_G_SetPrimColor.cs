@@ -32,15 +32,18 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Minimum possible LOD value (clamped to this at minimum)")]
-        public qushort MinLevel { get; set; }
+        public qushort MinLevel { get { return _minLevel; } set { _minLevel = value; Updated(); } }
+        private qushort _minLevel;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Primitive LOD fraction for mipmap filtering")]
-        public qushort LodFrac { get; set; }
+        public qushort LodFrac { get { return _lodFrac; } set { _lodFrac = value; Updated(); } }
+        private qushort _lodFrac;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Primitive color to be set")]
-        public Color PrimitiveColor { get; set; }
+        public Color PrimitiveColor { get { return _primitiveColor; } set { _primitiveColor = value; Updated(); } }
+        private Color _primitiveColor;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

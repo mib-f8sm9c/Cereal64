@@ -32,13 +32,15 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of first vertex for bounding volume"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort BufferIndexStart { get; set; }
-        
+        public ushort BufferIndexStart { get { return _bufferIndexStart; } set { _bufferIndexStart = value; Updated(); } }
+        private ushort _bufferIndexStart;
+
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of last vertex for bounding volume"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort BufferIndexEnd { get; set; }
-        
+        public ushort BufferIndexEnd { get { return _bufferIndexEnd; } set { _bufferIndexEnd = value; Updated(); } }
+        private ushort _bufferIndexEnd;
+
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute("True if the command was loaded without errors")]

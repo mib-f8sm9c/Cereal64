@@ -31,31 +31,37 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Scaled width of half the key window for green")]
-        public qushort WidthG; //Actually 4.8 float
+        public qushort WidthG { get { return _widthG; } set { _widthG = value; Updated(); } } //Actually 4.8 float
+        private qushort _widthG;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Scaled width of half the key window for blue")]
-        public qushort WidthB; //Actually 4.8 float
+        public qushort WidthB { get { return _widthB; } set { _widthB = value; Updated(); } } //Actually 4.8 float
+        private qushort _widthB;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Intensity of active key for green"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte CenterG;
+        public byte CenterG { get { return _centerG; } set { _centerG = value; Updated(); } }
+        private byte _centerG;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Reciprocal of size of soft edge, normalized to 0..0xFF, for green"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte ScaleG;
+        public byte ScaleG { get { return _scaleG; } set { _scaleG = value; Updated(); } }
+        private byte _scaleG;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Intensity of active key for blue"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte CenterB;
+        public byte CenterB { get { return _centerB; } set { _centerB = value; Updated(); } }
+        private byte _centerB;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Reciprocal of size of soft edge, normalized to 0..0xFF, for blue"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte ScaleB;
+        public byte ScaleB { get { return _scaleB; } set { _scaleB = value; Updated(); } }
+        private byte _scaleB;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

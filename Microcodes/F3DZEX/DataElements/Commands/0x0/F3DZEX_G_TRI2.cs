@@ -32,32 +32,38 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of first vertex of the first triangle"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Vertex1 { get; set; }
+        public byte Vertex1 { get { return _vertex1; } set { _vertex1 = value; Updated(); } }
+        private byte _vertex1;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of second vertex of the first triangle"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Vertex2 { get; set; }
+        public byte Vertex2 { get { return _vertex2; } set { _vertex2 = value; Updated(); } }
+        private byte _vertex2;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of third vertex of the first triangle"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Vertex3 { get; set; }
+        public byte Vertex3 { get { return _vertex3; } set { _vertex3 = value; Updated(); } }
+        private byte _vertex3;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of first vertex of the second triangle"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Vertex4 { get; set; }
+        public byte Vertex4 { get { return _vertex4; } set { _vertex4 = value; Updated(); } }
+        private byte _vertex4;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of second vertex of the second triangle"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Vertex5 { get; set; }
+        public byte Vertex5 { get { return _vertex5; } set { _vertex5 = value; Updated(); } }
+        private byte _vertex5;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of third vertex of the second triangle"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Vertex6 { get; set; }
+        public byte Vertex6 { get { return _vertex6; } set { _vertex6 = value; Updated(); } }
+        private byte _vertex6;
 
         [BrowsableAttribute(false)]
         public Texture TextureReference { get; set; }

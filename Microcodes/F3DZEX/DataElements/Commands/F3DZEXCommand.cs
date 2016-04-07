@@ -14,6 +14,10 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
     public abstract class F3DZEXCommand : N64DataElement
     {
+        public delegate void UpdateEvent();
+
+        public UpdateEvent Updated = delegate { };
+
         public abstract F3DZEXCommandID CommandID { get; }
 
         public abstract string CommandName { get; }
@@ -40,6 +44,11 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             node.Text =  string.Format("{0}: {1}", string.Format("{0:X2}", (int)this.CommandID), this.CommandID);
 
             return node;
-        } 
+        }
+
+        public void CallUpdate()
+        {
+            Updated();
+        }
     }
 }

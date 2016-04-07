@@ -14,6 +14,7 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
         //NOTE: THIS WILL ALL BREAK IF TEXTURE/COMMANDS ARE NULL
         public Texture F3DTexture;
         public F3DZEX_G_SetTile SetTileCommand;
+        public F3DZEX_G_Texture TextureCommand;
 
         public Bitmap Texture {
             get { return (F3DTexture == null ? null : F3DTexture.Image); } 
@@ -93,10 +94,11 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
         private bool _updated = true;
         private VO64SimpleTexture _simpleTexture;
 
-        public F3DZEXTextureWrapper(Texture texture, F3DZEX_G_SetTile command)
+        public F3DZEXTextureWrapper(Texture texture, F3DZEX_G_SetTile command, F3DZEX_G_Texture textureCommand)
         {
             F3DTexture = texture;
             SetTileCommand = command;
+            TextureCommand = textureCommand;
         }
 
         public VO64SimpleTexture GetAsSimpleTexture()
@@ -108,5 +110,54 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
             }
             return _simpleTexture;
         }
+
+        public float ShiftScaleS
+        {
+            get
+            {
+                if (SetTileCommand.ShiftS > 10)
+                {
+                    return (float)(1 << (int)(16 - SetTileCommand.ShiftS));
+                }
+                else if (SetTileCommand.ShiftS > 0)
+                {
+                    return 1.0f / (float)(1 << (int)(16 - SetTileCommand.ShiftS));
+                }
+                else
+                    return 1.0f;
+            }
+        }
+
+        public float ShiftScaleT
+        {
+            get
+            {
+                if (SetTileCommand.ShiftT > 10)
+                {
+                    return (float)(1 << (int)(16 - SetTileCommand.ShiftT));
+                }
+                else if (SetTileCommand.ShiftT > 0)
+                {
+                    return 1.0f / (float)(1 << (int)(16 - SetTileCommand.ShiftT));
+                }
+                else
+                    return 1.0f;
+            }
+        }
+
+        public float ScaleS
+        {
+            get { return (float)TextureCommand.ScaleS / (float)ushort.MaxValue; }
+        }
+
+        public float ScaleT
+        {
+            get { return (float)TextureCommand.ScaleT / (float)ushort.MaxValue; }
+        }
+
+        public int TexWidth { get { return Texture.Width; } }
+
+        public int TexHeight { get { return Texture.Height; } }
+
     }
 }

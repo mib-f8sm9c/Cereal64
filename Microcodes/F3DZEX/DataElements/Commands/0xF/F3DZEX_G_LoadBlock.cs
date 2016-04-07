@@ -28,28 +28,33 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         public override string CommandDesc //Copied from CloudModding
         { get { return _commandDesc; } }
         private const string _commandDesc = "Load texture into TMEM as a continuous stream";
-            
+
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner of texture to load, S-axis")]
-        public qushort ULS { get; set; } //10.2 fixed point
+        public qushort ULS { get { return _uls; } set { _uls = value; Updated(); } } //10.2 fixed point
+        private qushort _uls;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner of texture to load, T-axis")]
-        public qushort ULT { get; set; } //10.2 fixed point
+        public qushort ULT { get { return _ult; } set { _ult = value; Updated(); } } //10.2 fixed point
+        private qushort _ult;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Tile descriptor to load into"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Tile { get; set; }
+        public byte Tile { get { return _tile; } set { _tile = value; Updated(); } }
+        private byte _tile;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Number of texels to load to TMEM")]
-        public ushort Texels { get; set; }
+        public ushort Texels { get { return _texels; } set { _texels = value; Updated(); } }
+        private ushort _texels;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Change in T-axis per scanline")]
-        public qushort DXT { get; set; } //1.11 fixed point
-        
+        public qushort DXT { get { return _dxt; } set { _dxt = value; Updated(); } } //1.11 fixed point
+        private qushort _dxt;
+
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute("True if the command was loaded without errors")]

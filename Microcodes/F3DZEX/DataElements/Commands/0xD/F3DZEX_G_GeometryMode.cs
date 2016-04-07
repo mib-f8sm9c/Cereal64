@@ -32,12 +32,14 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Geometry mode bits to clear"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint ClearBits { get; set; }
+        public uint ClearBits { get { return _clearBits; } set { _clearBits = value; Updated(); } }
+        private uint _clearBits;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Geometry mode bits to set"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint SetBits { get; set; }
+        public uint SetBits { get { return _setBits; } set { _setBits = value; Updated(); } }
+        private uint _setBits;
 
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

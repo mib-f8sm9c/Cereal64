@@ -43,17 +43,20 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Index into DMEM pointer table(?)")]
-        public G_MW_INDEX WordIndex { get; set; }
+        public G_MW_INDEX WordIndex { get { return _wordIndex; } set { _wordIndex = value; Updated(); } }
+        private G_MW_INDEX _wordIndex;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Offset from the indexed base address(?)"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort Offset { get; set; }
+        public ushort Offset { get { return _offset; } set { _offset = value; Updated(); } }
+        private ushort _offset;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("New 32-bit value"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint Data { get; set; }
+        public uint Data { get { return _data; } set { _data = value; Updated(); } }
+        private uint _data;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

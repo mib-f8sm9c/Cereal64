@@ -32,11 +32,13 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Force the DL stack to reset")]
-        public bool ForceJump { get; set; }
+        public bool ForceJump { get { return _forceJump; } set { _forceJump = value; Updated(); } }
+        private bool _forceJump;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Ram address for the new display list")]
-        public DmaAddress DLAddress { get; set; }
+        public DmaAddress DLAddress { get { return _dlAddress; } set { _dlAddress = value; Updated(); } }
+        private DmaAddress _dlAddress;
 
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

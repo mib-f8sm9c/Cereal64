@@ -33,19 +33,23 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Lower-right corner X coordinate ")]
         public qushort LRX { get; set; }
+        private qushort _lrx;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Lower-right corner Y coordinate ")]
         public qushort LRY { get; set; }
+        private qushort _lry;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner X coordinate ")]
         public qushort ULX { get; set; }
+        private qushort _ulx;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner Y coordinate ")]
         public qushort ULY{ get; set; }
-        
+        private qushort _uly;
+
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
         DescriptionAttribute("True if the command was loaded without errors")]

@@ -31,12 +31,14 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Parameters controlling nature of matrix addition")]
-        public F3DZEX_G_Mtx_Params Params { get; set; }
+        public F3DZEX_G_Mtx_Params Params { get { return _params; } set { _params = value; Updated(); } }
+        private F3DZEX_G_Mtx_Params _params;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("RAM address of new matrix"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint MatrixAddress { get; set; }
+        public uint MatrixAddress { get { return _matrixAddress; } set { _matrixAddress = value; Updated(); } }
+        private uint _matrixAddress;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

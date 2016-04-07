@@ -32,12 +32,14 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Set the other mode higher word bits"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint OModeH { get; set; }
+        public uint OModeH { get { return _omodeH; } set { _omodeH = value; Updated(); } }
+        private uint _omodeH;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Set the other mode lower word bits"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint OModeL { get; set; }
+        public uint OModeL { get { return _omodeL; } set { _omodeL = value; Updated(); } }
+        private uint _omodeL;
 
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

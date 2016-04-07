@@ -20,19 +20,37 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
 
             Texture lastTexture = null;
             F3DZEX_G_SetTile lastSetTile = null;
+            F3DZEX_G_Texture lastTextureCommand = null;
 
             List<uint> vertexOffsetList = new List<uint>(); //Keeps track of which vertices are loaded where
             List<Vertex> vertices = new List<Vertex>();
+            F3DZEXVertexWrapper newVertex = null;
+            F3DZEXTextureWrapper newTexture = null;
+            bool recordTileCommands = false; //Use RDPLoadSync and RDPTileSync to determine when it's okay to pick up SetTile commands
+            //Note: Not guaranteed for all ways of using F3DZEX!!
 
             foreach(F3DZEXCommand command in commands.Commands)
             {
                 switch (command.CommandID)
                 {
+                    case F3DZEXCommandID.F3DZEX_G_RDPLOADSYNC:
+                        recordTileCommands = true;
+                        break;
+                    case F3DZEXCommandID.F3DZEX_G_RDPTILESYNC:
+                        recordTileCommands = false;
+                        break;
                     case F3DZEXCommandID.F3DZEX_G_DL: //ignore this one for now
                         break;
                     case F3DZEXCommandID.F3DZEX_G_SETTILE:
-                        //keep track of this command when setting up the texture
-                        lastSetTile = (F3DZEX_G_SetTile)command;
+                        if (recordTileCommands)
+                        {
+                            //keep track of this command when setting up the texture
+                            lastSetTile = (F3DZEX_G_SetTile)command;
+                            recordTileCommands = false;
+                        }
+                        break;
+                    case F3DZEXCommandID.F3DZEX_G_TEXTURE:
+                        lastTextureCommand = (F3DZEX_G_Texture)command;
                         break;
                     case F3DZEXCommandID.F3DZEX_G_VTX:
                         //Record the vertex offset here, to keep track of vertex counts
@@ -53,25 +71,32 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
 
                             //Set the texture here
                             lastTexture = ((F3DZEX_G_Tri2)command).TextureReference;
-                            element.SetTexture(new F3DZEXTextureWrapper(lastTexture, lastSetTile));
+                            newTexture = new F3DZEXTextureWrapper(lastTexture, lastSetTile, lastTextureCommand);
+                            element.SetTexture(newTexture);
                         }
 
                         F3DZEX_G_Tri1 tri = (F3DZEX_G_Tri1)command;
                         if (!vertices.Contains(tri.Vertex1Reference))
                         {
                             vertices.Add(tri.Vertex1Reference);
+                            newVertex = new F3DZEXVertexWrapper(tri.Vertex1Reference);
+                            newVertex.SetTextureProperties(newTexture);
+                            element.AddVertex(newVertex);
                         }
-                            element.AddVertex(new F3DZEXVertexWrapper(tri.Vertex1Reference));
                         if (!vertices.Contains(tri.Vertex2Reference))
                         {
                             vertices.Add(tri.Vertex2Reference);
+                            newVertex = new F3DZEXVertexWrapper(tri.Vertex2Reference);
+                            newVertex.SetTextureProperties(newTexture);
+                            element.AddVertex(newVertex);
                         }
-                            element.AddVertex(new F3DZEXVertexWrapper(tri.Vertex2Reference));
                         if (!vertices.Contains(tri.Vertex3Reference))
                         {
                             vertices.Add(tri.Vertex3Reference);
+                            newVertex = new F3DZEXVertexWrapper(tri.Vertex3Reference);
+                            newVertex.SetTextureProperties(newTexture);
+                            element.AddVertex(newVertex);
                         }
-                            element.AddVertex(new F3DZEXVertexWrapper(tri.Vertex3Reference));
 
                         VO64SimpleTriangle triangle = new VO64SimpleTriangle((ushort)vertices.IndexOf(tri.Vertex1Reference),
                             (ushort)vertices.IndexOf(tri.Vertex2Reference),
@@ -95,25 +120,32 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
 
                             //Set the texture here
                             lastTexture = ((F3DZEX_G_Tri2)command).TextureReference;
-                            element.SetTexture(new F3DZEXTextureWrapper(lastTexture, lastSetTile));
+                            newTexture = F3DZEXWrapperBank.GetTextureWrapper(lastTexture, lastSetTile, lastTextureCommand);
+                            element.SetTexture(newTexture);
                         }
 
                         F3DZEX_G_Tri2 tri2 = (F3DZEX_G_Tri2)command;
                         if (!vertices.Contains(tri2.Vertex1Reference))
                         {
                             vertices.Add(tri2.Vertex1Reference);
+                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex1Reference);
+                            newVertex.SetTextureProperties(newTexture);
+                            element.AddVertex(newVertex);
                         }
-                        element.AddVertex(new F3DZEXVertexWrapper(tri2.Vertex1Reference));
                         if (!vertices.Contains(tri2.Vertex2Reference))
                         {
                             vertices.Add(tri2.Vertex2Reference);
+                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex2Reference);
+                            newVertex.SetTextureProperties(newTexture);
+                            element.AddVertex(newVertex);
                         }
-                        element.AddVertex(new F3DZEXVertexWrapper(tri2.Vertex2Reference));
                         if (!vertices.Contains(tri2.Vertex3Reference))
                         {
                             vertices.Add(tri2.Vertex3Reference);
+                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex3Reference);
+                            newVertex.SetTextureProperties(newTexture);
+                            element.AddVertex(newVertex);
                         }
-                        element.AddVertex(new F3DZEXVertexWrapper(tri2.Vertex3Reference));
 
                         VO64SimpleTriangle triangle2 = new VO64SimpleTriangle((ushort)vertices.IndexOf(tri2.Vertex1Reference),
                             (ushort)vertices.IndexOf(tri2.Vertex2Reference),
@@ -125,18 +157,24 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
                         if (!vertices.Contains(tri2.Vertex4Reference))
                         {
                             vertices.Add(tri2.Vertex4Reference);
+                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex4Reference);
+                            newVertex.SetTextureProperties(newTexture);
+                            element.AddVertex(newVertex);
                         }
-                            element.AddVertex(new F3DZEXVertexWrapper(tri2.Vertex4Reference));
                         if (!vertices.Contains(tri2.Vertex5Reference))
                         {
                             vertices.Add(tri2.Vertex5Reference);
+                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex5Reference);
+                            newVertex.SetTextureProperties(newTexture);
+                            element.AddVertex(newVertex);
                         }
-                            element.AddVertex(new F3DZEXVertexWrapper(tri2.Vertex5Reference));
                         if (!vertices.Contains(tri2.Vertex6Reference))
                         {
                             vertices.Add(tri2.Vertex6Reference);
+                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex6Reference);
+                            newVertex.SetTextureProperties(newTexture);
+                            element.AddVertex(newVertex);
                         }
-                            element.AddVertex(new F3DZEXVertexWrapper(tri2.Vertex6Reference));
 
                         triangle2 = new VO64SimpleTriangle((ushort)vertices.IndexOf(tri2.Vertex4Reference),
                             (ushort)vertices.IndexOf(tri2.Vertex5Reference),

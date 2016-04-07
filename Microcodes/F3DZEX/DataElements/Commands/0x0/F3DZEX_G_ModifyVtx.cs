@@ -40,17 +40,20 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Enumerated set of values specifying what to change")]
-        public OverwriteType Type { get; set; }
+        public OverwriteType Type { get { return _type; } set { _type = value; Updated(); } }
+        private OverwriteType _type;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of vertex to modify"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort TargetBufferIndex { get; set; }
+        public ushort TargetBufferIndex { get { return _targetBufferIndex; } set { _targetBufferIndex = value; Updated(); } }
+        private ushort _targetBufferIndex;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("New value to insert"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint NewValue { get; set; }
+        public uint NewValue { get { return _newValue; } set { _newValue = value; Updated(); } }
+        private uint _newValue;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

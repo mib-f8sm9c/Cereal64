@@ -32,7 +32,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Blend color to be set")]
-        public Color BlendColor { get; set; }
+        public Color BlendColor { get { return _blendColor; } set { _blendColor = value; Updated(); } }
+        private Color _blendColor;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

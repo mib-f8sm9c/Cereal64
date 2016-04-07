@@ -31,17 +31,20 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Scaled width of half the key window for blue")]
-        public qushort WidthR { get; set; }
+        public qushort WidthR { get { return _widthR; } set { _widthR = value; Updated(); } }
+        private qushort _widthR;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Intensity of active key for red"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte CenterR { get; set; }
+        public byte CenterR { get { return _centerR; } set { _centerR = value; Updated(); } }
+        private byte _centerR;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Reciprocal of size of soft edge, normalized to 0..0xFF, for red"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte ScaleR { get; set; }
+        public byte ScaleR { get { return _scaleR; } set { _scaleR = value; Updated(); } }
+        private byte _scaleR;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

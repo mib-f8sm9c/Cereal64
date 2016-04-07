@@ -31,11 +31,13 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Z value for primitive")]
-        public short Z { get; set; }
+        public short Z { get { return _z; } set { _z = value; Updated(); } }
+        private short _z;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Delta Z value for primitive")]
-        public short DeltaZ { get; set; }
+        public short DeltaZ { get { return _deltaZ; } set { _deltaZ = value; Updated(); } }
+        private short _deltaZ;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

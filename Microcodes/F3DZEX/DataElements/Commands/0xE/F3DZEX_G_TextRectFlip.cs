@@ -33,24 +33,29 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Lower-right corner X coordinate ")]
-        public ushort LRX { get; set; }
+        public ushort LRX { get { return _lrx; } set { _lrx = value; Updated(); } }
+        private ushort _lrx;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Lower-right corner Y coordinate ")]
-        public ushort LRY { get; set; }
+        public ushort LRY { get { return _lry; } set { _lry = value; Updated(); } }
+        private ushort _lry;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Tile descriptor to use for rectangle"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Tile { get; set; }
+        public byte Tile { get { return _tile; } set { _tile = value; Updated(); } }
+        private byte _tile;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner X coordinate ")]
-        public ushort ULX { get; set; }
+        public ushort ULX { get { return _ulx; } set { _ulx = value; Updated(); } }
+        private ushort _ulx;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Upper-left corner Y coordinate ")]
-        public ushort ULY { get; set; }
+        public ushort ULY { get { return _uly; } set { _uly = value; Updated(); } }
+        private ushort _uly;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

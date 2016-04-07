@@ -32,7 +32,8 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Color of environment to be set")]
-        public Color EnvironmentColor { get; set; }
+        public Color EnvironmentColor { get { return _environmentColor; } set { _environmentColor = value; Updated(); } }
+        private Color _environmentColor;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

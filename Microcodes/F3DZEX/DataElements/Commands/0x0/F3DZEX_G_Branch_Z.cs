@@ -34,17 +34,20 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of vertex to test"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort BufferIndex1 { get; set; }
+        public ushort BufferIndex1 { get { return _bufferIndex1; } set { _bufferIndex1 = value; Updated(); } }
+        private ushort _bufferIndex1;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Vertex buffer index of vertex to test"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort BufferIndex2 { get; set; }
+        public ushort BufferIndex2 { get { return _bufferIndex2; } set { _bufferIndex2 = value; Updated(); } }
+        private ushort _bufferIndex2;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Z value to test against"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint ZVal { get; set; }
+        public uint ZVal { get { return _zval; } set { _zval = value; Updated(); } }
+        private uint _zval;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

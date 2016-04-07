@@ -32,11 +32,13 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Tile descriptor to load from"),
         TypeConverter(typeof(ByteHexTypeConverter))]
-        public byte Tile { get; set; }
+        public byte Tile { get { return _tile; } set { _tile = value; Updated(); } }
+        private byte _tile;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Number of colors to load")]
-        public ushort Count { get; set; }
+        public ushort Count { get { return _count; } set { _count = value; Updated(); } }
+        private ushort _count;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

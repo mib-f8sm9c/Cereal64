@@ -32,19 +32,23 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
             
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Format of color buffer to be pointed to")]
-        public Texture.ImageFormat Format { get; set; }
+        public Texture.ImageFormat Format { get { return _format; } set { _format = value; Updated(); } }
+        private Texture.ImageFormat _format;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Bit size of pixels in color buffer to be pointed to")]
-        public Texture.PixelInfo PixelSize { get; set; }
+        public Texture.PixelInfo PixelSize { get { return _pixelSize; } set { _pixelSize = value; Updated(); } }
+        private Texture.PixelInfo _pixelSize;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Width of the color buffer")]
-        public ushort Width { get; set; }
+        public ushort Width { get { return _width; } set { _width = value; Updated(); } }
+        private ushort _width;
         
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("RAM address of color buffer")]
-        public DmaAddress ImageAddress { get; set; }
+        public DmaAddress ImageAddress { get { return _imageAddress; } set { _imageAddress = value; Updated(); } }
+        private DmaAddress _imageAddress;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),

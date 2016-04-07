@@ -34,12 +34,14 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Size of data section"),
         TypeConverter(typeof(UInt16HexTypeConverter))]
-        public ushort DSize { get; set; }
+        public ushort DSize { get { return _dsize; } set { _dsize = value; Updated(); } }
+        private ushort _dsize;
 
         [CategoryAttribute("F3DZEX Settings"),
         DescriptionAttribute("Start of text section"),
         TypeConverter(typeof(UInt32HexTypeConverter))]
-        public uint TStart { get; set; }
+        public uint TStart { get { return _tstart; } set { _tstart = value; Updated(); } }
+        private uint _tstart;
         
         [CategoryAttribute("F3DZEX Settings"),
         ReadOnlyAttribute(true),
