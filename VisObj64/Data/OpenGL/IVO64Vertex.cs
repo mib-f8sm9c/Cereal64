@@ -18,6 +18,8 @@ namespace Cereal64.VisObj64.Data.OpenGL
         float NY { get; set; }
         float NZ { get; set; }
 
+        void SetVBOReference(uint vbo, int vboOffset);
+
         VO64SimpleVertex GetAsSimpleVertex();
     }
 }

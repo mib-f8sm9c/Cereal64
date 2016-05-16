@@ -1,0 +1,4 @@
+﻿Commands:
+-Non-consistent Enum names (consider moving to own file??)
+-Default ushort/uint/byte variable types (there are some missing enums, and some floating point numbers)
+-Need a testing method to see that input = output for the F3DZEX controls

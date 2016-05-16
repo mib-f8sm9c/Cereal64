@@ -1,0 +1,100 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using Cereal64.Common;
+using Cereal64.Common.Utils;
+using System.ComponentModel;
+using Cereal64.Common.DataElements;
+
+namespace Cereal64.Microcodes.F3DEX.DataElements.Commands
+{
+    public class F3DEX_G_ModifyVtx : F3DEXCommand
+    {
+        [CategoryAttribute("F3DEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc),
+        TypeConverter(typeof(F3DEXIDTypeConverter))]
+        public enum OverwriteType
+        {
+            G_MWO_POINT_RGBA = 0x10,
+            G_MWO_POINT_ST = 0x14,
+            G_MWO_POINT_XYSCREEN = 0x18,
+            G_MWO_POINT_ZSCREEN = 0x1C
+        }
+        
+        [CategoryAttribute("F3DEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute(_commandDesc)]
+        public override F3DEXCommandID CommandID
+        { get { return F3DEXCommandID.F3DEX_G_MODIFYVTX; } }
+        
+        [BrowsableAttribute(false)]
+        public override string CommandName
+        { get { return "G_MODIFYVTX"; } }
+
+        [BrowsableAttribute(false)]
+        public override string CommandDesc //Copied from CloudModding
+        { get { return _commandDesc; } }
+        private const string _commandDesc = "Modifies a portion of vertex attributes in RSP";
+
+        [CategoryAttribute("F3DEX Settings"),
+        DescriptionAttribute("Enumerated set of values specifying what to change")]
+        public OverwriteType Type { get { return _type; } set { _type = value; Updated(); } }
+        private OverwriteType _type;
+
+        [CategoryAttribute("F3DEX Settings"),
+        DescriptionAttribute("Vertex buffer index of vertex to modify"),
+        TypeConverter(typeof(UInt16HexTypeConverter))]
+        public ushort TargetBufferIndex { get { return _targetBufferIndex; } set { _targetBufferIndex = value; Updated(); } }
+        private ushort _targetBufferIndex;
+
+        [CategoryAttribute("F3DEX Settings"),
+        DescriptionAttribute("New value to insert"),
+        TypeConverter(typeof(UInt32HexTypeConverter))]
+        public uint NewValue { get { return _newValue; } set { _newValue = value; Updated(); } }
+        private uint _newValue;
+        
+        [CategoryAttribute("F3DEX Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the command was loaded without errors")]
+        public override bool IsValid { get; protected set; }
+
+        public F3DEX_G_ModifyVtx(int index, byte[] rawBytes)
+            : base (index, rawBytes)
+        {
+        }
+
+        public override byte[] RawData
+        {
+            get
+            {
+                uint firstHalf = (uint)(((uint)CommandID) << 24 |
+                                ((uint)Type) << 16 |
+                                (uint)(TargetBufferIndex * 2));
+                return ByteHelper.CombineIntoBytes(firstHalf, NewValue);
+            }
+            set
+            {
+                IsValid = false;
+
+                if (value.Length < 8 || value[0] != (byte)CommandID) return;
+
+                byte type = ByteHelper.ReadByte(value, 1);
+                if (!Enum.IsDefined(typeof(OverwriteType), (int)type))
+                    return;
+
+                Type = (OverwriteType)type;
+                TargetBufferIndex = (ushort)(ByteHelper.ReadUShort(value, 2) / 2);
+                NewValue = ByteHelper.ReadUInt(value, 4);
+
+                IsValid = true;
+            }
+        }
+
+        public override int RawDataSize
+        {
+            get { return 0x08; }
+        }
+    }
+}

@@ -38,7 +38,12 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         { 
             get
             {
-                return null;
+                byte[] rawBytes = new byte[RawDataSize];
+                for (int i = 0; i < _commands.Count; i++)
+                {
+                    Array.Copy(_commands[i].RawData, 0, rawBytes, i * 0x8, 0x8);
+                }
+                return rawBytes;
             }
             set
             {

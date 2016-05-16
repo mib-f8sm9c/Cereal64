@@ -53,6 +53,11 @@
     <Compile Include="Data\OpenGL\VO64GraphicsCollection.cs" />
     <Compile Include="Data\OpenGL\VO64GraphicsElement.cs" />
     <Compile Include="Data\OpenGL\VO64SimpleVertex.cs" />
+    <Compile Include="Data\OpenGL\Wrappers\F3DEX\F3DEXTextureWrapper.cs" />
+    <Compile Include="Data\OpenGL\Wrappers\F3DEX\F3DEXTriangleWrapper.cs" />
+    <Compile Include="Data\OpenGL\Wrappers\F3DEX\F3DEXVertexWrapper.cs" />
+    <Compile Include="Data\OpenGL\Wrappers\F3DEX\F3DEXWrapperBank.cs" />
+    <Compile Include="Data\OpenGL\Wrappers\F3DEX\VO64F3DEXReader.cs" />
     <Compile Include="Data\OpenGL\Wrappers\F3DZEX\F3DZEXVertexWrapper.cs" />
     <Compile Include="Data\OpenGL\Wrappers\F3DZEX\F3DZEXTextureWrapper.cs" />
     <Compile Include="Data\OpenGL\Wrappers\F3DZEX\F3DZEXTriangleWrapper.cs" />

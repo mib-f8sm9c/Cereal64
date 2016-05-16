@@ -57,5 +57,10 @@ namespace Cereal64.VisObj64.Data.OpenGL
         {
             return this;
         }
+
+        public void SetVBOReference(uint vbo, int vboOffset)
+        {
+            //Since a simple vertex won't change anything, we won't do anything with this
+        }
     }
 }

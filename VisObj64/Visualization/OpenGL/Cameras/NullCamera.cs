@@ -39,7 +39,8 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
 
         public void Focus()
         {
-
+            //Do nothing
+            CameraUpdated(this, new EventArgs());
         }
     }
 }

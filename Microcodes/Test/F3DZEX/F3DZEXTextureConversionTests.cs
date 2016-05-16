@@ -7,7 +7,7 @@ using Cereal64.Microcodes.F3DZEX.DataElements;
 using Cereal64.Microcodes.UnitTests.Properties;
 using System.Drawing;
 
-namespace Cereal64.Microcodes.UnitTests
+namespace Cereal64.Microcodes.UnitTests.F3DZEX
 {
     //To do: improve the quality of the unit test images here
 

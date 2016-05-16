@@ -28,6 +28,8 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
         public bool IsEmpty { get { return _vertices.Count == 0 && _indices.Count == 0; } }
 
+        public bool Selected;
+
         private VO64GraphicsElement(int vaIndex, int vbIndex, int ibIndex)
         {
             _vertices = new List<IVO64Vertex>();
@@ -38,6 +40,8 @@ namespace Cereal64.VisObj64.Data.OpenGL
             _iboIndex = ibIndex;
 
             _texture = null;
+
+            Selected = false;
         }
 
         public static VO64GraphicsElement CreateNewElement()
@@ -70,6 +74,37 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
         public void UpdateBuffers()
         {
+            if (_updatedTexture)
+            {
+                if (_texture != null && _texture.Texture != null)
+                {
+                    BitmapData bmp_data = _texture.Texture.LockBits(new Rectangle(0, 0, _texture.Texture.Width, _texture.Texture.Height),
+                        ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                    GL.GenTextures(1, out _textureID);
+                    GL.Enable(EnableCap.Texture2D);
+                    GL.BindTexture(TextureTarget.Texture2D, _textureID);
+                    GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (float)TextureEnvMode.Modulate);
+                    //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)_texture.MinFilter);
+                    //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)_texture.MagFilter);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (float)_texture.WrapS);
+                    GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (float)_texture.WrapT);
+
+                    GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0,
+                        OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
+
+                    GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+
+                    _texture.Texture.UnlockBits(bmp_data);
+
+                    GL.BindTexture(TextureTarget.Texture2D, 0);
+                    GL.Disable(EnableCap.Texture2D);
+                }
+                else
+                    _textureID = 0;
+                _updatedTexture = false;
+            }
+
             if (_updatedVertices || _updatedIndices)
             {
                 if (_updatedVertices)
@@ -87,6 +122,11 @@ namespace Cereal64.VisObj64.Data.OpenGL
                     
                     GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
 
+                    for (int i = 0; i < _vertices.Count; i++)
+                    {
+                        _vertices[i].SetVBOReference((uint)_vboIndex, VO64SimpleVertex.Size * i);
+                    }
+
                     _updatedVertices = false;
                 }
                 if (_updatedIndices)
@@ -102,36 +142,6 @@ namespace Cereal64.VisObj64.Data.OpenGL
                     GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
                     _updatedIndices = false;
-                }
-                if (_updatedTexture)
-                {
-                    if (_texture != null && _texture.Texture != null)
-                    {
-                        BitmapData bmp_data = _texture.Texture.LockBits(new Rectangle(0, 0, _texture.Texture.Width, _texture.Texture.Height),
-                            ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-
-                        GL.GenTextures(1, out _textureID);
-                        GL.Enable(EnableCap.Texture2D);
-                        GL.BindTexture(TextureTarget.Texture2D, _textureID);
-                        GL.TexEnv(TextureEnvTarget.TextureEnv, TextureEnvParameter.TextureEnvMode, (float)TextureEnvMode.Modulate);
-                        //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (float)_texture.MinFilter);
-                        //GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (float)_texture.MagFilter);
-                        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (float)_texture.WrapS);
-                        GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (float)_texture.WrapT);
-
-                        GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, bmp_data.Width, bmp_data.Height, 0,
-                            OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmp_data.Scan0);
-
-                        GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-
-                        _texture.Texture.UnlockBits(bmp_data);
-
-                        GL.BindTexture(TextureTarget.Texture2D, 0);
-                        GL.Disable(EnableCap.Texture2D);
-                    }
-                    else
-                        _textureID = 0;
-                    _updatedTexture = false;
                 }
 
                 //Update the vao
@@ -183,6 +193,8 @@ namespace Cereal64.VisObj64.Data.OpenGL
             //Remove from OpenGL
             GL.DeleteBuffer(_vboIndex);
             GL.DeleteBuffer(_iboIndex);
+
+            //TO DO: RESET ALL THE VERTEX VBO REFERENCES
         }
     }
 }

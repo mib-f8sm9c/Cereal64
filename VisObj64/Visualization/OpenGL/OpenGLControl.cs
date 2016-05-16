@@ -10,14 +10,29 @@ using OpenTK.Graphics.OpenGL;
 using OpenTK;
 using Cereal64.VisObj64.Visualization.OpenGL.Cameras;
 using Cereal64.VisObj64.Data.OpenGL;
+using System.Collections.ObjectModel;
 
 namespace VisObj64.Visualization.OpenGL
 {
     public partial class OpenGLControl : UserControl
     {
+        public enum MouseFunction
+        {
+            Camera,
+            Select
+        }
+
+        private MouseFunction _mouseFunction;
+
         public bool OpenGLLoaded { get; private set; }
 
         public List<VO64GraphicsCollection> GraphicsCollections;
+
+        public ReadOnlyCollection<VO64GraphicsElement> SelectedElements
+        {
+            get { return _selectedElements.AsReadOnly(); }
+        }
+        private List<VO64GraphicsElement> _selectedElements;
 
         public ICamera Camera
         {
@@ -45,6 +60,9 @@ namespace VisObj64.Visualization.OpenGL
             InitializeComponent();
 
             GraphicsCollections = new List<VO64GraphicsCollection>();
+            _selectedElements = new List<VO64GraphicsElement>();
+
+            _mouseFunction = MouseFunction.Camera;
         }
 
         private void Camera_CameraUpdated(object sender, EventArgs e)
@@ -62,28 +80,6 @@ namespace VisObj64.Visualization.OpenGL
 
             //If there are unitialized-related errors, it's probably setting this too early
             SetupViewport();
-
-            //TestMethod();
-        }
-
-        private void TestMethod()
-        {
-            //Create something to view
-            VO64GraphicsCollection collection = new VO64GraphicsCollection();
-            VO64GraphicsElement element = VO64GraphicsElement.CreateNewElement();
-
-            element.AddVertex(new VO64SimpleVertex(-0.5f, 0.5f, 0f, 0.0f, 0.0f, -0.5f, 0.5f, 0f));
-            element.AddVertex(new VO64SimpleVertex(-0.5f, -0.5f, 0f, 0.0f, 2.0f, -0.5f, -0.5f, 1f));
-            element.AddVertex(new VO64SimpleVertex(0.5f, -0.5f, 0f, 2.0f, 2.0f, 0.5f, -0.5f, 1f));
-            element.AddVertex(new VO64SimpleVertex(0.5f, 0.5f, 0f, 2.0f, 0.0f, 0.5f, 0.5f, 0f));
-            element.AddTriangle(new VO64SimpleTriangle(0, 1, 2));
-            element.AddTriangle(new VO64SimpleTriangle(2, 3, 0));
-
-            element.SetTexture(new VO64SimpleTexture((Bitmap)Bitmap.FromFile("test.bmp"), TextureWrapMode.MirroredRepeat, TextureWrapMode.MirroredRepeat));
-
-            collection.Add(element);
-            this.GraphicsCollections.Add(collection);
-
         }
 
         private void glDisplay_Paint(object sender, PaintEventArgs e)
@@ -126,6 +122,40 @@ namespace VisObj64.Visualization.OpenGL
         private void MakeCurrent()
         {
             _glDisplay.MakeCurrent();
+        }
+
+        private uint[] selectBuffer = new uint[16];
+
+        private void SelectAtMouse(bool addSelection)
+        {
+            //http://www.glprogramming.com/red/chapter13.html
+            GL.SelectBuffer(16, selectBuffer);
+            GL.RenderMode(RenderingMode.Select);
+            int hits;
+            gl_DrawScene();
+            hits = GL.RenderMode(RenderingMode.Render);
+
+            //look through the select buffer for the closest object to the camera?
+        }
+
+        private void SelectElement(VO64GraphicsElement element)
+        {
+            //Check if element exists?
+            if (!_selectedElements.Contains(element))
+            {
+                _selectedElements.Add(element);
+                element.Selected = true;
+            }
+        }
+
+        private void UnselectElement(VO64GraphicsElement element)
+        {
+            //Check if element exists?
+            if (_selectedElements.Contains(element))
+            {
+                _selectedElements.Remove(element);
+                element.Selected = false;
+            }
         }
 
         private void OpenGLControl_Resize(object sender, EventArgs e)
@@ -175,8 +205,16 @@ namespace VisObj64.Visualization.OpenGL
             MakeCurrent();
 
             //Any camera code or interaction code goes here
-            Camera.OnMouseDown(e);
-
+            switch(_mouseFunction)
+            {
+                case MouseFunction.Camera:
+                    Camera.OnMouseDown(e);
+                    break;
+                case MouseFunction.Select:
+                    OpenTK.Input.KeyboardState keyboard = OpenTK.Input.Keyboard.GetState();
+                    SelectAtMouse(keyboard.IsKeyDown(OpenTK.Input.Key.ShiftLeft) || keyboard.IsKeyDown(OpenTK.Input.Key.ShiftRight));
+                    break;
+            }
         }
 
         private void glDisplay_MouseUp(object sender, MouseEventArgs e)
@@ -262,6 +300,10 @@ namespace VisObj64.Visualization.OpenGL
 
 	        GL.Enable(EnableCap.Blend);
 	        GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+            //Note: This helps with the alpha problems, but it's not a good fix
+            //GL.AlphaFunc(AlphaFunction.Gequal, 0.75f);
+            //GL.Enable(EnableCap.AlphaTest);
 
             OpenGLLoaded = true;
         }

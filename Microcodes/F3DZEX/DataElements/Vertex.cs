@@ -12,33 +12,53 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
 {
     public class Vertex : N64DataElement
     {
+        public delegate void UpdateEvent();
+        public UpdateEvent Updated = delegate { };
+
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("X coordinate of the vertex")]
-        public short X { get; set; }
+        public short X { get { return _x; } set { _x = value; Updated(); } }
+        private short _x;
+
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Y coordinate of the vertex")]
-        public short Y { get; set; }
+        public short Y { get { return _y; } set { _y = value; Updated(); } }
+        private short _y;
+
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Z coordinate of the vertex")]
-        public short Z { get; set; }
+        public short Z { get { return _z; } set { _z = value; Updated(); } }
+        private short _z;
+
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("X coordinate of the texture")]
-        public short S { get; set; }
+        public short S { get { return _s; } set { _s = value; Updated(); } }
+        private short _s;
+
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Y coordinate of the vertex")]
-        public short T { get; set; }
+        public short T { get { return _t; } set { _t = value; Updated(); } }
+        private short _t;
+
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Red color component of the vertex (also can be X coordinate of the vertex normal)")]
-        public sbyte R { get; set; }
+        public sbyte R { get { return _r; } set { _r = value; Updated(); } }
+        private sbyte _r;
+
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Green color component of the vertex (also can be Y coordinate of the vertex normal)")]
-        public sbyte G { get; set; }
+        public sbyte G { get { return _g; } set { _g = value; Updated(); } }
+        private sbyte _g;
+
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Blue color component of the vertex (also can be Z coordinate of the vertex normal)")]
-        public sbyte B { get; set; }
+        public sbyte B { get { return _b; } set { _b = value; Updated(); } }
+        private sbyte _b;
+
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Alpha color component of the vertex")]
-        public byte A { get; set; }
+        public byte A { get { return _a; } set { _a = value; Updated(); } }
+        private byte _a;
 
         public Vertex(XElement xml, byte[] fileData)
             : base(xml, fileData)
@@ -73,5 +93,10 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
         }
 
         public override int RawDataSize { get { return 0x10; } }
+
+        public void CallUpdate()
+        {
+            Updated();
+        }
     }
 }

@@ -11,7 +11,6 @@ using System.Xml.Linq;
 namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
 {
     // To do: add a thanks to CloudModding for the F3DZEX help info
-
     public abstract class F3DZEXCommand : N64DataElement
     {
         public delegate void UpdateEvent();
@@ -34,7 +33,6 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements.Commands
         public F3DZEXCommand(int fileOffset, byte[] data)
             : base(fileOffset, data)
         {
-
         }
 
         public override TreeNode GetAsTreeNode()

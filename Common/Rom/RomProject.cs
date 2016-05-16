@@ -89,6 +89,12 @@ namespace Cereal64.Common.Rom
                 _files.Remove(file);
         }
 
+        public void RemoveDmaProfile(DmaProfile profile)
+        {
+            if (_dmaProfiles.Contains(profile))
+                _dmaProfiles.Remove(profile);
+        }
+
         public static void Save(string filePath)
         {
             //Get as xml

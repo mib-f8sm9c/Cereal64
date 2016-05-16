@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Cereal64.Microcodes.F3DZEX.DataElements;
+using OpenTK.Graphics.OpenGL;
 
 namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
 {
@@ -41,6 +42,21 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
         public F3DZEXVertexWrapper(Vertex vertex)
         {
             Vertex = vertex;
+            Vertex.Updated += vertexUpdated;
+        }
+
+        private void vertexUpdated()
+        {
+            _updated = true;
+
+            if (_vbo != 0)
+            {
+                //Update data automatically
+                VO64SimpleVertex vert = GetAsSimpleVertex();
+                GL.BindBuffer(BufferTarget.ArrayBuffer, _vbo);
+                GL.BufferSubData(BufferTarget.ArrayBuffer, (IntPtr)_vboOffset, (IntPtr)VO64SimpleVertex.Size, ref vert);
+                GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
+            }
         }
 
         public VO64SimpleVertex GetAsSimpleVertex()
@@ -58,6 +74,16 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
         public void SetTextureProperties(F3DZEXTextureWrapper textureWrap)
         {
             _texture = textureWrap;
+        }
+
+        //NOTE: CAN A VERTEX BE IN MORE THAN ONE VERTEX BUFFER OBJECT?
+        private uint _vbo;
+        private int _vboOffset;
+
+        public void SetVBOReference(uint vbo, int vboOffset)
+        {
+            _vbo = vbo;
+            _vboOffset = vboOffset;
         }
     }
 }

@@ -46,9 +46,11 @@
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="F3DZEXTextureConversionTests.cs" />
+    <Compile Include="F3DEX\F3DEXTextureConversionTests.cs" />
+    <Compile Include="F3DEX\F3DEXCommandTests.cs" />
+    <Compile Include="F3DZEX\F3DZEXTextureConversionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="F3DZEXCommandTests.cs" />
+    <Compile Include="F3DZEX\F3DZEXCommandTests.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>

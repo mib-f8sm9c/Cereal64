@@ -7,7 +7,7 @@ using Cereal64.Microcodes;
 using Cereal64.Common;
 using Cereal64.Microcodes.F3DZEX.DataElements.Commands;
 
-namespace Cereal64.Microcodes.UnitTests
+namespace Cereal64.Microcodes.UnitTests.F3DZEX
 {
     [TestClass]
     public class F3DZEXCommandTests

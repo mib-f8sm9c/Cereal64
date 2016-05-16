@@ -42,7 +42,74 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="F3DEX\Controls\F3DEXEditor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="F3DEX\Controls\F3DEXEditor.Designer.cs">
+      <DependentUpon>F3DEXEditor.cs</DependentUpon>
+    </Compile>
+    <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_DL.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_MoveMem.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_Mtx.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_Vtx.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0x8\F3DEX_G_Unknown.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xA\F3DEX_G_Load_UCode.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_ClearGeometryMode.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_Branch_Z.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_CullDL.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_EndDL.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_SetGeometryMode.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_ModifyVtx.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_NoOp.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_MoveWord.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_PopMtx.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_RDPHalf_1.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_RDPHalf_2.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_SetOtherMode_H.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_SetOtherMode_L.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_Texture.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_TRI1.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_TRI2.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_RDPFullSync.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_RDPLoadSync.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_RDPPipeSync.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_RDPSetOtherMode.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_RDPTileSync.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_SetConvert.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_SetKeyGB.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_SetKeyR.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_SetPrimDepth.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_SetScissor.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_TextRect.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xE\F3DEX_G_TextRectFlip.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_FillRect.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_LoadBlock.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_LoadTile.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_LoadTLut.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetBlendColor.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetCImg.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetCombine.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetEnvColor.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetFillColor.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetFogColor.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetPrimColor.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetTile.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetTileSize.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetTImg.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0xF\F3DEX_G_SetZImg.cs" />
     <Compile Include="F3DEX\DataElements\Commands\F3DEXCommandFactory.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\F3DEXCommand.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\F3DEXTypeConverter.cs" />
+    <Compile Include="F3DEX\DataElements\ReversedVertex.cs" />
+    <Compile Include="F3DEX\DataElements\F3DEXCommandCollection.cs" />
+    <Compile Include="F3DEX\DataElements\Palette.cs" />
+    <Compile Include="F3DEX\DataElements\Texture.cs" />
+    <Compile Include="F3DEX\DataElements\TextureConversion.cs" />
+    <Compile Include="F3DEX\DataElements\TMem.cs" />
+    <Compile Include="F3DEX\DataElements\Vertex.cs" />
+    <Compile Include="F3DEX\DataElements\VertexCollection.cs" />
+    <Compile Include="F3DEX\F3DEXContainer.cs" />
+    <Compile Include="F3DEX\F3DEXReader.cs" />
     <Compile Include="F3DZEX\Controls\F3DZEXEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -117,11 +184,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="F3DEX\Controls\" />
-    <Folder Include="F3DEX\DataElements\Commands\0x0\" />
-    <Folder Include="F3DEX\DataElements\Commands\0xD\" />
-    <Folder Include="F3DEX\DataElements\Commands\0xE\" />
-    <Folder Include="F3DEX\DataElements\Commands\0xF\" />
     <Folder Include="Fast3D\" />
   </ItemGroup>
   <ItemGroup>
@@ -134,6 +196,9 @@
     <Content Include="Issues.txt" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="F3DEX\Controls\F3DEXEditor.resx">
+      <DependentUpon>F3DEXEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="F3DZEX\Controls\F3DZEXEditor.resx">
       <DependentUpon>F3DZEXEditor.cs</DependentUpon>
     </EmbeddedResource>
