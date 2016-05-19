@@ -38,24 +38,48 @@ namespace Cereal64.Microcodes.F3DZEX
 
         private static List<Vertex> _vertexBuffer = new List<Vertex>();
 
-        //public static 
-        public static F3DZEXReaderPackage ReadF3DZEXAt(RomFile file, int offset)
+        public static void ParseF3DZEXCommands(IList<F3DZEXCommand> commands)
         {
+            ResetReaderVariables();
+
+            foreach (F3DZEXCommand command in commands)
+            {
+                ParseCommand(command);
+            }
+        }
+
+        private static void ResetReaderVariables()
+        {
+            _foundCommands.Clear();
             _foundPalettes.Clear();
             _foundTextures.Clear();
             _foundVertices.Clear();
-            _foundCommands.Clear();
-            _currentTexture = null;
 
+            _currentTexture = null;
+            
             _vertexBuffer.Clear();
             for (int i = 0; i < 32; i++)
                 _vertexBuffer.Add(null);
+            
+            TMEM = new TMem();
 
+            DefaultTextureTile = 0;
+            
+            _lastSetTile = null;
+            _lastSetTImg = null;
+            _lastSetTileSize = null;
+            _lastLoadBlock = null;
+            _lastLoadTLut = null;
+        }
+
+        //public static 
+        public static F3DZEXReaderPackage ReadF3DZEXAt(RomFile file, int offset)
+        {
+            ResetReaderVariables();
+            
             byte[] data = file.GetAsBytes();
 
             F3DZEXReaderPackage package = new F3DZEXReaderPackage();
-
-            TMEM = new TMem();
 
             if (offset < 0 || offset >= data.Length || offset % 8 != 0)
                 return package;
@@ -274,28 +298,58 @@ namespace Cereal64.Microcodes.F3DZEX
                     int offset;
                     if(RomProject.Instance.FindRamOffset(vtx.VertexSourceAddress, out file, out offset))
                     {
-                        byte[] bytes = file.GetAsBytes();
-
-                        byte[] vtxBytes = new byte[0x10];
-
-                        List<Vertex> vertices = new List<Vertex>();
-
-                        for (int i = 0; i < vtx.VertexCount; i++)
+                        if (file.GetElementAt(offset) is VertexCollection)
                         {
-                            Array.Copy(bytes, offset, vtxBytes, 0, 0x10);
-                            Vertex vertex = new Vertex(offset, vtxBytes);
-                            //Add to collection somewhere
-                            vertices.Add(vertex);
+                            //Just update the reference buffer
+                            VertexCollection collection = (VertexCollection)file.GetElementAt(offset);
 
-                            offset += 0x10;
+                            if(vtx.VertexCount > 0)
+                            {
+                                int startIndex = 0;
+                                bool foundVertices = false;
+                                for (int i = 0; i < collection.Vertices.Count; i++)
+                                {
+                                    if (collection.Vertices[i].FileOffset == offset)
+                                    {
+                                        startIndex = i;
+                                        foundVertices = true;
+                                    }
 
-                            _vertexBuffer[i + vtx.TargetBufferIndex] = vertex;
+                                    if (foundVertices)
+                                    {
+                                        _vertexBuffer[vtx.TargetBufferIndex + (i - startIndex)] = collection.Vertices[i];
+                                        if (i - startIndex + 1 >= vtx.VertexCount)
+                                            break;
+                                    }
+                                }
+                            }
                         }
+                        else
+                        {
+                            //Actually load in the bytes as new Vertices
+                            byte[] bytes = file.GetAsBytes();
 
-                        if (!_foundVertices.ContainsKey(file))
-                            _foundVertices.Add(file, new List<Vertex>());
+                            byte[] vtxBytes = new byte[0x10];
 
-                        _foundVertices[file].AddRange(vertices);
+                            List<Vertex> vertices = new List<Vertex>();
+
+                            for (int i = 0; i < vtx.VertexCount; i++)
+                            {
+                                Array.Copy(bytes, offset, vtxBytes, 0, 0x10);
+                                Vertex vertex = new Vertex(offset, vtxBytes);
+                                //Add to collection somewhere
+                                vertices.Add(vertex);
+
+                                offset += 0x10;
+
+                                _vertexBuffer[i + vtx.TargetBufferIndex] = vertex;
+                            }
+
+                            if (!_foundVertices.ContainsKey(file))
+                                _foundVertices.Add(file, new List<Vertex>());
+
+                            _foundVertices[file].AddRange(vertices);
+                        }
                     }
                     break;
                 case F3DZEXCommandID.F3DZEX_G_TRI1:
@@ -373,6 +427,15 @@ namespace Cereal64.Microcodes.F3DZEX
         {
             texture = null;
 
+            if (TMEM.LoadedElements.ContainsKey(TMEM.TileDescriptors[DefaultTextureTile].TMem))
+            {
+                texture = (TMEM.LoadedElements[TMEM.TileDescriptors[DefaultTextureTile].TMem] as Texture);
+                Palette newPalette;
+                if (TryLoadExistingPalette(out newPalette))
+                    texture.ImagePalette = newPalette;
+                return true;
+            }
+
             if (!TMEM.LoadedData.ContainsKey(TMEM.TileDescriptors[DefaultTextureTile].TMem))
                 return false;
 
@@ -396,6 +459,12 @@ namespace Cereal64.Microcodes.F3DZEX
         private static bool TryLoadExistingPalette(out Palette palette)
         {
             palette = null;
+
+            if (TMEM.LoadedElements.ContainsKey(PALETTE_TMEM_OFFSET))
+            {
+                palette = (TMEM.LoadedElements[PALETTE_TMEM_OFFSET] as Palette);
+                return true;
+            }
 
             if (!TMEM.LoadedData.ContainsKey(PALETTE_TMEM_OFFSET))
                 return false;

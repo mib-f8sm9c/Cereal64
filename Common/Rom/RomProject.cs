@@ -17,6 +17,7 @@ namespace Cereal64.Common.Rom
     {
         private const string ROMPROJECT = "RomProject";
         private const string PROJECTNAME = "ProjectName";
+        private const string SELECTEDDMA = "SelectedDMA";
         private const string ROMFILES = "RomFiles";
         private const string DMAPROFILES = "DmaProfiles";
 
@@ -34,6 +35,12 @@ namespace Cereal64.Common.Rom
         //DescriptionAttribute("More info on the Rom Project")]//        TypeConverter(typeof(UserDefinedRomInfoTypeConverter))]
         [Browsable(false)]
         public UserDefinedRomInfo RomInfo { get; private set; }
+
+        public DmaProfile SelectedDmaProfile { get { if (DMAProfiles.Count == 0) return null; return DMAProfiles[0]; } }
+
+        [Browsable(false)]
+        public int DmaProfileIndex { get { return _dmaProfileIndex; } }
+        private int _dmaProfileIndex;
 
         public static RomProject Instance
         {
@@ -68,6 +75,7 @@ namespace Cereal64.Common.Rom
         {
             _files = new List<RomFile>();
             _dmaProfiles = new List<DmaProfile>();
+            _dmaProfileIndex = -1;
 
             ProjectName = "New Rom Project";
             RomInfo = new UserDefinedRomInfo();
@@ -81,6 +89,8 @@ namespace Cereal64.Common.Rom
         public void AddDmaProfile(DmaProfile profile)
         {
             _dmaProfiles.Add(profile);
+            if (_dmaProfileIndex == -1)
+                _dmaProfileIndex = 0;
         }
 
         public void RemoveRomFile(RomFile file)
@@ -92,7 +102,11 @@ namespace Cereal64.Common.Rom
         public void RemoveDmaProfile(DmaProfile profile)
         {
             if (_dmaProfiles.Contains(profile))
+            {
+                if(_dmaProfileIndex >= _dmaProfiles.IndexOf(profile))
+                    _dmaProfileIndex--; //Will bring it to -1 when _dmaProfiles is emptied
                 _dmaProfiles.Remove(profile);
+            }
         }
 
         public static void Save(string filePath)
@@ -139,6 +153,7 @@ namespace Cereal64.Common.Rom
             //Start up the monster here boyo
             _instance = new RomProject();
             _instance.ProjectName = romProjectNode.Attribute(PROJECTNAME).Value;
+            _instance._dmaProfileIndex = int.Parse(romProjectNode.Attribute(SELECTEDDMA).Value);
             _instance.ProjectPath = Path.GetDirectoryName(filePath);
 
             foreach (XElement element in romProjectNode.Elements())
@@ -173,23 +188,19 @@ namespace Cereal64.Common.Rom
                     foreach (XElement profileElement in element.Elements())
                     {
                         //Load the profiles
-                        _instance._dmaProfiles.Add(new DmaProfile(profileElement));
+                        _instance.AddDmaProfile(new DmaProfile(profileElement));
                     }
                 }
             }
 
-            //Handle in-element references
-            foreach (RomFile file in _instance._files)
+            //Here, do stuff
+            foreach (RomFile file in _instance.Files)
             {
-                foreach (DataElements.IN64ElementContainer container in file.ElementContainers)
+                foreach (DataElements.N64DataElement element in file.Elements)
                 {
-                    container.LoadReferencesFromGUID();
+                    element.PostXMLLoad();
                 }
             }
-
-            DmaManager.Instance.ClearDMAProfilers();
-            foreach (DmaProfile profile in _instance._dmaProfiles)
-                DmaManager.Instance.AddNewDmaProfile(profile);
         }
 
         public bool FindRamOffset(DmaAddress address, out RomFile file, out int fileOffset)
@@ -197,9 +208,10 @@ namespace Cereal64.Common.Rom
             file = null;
             fileOffset = 0;
 
-            if (!DmaManager.Instance.SelectedDmaProfile.RamSegments.ContainsKey(address.Segment))
+            if (SelectedDmaProfile == null || !SelectedDmaProfile.RamSegments.ContainsKey(address.Segment))
                 return false;
-            foreach (DmaSegment segment in DmaManager.Instance.SelectedDmaProfile.RamSegments[address.Segment])
+
+            foreach (DmaSegment segment in SelectedDmaProfile.RamSegments[address.Segment])
             {
                 if (address.Offset >= segment.RamStartOffset && address.Offset < segment.RamEndOffset)
                 {
@@ -216,6 +228,7 @@ namespace Cereal64.Common.Rom
         {
             XElement xml = new XElement(ROMPROJECT);
             xml.Add(new XAttribute(PROJECTNAME, ProjectName));
+            xml.Add(new XAttribute(SELECTEDDMA, _dmaProfileIndex));
 
             xml.Add(RomInfo.GetAsXML());
 

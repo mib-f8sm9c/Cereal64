@@ -281,9 +281,5 @@ namespace Cereal64.Common.Rom
             return bytes;
         }
 
-        public void LoadReferencesFromGUID()
-        {
-        }
-
     }
 }

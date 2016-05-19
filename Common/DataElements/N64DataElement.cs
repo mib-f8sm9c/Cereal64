@@ -25,9 +25,6 @@ namespace Cereal64.Common.DataElements
         TypeConverter(typeof(Int32HexTypeConverter))]
         public int FileOffset { get; set; }
 
-        [Browsable(false)]
-        public Guid GUID { get; set; }
-
         public N64DataElement(XElement xml, byte[] fileData)
         {
             //Assume that the xml is perfectly formatted
@@ -52,12 +49,6 @@ namespace Cereal64.Common.DataElements
                 UserTag = att.Value;
             else
                 UserTag = string.Empty;
-
-            att = xml.Attribute(GUID_STRING);
-            if (att != null)
-                GUID = new Guid(att.Value);
-            else
-                GUID = Guid.NewGuid();
         }
 
         public N64DataElement(int offset, byte[] rawData)
@@ -65,7 +56,6 @@ namespace Cereal64.Common.DataElements
             FileOffset = offset;
             RawData = rawData;
             UserTag = string.Empty;
-            GUID = Guid.NewGuid();
         }
 
         [CategoryAttribute("N64 Element"),
@@ -93,7 +83,6 @@ namespace Cereal64.Common.DataElements
             xml.Add(new XAttribute(FILEOFFSET, FileOffset));
             xml.Add(new XAttribute(LENGTH, RawDataSize));
             xml.Add(new XAttribute(TAGINFO, UserTag));
-            xml.Add(new XAttribute(GUID_STRING, GUID.ToString()));
 
             return xml;
         }
@@ -108,5 +97,9 @@ namespace Cereal64.Common.DataElements
             return node;
         }
 
+        public virtual void PostXMLLoad()
+        {
+            //If anything needs to be done post-loading via xml, do it here
+        }
     }
 }

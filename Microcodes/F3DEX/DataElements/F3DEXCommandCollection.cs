@@ -78,5 +78,10 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
             return node;
         }
+
+        public override void PostXMLLoad()
+        {
+            F3DEXReader.ParseF3DEXCommands(_commands);
+        }
     }
 }

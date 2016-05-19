@@ -5,6 +5,8 @@ using System.Text;
 using Cereal64.Common.Utils;
 using Cereal64.Microcodes.F3DEX.DataElements.Commands;
 using Cereal64.Common.Rom;
+using Cereal64.Common.DataElements;
+
 
 namespace Cereal64.Microcodes.F3DEX.DataElements
 {
@@ -32,6 +34,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         public F3DEX_G_SetTImg LastTImgCommand;
 
         public Dictionary<int, LoadedTMemData> LoadedData; //Info of blocks of data loaded into TMEM
+        public Dictionary<int, N64DataElement> LoadedElements; //Info of existing elements loaded into TMEM (used when parsing previously parsed data)
 
         public TMem()
         {
@@ -40,6 +43,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             for (int i = 0; i < TileDescriptors.Length; i++)
                 TileDescriptors[i] = new TileDescriptor((byte)i);
             LoadedData = new Dictionary<int, LoadedTMemData>();
+            LoadedElements = new Dictionary<int, N64DataElement>();
         }
 
         public void LoadBlockIntoTMem(F3DEX_G_LoadBlock loadBlock)
@@ -50,30 +54,43 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
             if (RomProject.Instance.FindRamOffset(LastTImgCommand.ImageAddress, out file, out offset))
             {
-                byte[] data = file.GetAsBytes();
-
-                double texelSizeInBytes = 1;
-                switch (tile.PixelSize)
+                if (file.GetElementAt(offset) is Palette)
                 {
-                    case Texture.PixelInfo.Size_4b:
-                        texelSizeInBytes = 0.5;
-                        break;
-                    case Texture.PixelInfo.Size_16b:
-                        texelSizeInBytes = 2;
-                        break;
-                    case Texture.PixelInfo.Size_32b:
-                        texelSizeInBytes = 4;
-                        break;
+                    Palette palette = (Palette)file.GetElementAt(offset);
+                    LoadedElements[tile.TMem] = palette;
                 }
+                else if (file.GetElementAt(offset) is Texture)
+                {
+                    Texture texture = (Texture)file.GetElementAt(offset);
+                    LoadedElements[tile.TMem] = texture;
+                }
+                else
+                {
+                    byte[] data = file.GetAsBytes();
 
-                int size = (int)Math.Round(loadBlock.Texels * texelSizeInBytes);
-                byte[] newData = new byte[size];
+                    double texelSizeInBytes = 1;
+                    switch (tile.PixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            texelSizeInBytes = 0.5;
+                            break;
+                        case Texture.PixelInfo.Size_16b:
+                            texelSizeInBytes = 2;
+                            break;
+                        case Texture.PixelInfo.Size_32b:
+                            texelSizeInBytes = 4;
+                            break;
+                    }
 
-                Array.Copy(data, offset, newData, 0, size);
-                Array.Copy(newData, 0, this.Data, tile.TMemInBytes, size);
+                    int size = (int)Math.Round(loadBlock.Texels * texelSizeInBytes);
+                    byte[] newData = new byte[size];
 
-                LoadedData[tile.TMem] = new LoadedTMemData(file,
-                    offset, size, newData);
+                    Array.Copy(data, offset, newData, 0, size);
+                    Array.Copy(newData, 0, this.Data, tile.TMemInBytes, size);
+
+                    LoadedData[tile.TMem] = new LoadedTMemData(file,
+                        offset, size, newData);
+                }
             }
         }
 
@@ -85,18 +102,31 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
             if (RomProject.Instance.FindRamOffset(LastTImgCommand.ImageAddress, out file, out offset))
             {
-                byte[] data = file.GetAsBytes();
+                if (file.GetElementAt(offset) is Palette)
+                {
+                    Palette palette = (Palette)file.GetElementAt(offset);
+                    LoadedElements[tile.TMem] = palette;
+                }
+                else if (file.GetElementAt(offset) is Texture)
+                {
+                    Texture texture = (Texture)file.GetElementAt(offset);
+                    LoadedElements[tile.TMem] = texture;
+                }
+                else
+                {
+                    byte[] data = file.GetAsBytes();
 
-                double texelSizeInBytes = 2; //Hardcoded?
+                    double texelSizeInBytes = 2; //Hardcoded?
 
-                int size = (int)Math.Round(loadTLut.Count * texelSizeInBytes);
-                byte[] newData = new byte[size];
+                    int size = (int)Math.Round(loadTLut.Count * texelSizeInBytes);
+                    byte[] newData = new byte[size];
 
-                Array.Copy(data, offset, newData, 0, size);
-                Array.Copy(newData, 0, this.Data, tile.TMemInBytes, size);
+                    Array.Copy(data, offset, newData, 0, size);
+                    Array.Copy(newData, 0, this.Data, tile.TMemInBytes, size);
 
-                LoadedData[tile.TMem] = new LoadedTMemData(file,
-                    offset, size, newData);
+                    LoadedData[tile.TMem] = new LoadedTMemData(file,
+                        offset, size, newData);
+                }
             }
         }
 

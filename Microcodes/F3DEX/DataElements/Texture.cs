@@ -62,9 +62,22 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         public Palette ImagePalette
         {
             get { return _imagePalette; }
-            set { _imagePalette = value; if (_unconvertedData != null) RawData = _unconvertedData; } //Try reloading the data if it failed previously
+            set
+            {
+                if (_imagePalette != value) //Try reloading the data
+                {
+                    byte[] currentRawData = RawData;
+                    _imagePalette = value;
+                    RawData = currentRawData;
+                }
+            }
         }
         private Palette _imagePalette;
+
+        [CategoryAttribute("Texture Settings"),
+        ReadOnlyAttribute(true),
+        DescriptionAttribute("True if the format is CI and the Palette is null")]
+        public bool IsMissingPalette { get { return Format == ImageFormat.CI && _imagePalette == null; } } //Data is stored in _unconvertedData
 
         [CategoryAttribute("Texture Settings"),
         ReadOnlyAttribute(true),
@@ -77,7 +90,6 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         public Bitmap Image { get; private set; }
 
         private bool _initializing = true;
-        public Guid MatchedPaletteGUID; //Used to link the palette to the texture
         private byte[] _unconvertedData;
 
         [CategoryAttribute("Texture Settings"),
@@ -124,12 +136,6 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             Width = int.Parse(xml.Attribute(WIDTH).Value);
             Height = int.Parse(xml.Attribute(HEIGHT).Value);
 
-            XAttribute att = xml.Attribute(IMAGE_PALETTE);
-            if (att != null)
-                MatchedPaletteGUID = new Guid(att.Value);
-            else
-                MatchedPaletteGUID = Guid.Empty;
-
             PaletteIndex = int.Parse(xml.Attribute(PALETTE_INDEX).Value);
 
             //generate image
@@ -159,7 +165,10 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         {
             get
             {
-                return ConvertImage();
+                if (IsMissingPalette)
+                    return _unconvertedData;
+                else
+                    return ConvertImage();
             }
             set
             {
@@ -192,7 +201,11 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             {
                 int length = 0;
 
-                if (Image != null)
+                if (IsMissingPalette)
+                {
+                    length = _unconvertedData.Length;
+                }
+                else
                 {
                     length = Image.Width * Image.Height;
 
@@ -222,9 +235,6 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             baseElement.Add(new XAttribute(PIXEL_SIZE, PixelSize));
             baseElement.Add(new XAttribute(WIDTH, Width));
             baseElement.Add(new XAttribute(HEIGHT, Height));
-            
-            if(ImagePalette != null)
-                baseElement.Add(new XAttribute(IMAGE_PALETTE, ImagePalette.GUID.ToString()));
             baseElement.Add(new XAttribute(PALETTE_INDEX, PaletteIndex));
 
             return baseElement;

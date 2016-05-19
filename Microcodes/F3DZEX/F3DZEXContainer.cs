@@ -66,7 +66,6 @@ namespace Cereal64.Microcodes.F3DZEX
             else
                 return false;
 
-            ReferencesNeedUpdating = true;
             return true;
         }
 
@@ -143,43 +142,5 @@ namespace Cereal64.Microcodes.F3DZEX
             return F3DZEXOverallNode;
         }
 
-        private static bool ReferencesNeedUpdating = false;
-
-        public void LoadReferencesFromGUID()
-        {
-            //Since references can be done across RomFiles, we need to handle all F3DZEXContainers in the project at once
-            if (!ReferencesNeedUpdating)
-                return;
-
-            List<Texture> allTextures = new List<Texture>();
-            List<Palette> allPalettes = new List<Palette>();
-
-            foreach (RomFile file in RomProject.Instance.Files)
-            {
-                if (file.ElementContainers.Count(c => c is F3DZEXContainer) > 0)
-                {
-                    F3DZEXContainer container = (F3DZEXContainer)file.ElementContainers.First(c => c is F3DZEXContainer);
-
-                    allTextures.AddRange(container.Textures);
-                    allPalettes.AddRange(container.Palettes);
-                }
-            }
-
-            //Texture -> Palette
-            foreach (Texture texture in allTextures)
-            {
-                if (texture.Format == Texture.ImageFormat.CI && texture.ImagePalette == null && texture.MatchedPaletteGUID != Guid.Empty)
-                {
-                    //Find the actual palette
-                    if (allPalettes.Exists(p => p.GUID == texture.MatchedPaletteGUID))
-                    {
-                        texture.ImagePalette = allPalettes.First(p => p.GUID == texture.MatchedPaletteGUID);
-                        texture.MatchedPaletteGUID = Guid.Empty;
-                    }
-                }
-            }
-
-            ReferencesNeedUpdating = false;
-        }
     }
 }

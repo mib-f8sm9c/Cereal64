@@ -16,57 +16,58 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
         /// Move these into the appropriate wrapper file for each, and remove the constructors???
         /// </summary>
 
-        private static Dictionary<Guid, F3DEXTextureWrapper> _textureWrappers = new Dictionary<Guid, F3DEXTextureWrapper>();
-        private static Dictionary<Guid, F3DEXVertexWrapper> _vertexWrappers = new Dictionary<Guid, F3DEXVertexWrapper>();
-        private static Dictionary<Guid, F3DEXTriangleWrapper> _triangleWrappers = new Dictionary<Guid, F3DEXTriangleWrapper>();
-        private static Dictionary<Guid, F3DEXTriangleWrapper> _triangle2Wrappers = new Dictionary<Guid, F3DEXTriangleWrapper>();
+        private static Dictionary<Texture, F3DEXTextureWrapper> _textureWrappers = new Dictionary<Texture, F3DEXTextureWrapper>();
+        private static Dictionary<Vertex, F3DEXVertexWrapper> _vertexWrappers = new Dictionary<Vertex, F3DEXVertexWrapper>();
+        private static Dictionary<F3DEX_G_Tri1, F3DEXTriangleWrapper> _triangleWrappers = new Dictionary<F3DEX_G_Tri1, F3DEXTriangleWrapper>();
+        private static Dictionary<F3DEX_G_Tri2, F3DEXTriangleWrapper> _triangle2FirstWrappers = new Dictionary<F3DEX_G_Tri2, F3DEXTriangleWrapper>();
+        private static Dictionary<F3DEX_G_Tri2, F3DEXTriangleWrapper> _triangle2SecondWrappers = new Dictionary<F3DEX_G_Tri2, F3DEXTriangleWrapper>();
 
         public static F3DEXTextureWrapper GetTextureWrapper(Texture texture, F3DEX_G_SetTile command, F3DEX_G_Texture textureCommand)
         {
-            if (_textureWrappers.ContainsKey(texture.GUID))
-                return _textureWrappers[texture.GUID];
+            if (_textureWrappers.ContainsKey(texture))
+                return _textureWrappers[texture];
 
             F3DEXTextureWrapper wrapper = new F3DEXTextureWrapper(texture, command, textureCommand);
-            _textureWrappers.Add(texture.GUID, wrapper);
+            _textureWrappers.Add(texture, wrapper);
 
             return wrapper;
         }
 
         public static F3DEXVertexWrapper GetVertexWrapper(Vertex vertex)
         {
-            if (_vertexWrappers.ContainsKey(vertex.GUID))
-                return _vertexWrappers[vertex.GUID];
+            if (_vertexWrappers.ContainsKey(vertex))
+                return _vertexWrappers[vertex];
 
             F3DEXVertexWrapper wrapper = new F3DEXVertexWrapper(vertex);
-            _vertexWrappers.Add(vertex.GUID, wrapper);
+            _vertexWrappers.Add(vertex, wrapper);
 
             return wrapper;
         }
 
         public static F3DEXTriangleWrapper GetTriangleWrapper(F3DEX_G_Tri1 triangle)
         {
-            if (_triangleWrappers.ContainsKey(triangle.GUID))
-                return _triangleWrappers[triangle.GUID];
+            if (_triangleWrappers.ContainsKey(triangle))
+                return _triangleWrappers[triangle];
 
             F3DEXTriangleWrapper wrapper = new F3DEXTriangleWrapper(triangle);
-            _triangleWrappers.Add(triangle.GUID, wrapper);
+            _triangleWrappers.Add(triangle, wrapper);
 
             return wrapper;
         }
 
         public static F3DEXTriangleWrapper GetTriangleWrapper(F3DEX_G_Tri2 triangle, int index)
         {
-            Dictionary<Guid, F3DEXTriangleWrapper> wrappers;
+            Dictionary<F3DEX_G_Tri2, F3DEXTriangleWrapper> wrappers;
             if (index % 2 == 1)
-                wrappers = _triangleWrappers;
+                wrappers = _triangle2FirstWrappers;
             else
-                wrappers = _triangle2Wrappers;
+                wrappers = _triangle2SecondWrappers;
 
-            if (wrappers.ContainsKey(triangle.GUID))
-                return wrappers[triangle.GUID];
+            if (wrappers.ContainsKey(triangle))
+                return wrappers[triangle];
 
             F3DEXTriangleWrapper wrapper = new F3DEXTriangleWrapper(triangle, index);
-            wrappers.Add(triangle.GUID, wrapper);
+            wrappers.Add(triangle, wrapper);
 
             return wrapper;
         }
