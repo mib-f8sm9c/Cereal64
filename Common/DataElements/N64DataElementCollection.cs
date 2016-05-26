@@ -171,5 +171,27 @@ namespace Cereal64.Common.DataElements
             return true;
         }
 
+        public byte[] GetAsBytes()
+        {
+            if(_elements.Count == 0)
+                return new byte[0];
+
+            int lastIndex = 0;
+
+            foreach (N64DataElement element in _elements)
+            {
+                lastIndex = Math.Max(lastIndex, element.FileOffset + element.RawDataSize);
+            }
+
+            byte[] bytes = new byte[lastIndex];
+
+            foreach (N64DataElement element in _elements)
+            {
+                Array.Copy(element.RawData, 0, bytes, element.FileOffset, element.RawDataSize);
+            }
+
+            return bytes;
+        }
+
     }
 }

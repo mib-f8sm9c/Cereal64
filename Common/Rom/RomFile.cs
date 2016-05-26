@@ -14,7 +14,7 @@ namespace Cereal64.Common.Rom
         //TO DO: Add an Unsorted IContainer to hold elements that didn't get sorted into existing containers
 
         public const string ROMFILE = "RomFile";
-        private const string FILEID = "FileId";
+        public const string FILEID = "FileId";
         public const string FILENAME = "FileName";
         private const string N64ELEMENTS = "N64Elements";
         private const string N64CONTAINERS = "N64Containers";
@@ -171,7 +171,10 @@ namespace Cereal64.Common.Rom
             return _elements.GetElementAt(offset);
         }
 
-        //public byte[] GetAsBytes() { }
+        public byte[] GetAsBytes()
+        {
+            return _elements.GetAsBytes();
+        }
 
         public XElement GetAsXML()
         {
@@ -259,27 +262,27 @@ namespace Cereal64.Common.Rom
         }
 
         //To do: Find a way to cache this so we don't spend a huge amount of space always creaing new data
-        public byte[] GetAsBytes()
-        {
-            byte [] bytes;
+        //public byte[] GetAsBytes()
+        //{
+        //    byte [] bytes;
 
-            //Go through each element, and add up how large it is
-            int endOffset = int.MinValue;
+        //    //Go through each element, and add up how large it is
+        //    int endOffset = int.MinValue;
 
-            foreach (N64DataElement element in _elements.Elements)
-            {
-                endOffset = Math.Max(endOffset, element.FileOffset + element.RawDataSize);
-            }
+        //    foreach (N64DataElement element in _elements.Elements)
+        //    {
+        //        endOffset = Math.Max(endOffset, element.FileOffset + element.RawDataSize);
+        //    }
 
-            bytes = new byte[endOffset];
+        //    bytes = new byte[endOffset];
 
-            foreach (N64DataElement element in _elements.Elements)
-            {
-                Array.Copy(element.RawData, 0, bytes, element.FileOffset, element.RawDataSize);
-            }
+        //    foreach (N64DataElement element in _elements.Elements)
+        //    {
+        //        Array.Copy(element.RawData, 0, bytes, element.FileOffset, element.RawDataSize);
+        //    }
 
-            return bytes;
-        }
+        //    return bytes;
+        //}
 
     }
 }

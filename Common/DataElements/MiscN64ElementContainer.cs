@@ -32,10 +32,6 @@ namespace Cereal64.Common.DataElements
             return true;
         }
 
-        public void LoadReferencesFromGUID()
-        {
-        }
-
         public TreeNode GetAsTreeNode()
         {
             TreeNode elementsNode = new TreeNode();

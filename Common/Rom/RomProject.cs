@@ -122,6 +122,13 @@ namespace Cereal64.Common.Rom
                     s.PutNextEntry("ProjectInfo");
                     byte[] bytes = Encoding.ASCII.GetBytes(xml.ToString());
                     s.Write(bytes, 0, bytes.Length);
+
+                    for (int i = 0; i < Instance.Files.Count; i++)
+                    {
+                        s.PutNextEntry(Instance.Files[i].FileID.ToString());
+                        bytes = Instance.Files[i].GetAsBytes();
+                        s.Write(bytes, 0, bytes.Length);
+                    }
                 }
             }
 
@@ -133,16 +140,25 @@ namespace Cereal64.Common.Rom
         {
             //XmlDocument doc = new XmlDocument();
             XElement romProjectNode = null;
+            Dictionary<int, byte[]> romData = new Dictionary<int, byte[]>();
 
             using (ZipFile zip = ZipFile.Read(filePath))
             {
                 foreach (ZipEntry e in zip)
                 {
-                    if(e.FileName == "ProjectInfo")
+                    if (e.FileName == "ProjectInfo")
                     {
                         MemoryStream projectStream = new MemoryStream();
                         e.Extract(projectStream);
                         romProjectNode = XElement.Parse(Encoding.ASCII.GetString(projectStream.ToArray()));
+                    }
+                    else
+                    {
+                        MemoryStream projectStream = new MemoryStream();
+                        e.Extract(projectStream);
+                        byte[] data = projectStream.ToArray();
+                        //projectStream.Read(data, 0, (int)projectStream.Length);
+                        romData.Add(int.Parse(e.FileName), data);
                     }
                 }
             }
@@ -169,18 +185,16 @@ namespace Cereal64.Common.Rom
                     {
                         //Load a file
                         //Get the raw data
-                        XAttribute attribute = fileElement.Attribute(RomFile.FILENAME);
+                        XAttribute attribute = fileElement.Attribute(RomFile.FILEID);
                         if (attribute == null)
                             continue;
 
-                        string fileP = attribute.Value;
-                        if (!File.Exists(fileP))
+                        int fileNum;
+                        if (!int.TryParse(attribute.Value, out fileNum))
                             continue;
 
-                        byte[] data = File.ReadAllBytes(fileP);
-
                         //Pass into the file using XElement
-                        _instance.AddRomFile(new RomFile(fileElement, data));
+                        _instance.AddRomFile(new RomFile(fileElement, romData[fileNum]));
                     }
                 }
                 else if (element.Name == DMAPROFILES)
@@ -201,6 +215,11 @@ namespace Cereal64.Common.Rom
                     element.PostXMLLoad();
                 }
             }
+        }
+
+        public void Reset()
+        {
+            _instance = new RomProject();
         }
 
         public bool FindRamOffset(DmaAddress address, out RomFile file, out int fileOffset)
