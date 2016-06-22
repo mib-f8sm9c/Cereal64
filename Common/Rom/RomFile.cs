@@ -25,7 +25,10 @@ namespace Cereal64.Common.Rom
 
         public int FileID { get; set; }
 
-        public int FileLength { get; set; }
+        public int FileLength { get; private set; }
+
+        //Implement more later
+        private bool _lockFileSize = false;
 
         public ReadOnlyCollection<N64DataElement> Elements { get { return _elements.Elements; } }
         private N64DataElementCollection _elements;
@@ -74,6 +77,8 @@ namespace Cereal64.Common.Rom
                     AddElementContainer(newContainer);
                 }
             }
+
+            FileLength = rawData.Length;
         }
 
         public RomFile(string fileName, int fileID, UnknownData rawFileData)
@@ -93,8 +98,17 @@ namespace Cereal64.Common.Rom
 
         public bool AddElement(N64DataElement element)
         {
+            //Detect if the file size has increased due to this addition
+            int fileOffsetEnd = element.FileOffset + element.RawDataSize;
+
+            if (_lockFileSize && fileOffsetEnd > FileLength)
+                return false;
+
             if (!_elements.AddElement(element))
                 return false;
+
+            if (fileOffsetEnd > FileLength)
+                FileLength = fileOffsetEnd;
 
             if(_elementContainers.Count != 0)
             {
@@ -164,6 +178,11 @@ namespace Cereal64.Common.Rom
             _elementContainers.Remove(container);
 
             return true;
+        }
+
+        public bool HasElementExactlyAt(int offset)
+        {
+            return _elements.HasElementExactlyAt(offset);
         }
 
         public N64DataElement GetElementAt(int offset)
@@ -259,6 +278,23 @@ namespace Cereal64.Common.Rom
 
             if(!added)
                 _miscElementContainer.AddElement(data);
+        }
+
+        public bool ExpandFileTo(int newFileSize, byte fillByte = 0x00)
+        {
+            if (newFileSize <= FileLength)
+                return false;
+
+            N64DataElement lastElement = GetElementAt(FileLength - 1);
+            if (lastElement == null)
+                return false;
+
+            //Create a new UnknownData element
+            byte[] newBytes =  new byte[newFileSize - FileLength];
+            for(int i = 0; i < newBytes.Length; i++)
+                newBytes[i] = fillByte;
+            UnknownData newData = new UnknownData(FileLength, newBytes);
+            return AddElement(newData);
         }
 
         //To do: Find a way to cache this so we don't spend a huge amount of space always creaing new data

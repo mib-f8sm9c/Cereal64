@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections;
+using Cereal64.Common.DataElements;
+using Cereal64.Common.Rom;
 
 namespace Cereal64.Common.Utils
 {
@@ -437,6 +439,18 @@ namespace Cereal64.Common.Utils
                             if (BitConverter.IsLittleEndian ^ endian == Endianness.LittleEndian)
                                 floatBytes = floatBytes.Reverse().ToArray();
                             bytes.AddRange(floatBytes);
+                            break;
+                        case TypeCode.Object:
+                            //Here we check for our custom types
+                            if (value is N64DataElement)
+                            {
+                                bytes.AddRange(((N64DataElement)value).RawData);
+                            }
+                            else if (value is DmaAddress)
+                            {
+                                bytes.AddRange(((DmaAddress)value).GetAsBytes());
+                            }
+
                             break;
                     }
                 }

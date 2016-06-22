@@ -79,6 +79,7 @@
     <Compile Include="Rom\DmaAddress.cs" />
     <Compile Include="DataElements\N64DataElement.cs" />
     <Compile Include="Utils\Encoding\MIO0.cs" />
+    <Compile Include="Utils\Encoding\MIO0Block.cs" />
     <Compile Include="Utils\Encoding\VPK.cs" />
     <Compile Include="Utils\HexDataConverter.cs" />
     <Compile Include="Utils\N64Sums.cs" />

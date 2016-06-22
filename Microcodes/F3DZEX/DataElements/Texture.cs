@@ -341,7 +341,6 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
 
                         case PixelInfo.Size_8b:
                             return TextureConversion.BinaryToCI8(bytes, ImagePalette, Width, Height);
-
                     }
                     break;
                 case ImageFormat.IA:
