@@ -147,7 +147,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             if (width / 2 * height != imgData.Length)
                 return null;
 
-            if (palette == null || palette.Colors.Length < 16)
+            if (palette == null || palette.Colors.Length < 1)
                 return null;
             
             Bitmap bmp = new Bitmap(width, height);
@@ -162,8 +162,16 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     byte CI1 = (byte)(CI >> 4);
                     byte CI2 = (byte)(CI & 0x0F);
 
-                    bmp.SetPixel(i, j, palette.Colors[CI1 + 16 * paletteIndex]);
-                    bmp.SetPixel(i + 1, j, palette.Colors[CI2 + 16 * paletteIndex]);
+                    int color1Index = CI1 + 16 * paletteIndex;
+                    if (color1Index >= palette.Colors.Length)
+                        color1Index = 0;
+
+                    int color2Index = CI2 + 16 * paletteIndex;
+                    if (color2Index >= palette.Colors.Length)
+                        color2Index = 0;
+
+                    bmp.SetPixel(i, j, palette.Colors[color1Index]);
+                    bmp.SetPixel(i + 1, j, palette.Colors[color2Index]);
 
                 }
             }
@@ -177,18 +185,25 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             if (bmp == null)
                 return null;
 
-            if (palette == null || palette.Colors.Length < 16)
+            if (palette == null || palette.Colors.Length < 1)
                 return null;
 
             if (generateNewPalette)
+            {
                 GenerateNewPalette(palette, bmp, 16);
+                paletteIndex = 0;
+            }
 
             byte[] imgData = new byte[bmp.Width * bmp.Height / 2];
 
-            int[] paletteIDs = new int[16];
-            for(int k = 0; k < 16; k++)
+            int[] paletteIDs = new int[palette.Colors.Length];
+            for (int k = 0; k < palette.Colors.Length; k++)
             {
-                paletteIDs[k] = palette.Colors[k + 16 * paletteIndex].ToArgb();
+                int colorIndex = k + 16 * paletteIndex;
+                if (colorIndex > palette.Colors.Length)
+                    colorIndex = 0;
+
+                paletteIDs[k] = palette.Colors[colorIndex].ToArgb();
             }
 
             for (int i = 0; i < bmp.Width; i+=2)
@@ -267,7 +282,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             if (width * height != imgData.Length)
                 return null;
 
-            if (palette == null || palette.Colors.Length < 256)
+            if (palette == null || palette.Colors.Length < 1)
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
@@ -279,6 +294,9 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     int index = (i + j * width);
 
                     byte CI = ByteHelper.ReadByte(imgData, index);
+
+                    if (CI > palette.Colors.Length)
+                        CI = 0;
 
                     bmp.SetPixel(i, j, palette.Colors[CI]);
                 }
@@ -294,13 +312,13 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             if (bmp == null)
                 return null;
 
-            if (palette == null || palette.Colors.Length < 256)
+            if (palette == null || palette.Colors.Length < 1)
                 return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height];
 
-            int[] paletteIDs = new int[256];
-            for (int k = 0; k < 256; k++)
+            int[] paletteIDs = new int[palette.Colors.Length];
+            for (int k = 0; k < palette.Colors.Length; k++)
             {
                 paletteIDs[k] = palette.Colors[k].ToArgb();
             }
@@ -315,16 +333,36 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     int pixelID = pixel.ToArgb();
 
                     byte palIndex = 0x00;
+                    bool foundExactMatch = false;
+
+                    double closestDist = double.MaxValue;
+                    byte closestIndex = 0;
+
                     for (byte p = 0; p < paletteIDs.Length; p++)
                     {
                         if (paletteIDs[p] == pixelID)
                         {
                             palIndex = p;
+                            foundExactMatch = true;
                             break;
+                        }
+                        else
+                        {
+                            //Get the dist to the color, and keep track of which is the best representation
+                            double dist = pixel.ColorDistanceFrom(palette.Colors[p]);
+
+                            if (dist < closestDist)
+                            {
+                                closestDist = dist;
+                                closestIndex = p;
+                            }
                         }
                     }
 
-                    ByteHelper.WriteByte(palIndex, imgData, index);
+                    if(foundExactMatch)
+                        ByteHelper.WriteByte(palIndex, imgData, index);
+                    else
+                        ByteHelper.WriteByte(closestIndex, imgData, index);
                 }
             }
 

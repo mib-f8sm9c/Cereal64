@@ -10,6 +10,7 @@ using System.Xml;
 using System.IO;
 using Ionic.Zlib;
 using Ionic.Zip;
+using System.Text.RegularExpressions;
 
 namespace Cereal64.Common.Rom
 {
@@ -71,11 +72,16 @@ namespace Cereal64.Common.Rom
         public ReadOnlyCollection<DmaProfile> DMAProfiles { get { return _dmaProfiles.AsReadOnly(); } }
         private List<DmaProfile> _dmaProfiles;
 
+        //COME UP WITH BETTER NAME
+        public ReadOnlyCollection<RomItem> Items { get { return _items.AsReadOnly(); } }
+        private List<RomItem> _items;
+
         private RomProject()
         {
             _files = new List<RomFile>();
             _dmaProfiles = new List<DmaProfile>();
             _dmaProfileIndex = -1;
+            _items = new List<RomItem>();
 
             ProjectName = "New Rom Project";
             RomInfo = new UserDefinedRomInfo();
@@ -84,6 +90,11 @@ namespace Cereal64.Common.Rom
         public void AddRomFile(RomFile file)
         {
             _files.Add(file);
+        }
+
+        public void AddRomItem(RomItem item)
+        {
+            _items.Add(item);
         }
 
         public void AddDmaProfile(DmaProfile profile)
@@ -129,6 +140,13 @@ namespace Cereal64.Common.Rom
                         bytes = Instance.Files[i].GetAsBytes();
                         s.Write(bytes, 0, bytes.Length);
                     }
+
+                    foreach (RomItem item in Instance.Items)
+                    {
+                        bytes = Encoding.ASCII.GetBytes(item.GetAsXML().ToString());
+                        s.PutNextEntry(item.GetType().ToString());
+                        s.Write(bytes, 0, bytes.Length);
+                    }
                 }
             }
 
@@ -141,7 +159,7 @@ namespace Cereal64.Common.Rom
             //XmlDocument doc = new XmlDocument();
             XElement romProjectNode = null;
             Dictionary<int, byte[]> romData = new Dictionary<int, byte[]>();
-
+            Dictionary<string, XElement> romItems = new Dictionary<string, XElement>();
             using (ZipFile zip = ZipFile.Read(filePath))
             {
                 foreach (ZipEntry e in zip)
@@ -152,13 +170,20 @@ namespace Cereal64.Common.Rom
                         e.Extract(projectStream);
                         romProjectNode = XElement.Parse(Encoding.ASCII.GetString(projectStream.ToArray()));
                     }
-                    else
+                    else if(Regex.IsMatch(e.FileName, @"^\d+$"))//Numbers only, rom file
                     {
                         MemoryStream projectStream = new MemoryStream();
                         e.Extract(projectStream);
                         byte[] data = projectStream.ToArray();
                         //projectStream.Read(data, 0, (int)projectStream.Length);
                         romData.Add(int.Parse(e.FileName), data);
+                    }
+                    else //Rom item
+                    {
+                        MemoryStream projectStream = new MemoryStream();
+                        e.Extract(projectStream);
+                        XElement itemElement = XElement.Parse(Encoding.ASCII.GetString(projectStream.ToArray()));
+                        romItems.Add(e.FileName, itemElement);
                     }
                 }
             }
@@ -205,6 +230,12 @@ namespace Cereal64.Common.Rom
                         _instance.AddDmaProfile(new DmaProfile(profileElement));
                     }
                 }
+            }
+
+            //Finish up the rom items here
+            foreach(string key in romItems.Keys)
+            {
+                _instance._items.Add(RomItemFactory.CreateRomItemFromType(key, romItems[key]));
             }
 
             //Here, do stuff

@@ -93,6 +93,8 @@ namespace Cereal64.Common.Rom
             _elementContainers = new List<IN64ElementContainer>();
             _miscElementContainer = new MiscN64ElementContainer();
 
+            FileLength = rawFileData.RawDataSize;
+
             _elements.AddElement(rawFileData);
         }
 
@@ -183,6 +185,11 @@ namespace Cereal64.Common.Rom
         public bool HasElementExactlyAt(int offset)
         {
             return _elements.HasElementExactlyAt(offset);
+        }
+
+        public bool HasElementAt(int offset)
+        {
+            return _elements.GetElementAt(offset) != null;
         }
 
         public N64DataElement GetElementAt(int offset)

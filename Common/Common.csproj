@@ -67,6 +67,8 @@
     <Compile Include="DataElements\IN64ElementContainer.cs" />
     <Compile Include="DataElements\MiscN64ElementContainer.cs" />
     <Compile Include="DataElements\N64DataElementFactory.cs" />
+    <Compile Include="Rom\RomItem.cs" />
+    <Compile Include="Rom\RomItemFactory.cs" />
     <Compile Include="Rom\RomProject.cs" />
     <Compile Include="Rom\UserDefinedRomInfo.cs" />
     <Compile Include="Utils\ByteHelper.cs" />
