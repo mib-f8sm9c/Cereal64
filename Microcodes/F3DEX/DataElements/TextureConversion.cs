@@ -855,7 +855,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             boxIndex++;
             while (boxIndex < paletteSize)
             {
-                byte longestEdge = 0;
+                int longestEdge = -1;
                 int longestIndex = startIndex;
                 for (int i = startIndex; i < boxIndex; i++)
                 {
@@ -893,13 +893,13 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
             public ColorBox(int nothing = 0)
             {
-                MinRed = 0x00;
-                MinBlue = 0x00;
-                MinGreen = 0x00;
+                MinRed = 0xFF;
+                MinBlue = 0xFF;
+                MinGreen = 0xFF;
 
-                MaxRed = 0xFF;
-                MaxGreen = 0xFF;
-                MaxBlue = 0xFF;
+                MaxRed = 0x00;
+                MaxGreen = 0x00;
+                MaxBlue = 0x00;
 
                 Colors = new List<Color>();
             }
@@ -933,6 +933,9 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             {
                 get
                 {
+                    if (MaxRed < MinRed || MaxBlue < MinBlue || MaxGreen < MinGreen) //Invalid box
+                        return 0;
+                    
                     return (byte)Math.Max(Math.Max(MaxRed - MinRed, MaxGreen - MinGreen), MaxBlue - MinBlue);
                 }
             }
@@ -950,7 +953,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     cb1 = new ColorBox(MinRed, (byte)(MinRed + (redLength / 2)), MinBlue, MaxBlue, MinGreen, MaxGreen);
                     cb2 = new ColorBox((byte)(MinRed + (redLength / 2)), MaxRed, MinBlue, MaxBlue, MinGreen, MaxGreen);
                 }
-                if (blueLength >= redLength && blueLength >= greenLength)
+                else if (blueLength >= redLength && blueLength >= greenLength)
                 {
                     cb1 = new ColorBox(MinRed, MaxRed, MinBlue, (byte)(MinBlue + (blueLength / 2)), MinGreen, MaxGreen);
                     cb2 = new ColorBox(MinRed, MaxRed, (byte)(MinBlue + (blueLength / 2)), MaxBlue, MinGreen, MaxGreen);
