@@ -5,6 +5,7 @@ using System.Text;
 using System.Drawing;
 using Cereal64.Common;
 using Cereal64.Common.Utils;
+using System.Drawing.Imaging;
 
 namespace Cereal64.Microcodes.F3DEX.DataElements
 {
@@ -286,6 +287,31 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
+            
+            //NOTE: Here's some optimization code that will make it much faster, just adapt it to the BinaryToCI8 method
+
+            //BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            //int stride = data.Stride;
+            //unsafe
+            //{
+            //    byte* ptr = (byte*)data.Scan0;
+            //    // Check this is not a null area
+            //    if (!areaToPaint.IsEmpty)
+            //    {
+            //        // Go through the draw area and set the pixels as they should be
+            //        for (int y = areaToPaint.Top; y < areaToPaint.Bottom; y++)
+            //        {
+            //            for (int x = areaToPaint.Left; x < areaToPaint.Right; x++)
+            //            {
+            //                // layer.GetBitmap().SetPixel(x, y, m_colour);
+            //                ptr[(x * 3) + y * stride] = m_colour.B;
+            //                ptr[(x * 3) + y * stride + 1] = m_colour.G;
+            //                ptr[(x * 3) + y * stride + 2] = m_colour.R;
+            //            }
+            //        }
+            //    }
+            //}
+            //bmp.UnlockBits(data);
 
             for (int i = 0; i < width; i++)
             {

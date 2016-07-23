@@ -339,7 +339,7 @@ namespace Cereal64.Common.Utils
 
         public static byte[] CombineIntoBytes(Endianness endian, params object[] values)
         {
-            //To do: allow arrays to be passed in
+            //WARNING: IT LOOKS LIKE THE ENDIANNESS PARAMETER WILL ALSO ACCEPT INTEGERS
 
             List<byte> bytes = new List<byte>();
 

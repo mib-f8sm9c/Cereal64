@@ -100,7 +100,7 @@ namespace VisObj64.Visualization.OpenGL
 
         private void SetupViewport()
         {
-            MakeCurrent();
+            //MakeCurrent();
 
             gl_InitRenderer();
             gl_ResizeScene(_glDisplay.Width, _glDisplay.Height);
