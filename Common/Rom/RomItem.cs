@@ -6,9 +6,9 @@ using System.Xml.Linq;
 
 namespace Cereal64.Common.Rom
 {
-    public abstract class RomItem : IXMLSerializable
+    public abstract class RomItem : IXMLSerializable, IXMLRomProjectItem
     {
-        public RomItem(XElement xml)
+        public RomItem()
         {
 
         }
@@ -18,6 +18,17 @@ namespace Cereal64.Common.Rom
             XElement xml = new XElement(this.GetType().ToString());
 
             return xml;
+        }
+
+        public virtual string GetXMLPath()
+        {
+            return this.GetType().ToString();
+        }
+
+        //Keep this please!
+        public string GetXMLName()
+        {
+            return this.GetType().ToString();
         }
     }
 }

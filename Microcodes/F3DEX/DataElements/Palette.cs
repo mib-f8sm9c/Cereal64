@@ -29,6 +29,19 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         {
         }
 
+        public Palette Combine(Palette secondPalette)
+        {
+            List<byte> bytes = new List<byte>();
+            bytes.AddRange(RawData);
+            bytes.AddRange(secondPalette.RawData);
+            return new Palette(-1, bytes.ToArray());
+        }
+
+        public Palette Duplicate()
+        {
+            return new Palette(-1, RawData);
+        }
+
         public override byte[] RawData
         {
             get

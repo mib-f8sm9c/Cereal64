@@ -9,7 +9,7 @@ using Cereal64.Common.DataElements;
 
 namespace Cereal64.Common.Rom
 {
-    public class RomFile : IN64ElementContainer
+    public class RomFile : IN64ElementContainer, IXMLRomProjectItem
     {
         //TO DO: Add an Unsorted IContainer to hold elements that didn't get sorted into existing containers
 
@@ -327,5 +327,14 @@ namespace Cereal64.Common.Rom
         //    return bytes;
         //}
 
+        public string GetXMLName()
+        {
+            return FileID.ToString();
+        }
+
+        public string GetXMLPath()
+        {
+            return "Files/" + FileID;
+        }
     }
 }

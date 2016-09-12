@@ -65,6 +65,16 @@ namespace VisObj64.Visualization.OpenGL
             _mouseFunction = MouseFunction.Camera;
         }
 
+        public void ClearGraphics()
+        {
+            for (int i = GraphicsCollections.Count - 1; i >= 0; i--)
+            {
+                VO64GraphicsCollection collection = GraphicsCollections[i];
+                GraphicsCollections.Remove(collection);
+                collection.Dispose();
+            }
+        }
+
         private void Camera_CameraUpdated(object sender, EventArgs e)
         {
             //Repaint the contrl
