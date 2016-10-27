@@ -595,9 +595,11 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     byte I = ByteHelper.ReadByte(imgData, index);
                     byte I1 = (byte)Math.Round((I >> 4) * 255.0 / 15.0);
                     byte I2 = (byte)Math.Round((I & 0x0F) * 255.0 / 15.0);
+                    byte A1 = (byte)(I1 == 0 ? byte.MinValue : byte.MaxValue);
+                    byte A2 = (byte)(I2 == 0 ? byte.MinValue : byte.MaxValue);
 
-                    bmp.SetPixel(i, j, Color.FromArgb(I1, I1, I1, I1));
-                    bmp.SetPixel(i, j, Color.FromArgb(I2, I2, I2, I2));
+                    bmp.SetPixel(i, j, Color.FromArgb(A1, I1, I1, I1));
+                    bmp.SetPixel(i, j, Color.FromArgb(A2, I2, I2, I2));
 
                 }
             }
@@ -649,8 +651,9 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     int index = i + j * width;
 
                     byte I = ByteHelper.ReadByte(imgData, index);
+                    byte A = (byte)(I == 0 ? byte.MinValue : byte.MaxValue);
 
-                    bmp.SetPixel(i, j, Color.FromArgb(I, I, I, I));
+                    bmp.SetPixel(i, j, Color.FromArgb(A, I, I, I));
                 }
             }
 
