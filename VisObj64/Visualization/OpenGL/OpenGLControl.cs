@@ -75,11 +75,16 @@ namespace VisObj64.Visualization.OpenGL
             }
         }
 
-        private void Camera_CameraUpdated(object sender, EventArgs e)
+        public void RefreshGraphics()
         {
-            //Repaint the contrl
+            //Repaint the control
             _glDisplay.Invalidate();
             _glDisplay.Update();
+        }
+
+        private void Camera_CameraUpdated(object sender, EventArgs e)
+        {
+            RefreshGraphics();
         }
 
         private void glDisplay_Load(object sender, EventArgs e)
@@ -308,12 +313,11 @@ namespace VisObj64.Visualization.OpenGL
 	        GL.Disable(EnableCap.CullFace);
 	        //GL.CullFace(CullFaceMode.FrontAndBack);
 
-	        GL.Enable(EnableCap.Blend);
-	        GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+	        //GL.Enable(EnableCap.Blend);
+	        //GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-            //Note: This helps with the alpha problems, but it's not a good fix
-            //GL.AlphaFunc(AlphaFunction.Gequal, 0.75f);
-            //GL.Enable(EnableCap.AlphaTest);
+            GL.AlphaFunc(AlphaFunction.Gequal, 0.5f);
+            GL.Enable(EnableCap.AlphaTest);
 
             OpenGLLoaded = true;
         }

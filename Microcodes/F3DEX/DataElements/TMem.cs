@@ -52,6 +52,8 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             int offset;
             TileDescriptor tile = TileDescriptors[loadBlock.Tile];
 
+            //TO DO: FIGURE OUT HOW TO USE THE ULS AND ULT STUFF
+
             if (RomProject.Instance.FindRamOffset(LastTImgCommand.ImageAddress, out file, out offset))
             {
                 if (file.GetElementAt(offset) is Palette)

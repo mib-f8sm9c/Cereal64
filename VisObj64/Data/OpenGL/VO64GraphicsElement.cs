@@ -47,7 +47,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
         public static VO64GraphicsElement CreateNewElement()
         {
             int newvaIndex, newvbIndex, newibIndex;
-            newvaIndex = GL.GenVertexArray();
+            GL.GenVertexArrays(1, out newvaIndex);
             GL.GenBuffers(1, out newvbIndex);
             GL.GenBuffers(1, out newibIndex);
 
@@ -80,6 +80,9 @@ namespace Cereal64.VisObj64.Data.OpenGL
                 {
                     BitmapData bmp_data = _texture.Texture.LockBits(new Rectangle(0, 0, _texture.Texture.Width, _texture.Texture.Height),
                         ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+
+                    if (_textureID != 0)
+                        GL.DeleteTexture(_textureID);
 
                     GL.GenTextures(1, out _textureID);
                     GL.Enable(EnableCap.Texture2D);
@@ -193,7 +196,10 @@ namespace Cereal64.VisObj64.Data.OpenGL
             //Remove from OpenGL
             GL.DeleteBuffer(_vboIndex);
             GL.DeleteBuffer(_iboIndex);
+            GL.DeleteVertexArray(_vaoIndex);
 
+            if (_textureID != 0)
+                GL.DeleteTexture(_textureID);
             //TO DO: RESET ALL THE VERTEX VBO REFERENCES
         }
     }
