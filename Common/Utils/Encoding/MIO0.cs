@@ -46,46 +46,27 @@ namespace Cereal64.Common.Utils.Encoding
 
         public const uint MIO0_AS_UINT = 0x4D494F30;
 
-        public static byte[] Encode(byte[] rawData)
+        public static byte[] Encode(byte[] rawData, byte padToAddress = 4)
         {
-            //Pretty simple idea here, though it will be slow: basically filter backwards through the data, trying to find the best
-            // matches for the current string of bytes (3-18 long). Match from the rear first, to try to allow for dynamic size testing.
-            // Use the biggest match you can find. If you max out size early on, stop the current search early.
-
-            //If a match is found, save the info to a compressed data info table(offset & length). Push on.
-
-            //After you're done, you can go forwards and split the data into the compressed and uncompressed sections. Finalize it.
-
+            //To do: describe this algorithm
+            // for now, just see here: http://wiki.origami64.net/sm64:mio0
             int minByteClump = 3;
             int maxByteClump = 18;
             int maxReadBack = 4096;
 
-            Tuple<int, int, int> currentBestClump;
+            ClumpInfo currentBestClump;
 
-            List<Tuple<int, int, int>> clumpInfo = new List<Tuple<int, int, int>>(); //output offset, input offset, length
+            List<ClumpInfo> clumpInfo = new List<ClumpInfo>();
 
             for (int offset = 1; offset < rawData.Length; )
             {
-                currentBestClump = new Tuple<int, int, int>(-1, -1, -1);
-                for (int refOffset = offset - 1; offset - refOffset <= maxReadBack && refOffset >= 0; refOffset--)
-                {
-                    int matchCount = 0;
-                    while (matchCount < maxByteClump && offset + matchCount < rawData.Length && rawData[refOffset + matchCount] == rawData[offset + matchCount])
-                        matchCount++;
+                currentBestClump = FindBestClump(rawData, offset, maxReadBack, maxByteClump, minByteClump);
 
-                    if (matchCount >= minByteClump && matchCount > currentBestClump.Item3)
-                    {
-                        currentBestClump = new Tuple<int, int, int>(offset, offset - refOffset, matchCount);
-                        if (matchCount == maxByteClump)
-                            break;
-                    }
-                }
-
-                if (currentBestClump.Item3 >= minByteClump)
+                if (currentBestClump.Length >= minByteClump)
                 {
                     //Set the clump, set back x bytes
                     clumpInfo.Add(currentBestClump);
-                    offset += currentBestClump.Item3;
+                    offset += currentBestClump.Length;
                 }
                 else
                 {
@@ -94,69 +75,24 @@ namespace Cereal64.Common.Utils.Encoding
                 }
             }
 
-            //THOUGHTS ON IMPROVING THE ALGORITHM: TRY A NORMAL AND A REVERSE PASS, THEN COMBINE THEM AS BEST YOU CAN?
-
-            //Thoughts on combining: just measure the bytes along each section as you go down it, and when they match up in index,
-            //       compare the two and take the one that matches best.
-
             if (clumpInfo.Count == 0)
             {
                 //Call the other one, huge waste of time
                 return EncodeAsRaw(rawData);
             }
 
-            //OPTIMIZATION: SEE IF PARTING WITH THE FIRST BYTE OF A SMALLER CLUMP CAN MAKE IT EXPAND!
+            //Optimization code
             for (int i = 0; i < clumpInfo.Count; i++)
             {
-                //First test case: it's right next to a clump && combined are less than or equal to 19
-                if (i < clumpInfo.Count - 1 && clumpInfo[i].Item3 + clumpInfo[i + 1].Item3 <= maxByteClump + 1 &&
-                    clumpInfo[i].Item1 + clumpInfo[i].Item3 == clumpInfo[i + 1].Item1)
+                if(FindBestAlternativeClumps(rawData, maxReadBack, maxByteClump, minByteClump,
+                    clumpInfo, i))
                 {
-                    //Test if removing the first byte combines the two clumps
-                    int startIndex = clumpInfo[i].Item1 + 1;
-                    int idealClumpLength = clumpInfo[i].Item3 + clumpInfo[i + 1].Item3 - 1;
-                    for (int refOffset = startIndex - 1; startIndex - refOffset <= maxReadBack && refOffset >= 0; refOffset--)
-                    {
-                        int matchCount = 0;
-                        while (matchCount < maxByteClump && startIndex + matchCount < rawData.Length && rawData[refOffset + matchCount] == rawData[startIndex + matchCount])
-                            matchCount++;
-
-                        if (matchCount == idealClumpLength)
-                        {
-                            clumpInfo[i] = new Tuple<int, int, int>(startIndex, startIndex - refOffset, matchCount);
-                            clumpInfo.RemoveAt(i + 1);
-                            break;
-                        }
-                    }
+                    //to try to further optimize?
                 }
-                else if ((i == clumpInfo.Count - 1 && clumpInfo[i].Item1 + clumpInfo[i].Item2 < rawData.Length - 2) ||
-                    (i < clumpInfo.Count - 1 && clumpInfo[i].Item1 + clumpInfo[i].Item2 < clumpInfo[i + 1].Item1))
-                {
-                    //Test if removing the first byte merges two or more of the following unclumped bytes into a single clump
-                    //Test if removing the first byte combines the two clumps
-                    int startIndex = clumpInfo[i].Item1 + 1;
-                    int idealClumpLength;
-                    if (i == clumpInfo.Count - 1)
-                        idealClumpLength = rawData.Length - clumpInfo[i].Item1 - 1;
-                    else
-                        idealClumpLength = clumpInfo[i + 1].Item1 - clumpInfo[i].Item1 - 1;
-                    for (int refOffset = startIndex - 1; startIndex - refOffset <= maxReadBack && refOffset >= 0; refOffset--)
-                    {
-                        int matchCount = 0;
-                        while (matchCount < maxByteClump && startIndex + matchCount < rawData.Length && rawData[refOffset + matchCount] == rawData[startIndex + matchCount])
-                            matchCount++;
 
-                        if (matchCount > clumpInfo[i].Item3 && matchCount <= idealClumpLength)
-                        {
-                            clumpInfo[i] = new Tuple<int, int, int>(startIndex, startIndex - refOffset, matchCount);
-                            clumpInfo.RemoveAt(i + 1);
-                            break;
-                        }
-                    }
-                }
             }
 
-            Tuple<int, int, int> nextCompressedSection = clumpInfo[0];
+            ClumpInfo nextCompressedSection = clumpInfo[0];
             clumpInfo.RemoveAt(0);
             List<byte> UncompressedInfo = new List<byte>();
             List<byte> CompressedInfo = new List<byte>();
@@ -167,16 +103,16 @@ namespace Cereal64.Common.Utils.Encoding
             for (int offset = 0; offset < rawData.Length; )
             {
                 //If it's the offset from the next compressed section, do the compression. Else add an uncompressed.
-                if (nextCompressedSection != null && offset == nextCompressedSection.Item1)
+                if (nextCompressedSection != null && offset == nextCompressedSection.Offset)
                 {
                     //Write the compressed data
-                    short compressedValues = (short)((((nextCompressedSection.Item3 - 3) & 0xF) << 12) | ((nextCompressedSection.Item2 - 1) & 0xFFF));
+                    short compressedValues = (short)((((nextCompressedSection.Length - 3) & 0xF) << 12) | ((nextCompressedSection.CopyOffset - 1) & 0xFFF));
                     CompressedInfo.Add((byte)(compressedValues >> 8));
                     CompressedInfo.Add((byte)compressedValues);
 
                     //No writing to the byte, since it's a 0
 
-                    offset += nextCompressedSection.Item3;
+                    offset += nextCompressedSection.Length;
                     if (clumpInfo.Count == 0)
                         nextCompressedSection = null;
                     else
@@ -214,8 +150,10 @@ namespace Cereal64.Common.Utils.Encoding
             header.CompLoc = 0x10 + (uint)LayoutInfo.Count;
             header.RawLoc = header.CompLoc + (uint)CompressedInfo.Count;
             uint fullLength = header.RawLoc + (uint)UncompressedInfo.Count;
-            if (fullLength % 4 != 0)
-                fullLength += 4 - (fullLength % 4);
+
+            //Pad if needed to hit a certain address value
+            if (padToAddress != 0 && fullLength % padToAddress != 0)
+                fullLength += padToAddress - (fullLength % padToAddress);
 
             byte[] finalData = new byte[fullLength];
             header.WriteToBytes(finalData, 0);
@@ -226,289 +164,173 @@ namespace Cereal64.Common.Utils.Encoding
             return finalData;
         }
 
-        public static byte[] EncodeDoublePass(byte[] rawData)
+        private static ClumpInfo FindBestClump(byte[] rawData, int offset, int maxReadBack, int maxByteClump, int minByteClump)
         {
-            //Pretty simple idea here, though it will be slow: basically filter backwards through the data, trying to find the best
-            // matches for the current string of bytes (3-18 long). Match from the rear first, to try to allow for dynamic size testing.
-            // Use the biggest match you can find. If you max out size early on, stop the current search early.
+            ClumpInfo currentBestClump = new ClumpInfo(-1, -1, -1);
 
-            //If a match is found, save the info to a compressed data info table(offset & length). Push on.
+            int startRef = Math.Max(offset - maxReadBack, 0);
 
-            //After you're done, you can go forwards and split the data into the compressed and uncompressed sections. Finalize it.
-
-            int minByteClump = 3;
-            int maxByteClump = 18;
-            int maxReadBack = 4096;
-
-            Stack<Tuple<int, int, int>> reverseClumpInfo = new Stack<Tuple<int, int, int>>(); //output offset, input offset, length
-
-            Tuple<int, int, int> currentBestClump;
-
-            for (int offset = rawData.Length - 1; offset > 0; )
+            for (int refOffset = startRef; refOffset < offset && refOffset < rawData.Length; refOffset++)
             {
-                currentBestClump = new Tuple<int, int, int>(-1, -1, -1);
-                for (int refOffset = offset - 1; offset - refOffset <= maxReadBack && refOffset >= 0; refOffset--)
-                {
-                    int matchCount = 0;
-                    while (matchCount < maxByteClump && refOffset - matchCount >= 0 && rawData[refOffset - matchCount] == rawData[offset - matchCount])
-                        matchCount++;
+                int matchCount = 0;
+                while (matchCount < maxByteClump && offset + matchCount < rawData.Length && rawData[refOffset + matchCount] == rawData[offset + matchCount])
+                    matchCount++;
 
-                    if (matchCount >= minByteClump && matchCount > currentBestClump.Item3)
-                    {
-                        currentBestClump = new Tuple<int, int, int>(offset - matchCount + 1, offset - refOffset, matchCount);
-                        if (matchCount == maxByteClump)
-                            break;
-                    }
-                }
-
-                if (currentBestClump.Item3 >= minByteClump)
+                if (matchCount >= minByteClump && matchCount > currentBestClump.Length)
                 {
-                    //Set the clump, set back x bytes
-                    reverseClumpInfo.Push(currentBestClump);
-                    offset -= currentBestClump.Item3;
-                }
-                else
-                {
-                    //Uncompressed, move on one byte
-                    offset--;
+                    currentBestClump = new ClumpInfo(offset, offset - refOffset, matchCount);
+                    if (matchCount == maxByteClump)
+                        break;
                 }
             }
 
-            Queue<Tuple<int, int, int>> forwardClumpInfo = new Queue<Tuple<int, int, int>>(); //output offset, input offset, length
+            return currentBestClump;
+        }
 
-            for (int offset = 1; offset < rawData.Length; )
+        private static  bool FindBestAlternativeClumps(byte[] rawData, int maxReadBack, int maxByteClump, int minByteClump,
+            List<ClumpInfo> origClumps, int clumpOffset)
+        {
+            //The idea is to shave off a byte at the beginning of the clump. If it improves the # of bytes used, then goodie goodie!
+
+            //To do: look into shaving the end as well!
+            int oldLayoutBitCount = 1;
+            int oldByteCount = 2;
+            bool isInOldClump = true;
+            int oldClumpOffset = clumpOffset;
+
+            int newLayoutBitCount = 1;
+            int newByteCount = 1;
+            bool isInNewClump = false;
+            int newClumpOffset = 0;
+
+            List<ClumpInfo> newClumps = new List<ClumpInfo>();
+            
+            int byteOffset = origClumps[clumpOffset].Offset + 1;
+
+            while (byteOffset < rawData.Length)
             {
-                currentBestClump = new Tuple<int, int, int>(-1, -1, -1);
-                for (int refOffset = offset - 1; offset - refOffset <= maxReadBack && refOffset >= 0; refOffset--)
+                if ((!isInNewClump || newClumps[newClumpOffset].FollowingByte == byteOffset) &&
+                    (!isInOldClump || origClumps[oldClumpOffset].FollowingByte == byteOffset))
                 {
-                    int matchCount = 0;
-                    while (matchCount < maxByteClump && offset + matchCount < rawData.Length && rawData[refOffset + matchCount] == rawData[offset + matchCount])
-                        matchCount++;
-
-                    if (matchCount >= minByteClump && matchCount > currentBestClump.Item3)
-                    {
-                        currentBestClump = new Tuple<int, int, int>(offset, offset - refOffset, matchCount);
-                        if (matchCount == maxByteClump)
-                            break;
-                    }
+                    break; //We are synced again, make sure to increment the oldClumpOffset so you don't overwrite a clump
                 }
 
-                if (currentBestClump.Item3 >= minByteClump)
+                //If we're not in a clump, try to generate a clump. If successful, add it in and jump in.
+                if (isInNewClump)
                 {
-                    //Set the clump, set back x bytes
-                    forwardClumpInfo.Enqueue(currentBestClump);
-                    offset += currentBestClump.Item3;
-                }
-                else
-                {
-                    //Uncompressed, move on one byte
-                    offset++;
-                }
-            }
-
-            //THOUGHTS ON IMPROVING THE ALGORITHM: TRY A NORMAL AND A REVERSE PASS, THEN COMBINE THEM AS BEST YOU CAN?
-
-            //Thoughts on combining: just measure the bytes along each section as you go down it, and when they match up in index,
-            //       compare the two and take the one that matches best.
-
-            List<Tuple<int, int, int>> combinedClumpInfo = new List<Tuple<int, int, int>>();
-
-            Queue<Tuple<int, int, int>> builtUpReverseInfos = new Queue<Tuple<int, int, int>>();
-            Queue<Tuple<int, int, int>> builtUpForwardInfos = new Queue<Tuple<int, int, int>>();
-
-            int lastMatchingIndex = 0;
-            int currentForwardIndex = 0;
-            int currentReverseIndex = 0;
-            int forwardBytes = 0;
-            int reverseBytes = 0;
-            for (int i = 1; i < rawData.Length; i++)
-            {
-                if (currentForwardIndex < i)
-                {
-                    //Move it forward
-                    if (forwardClumpInfo.Peek().Item1 == i)
+                    //Check if we need to exit
+                    if (newClumps[newClumpOffset].FollowingByte == byteOffset)
                     {
-                        currentForwardIndex = forwardClumpInfo.Peek().Item1 + forwardClumpInfo.Peek().Item3 - 1;
-                        forwardBytes += 2;
-                        builtUpForwardInfos.Enqueue(forwardClumpInfo.Dequeue());
-                    }
-                    else
-                    {
-                        currentForwardIndex = i;
-                        forwardBytes++;
-                    }
-                }
-
-                if (currentReverseIndex < i)
-                {
-                    //Move it forward
-                    if (reverseClumpInfo.Peek().Item1 == i)
-                    {
-                        currentReverseIndex = reverseClumpInfo.Peek().Item1 + reverseClumpInfo.Peek().Item3 - 1;
-                        reverseBytes += 2;
-                        builtUpReverseInfos.Enqueue(reverseClumpInfo.Pop());
-                    }
-                    else
-                    {
-                        currentReverseIndex = i;
-                        reverseBytes++;
-                    }
-                }
-
-                if (i == currentForwardIndex && i == currentReverseIndex)
-                {
-                    //Caught up matching!
-                    if (false)//reverseBytes < forwardBytes)
-                    {
-                        while (builtUpReverseInfos.Count > 0)
-                            combinedClumpInfo.Add(builtUpReverseInfos.Dequeue());
-
-                        builtUpForwardInfos.Clear();
-                    }
-                    else
-                    {
-                        while (builtUpForwardInfos.Count > 0)
-                            combinedClumpInfo.Add(builtUpForwardInfos.Dequeue());
-
-                        builtUpReverseInfos.Clear();
-                    }
-
-                    forwardBytes = 0;
-                    reverseBytes = 0;
-                }
-            }
-
-            //reverseClumpInfo.Clear();
-            //while (forwardClumpInfo.Count > 0)
-            //    reverseClumpInfo.Push(forwardClumpInfo.Pop());
-            //So now we should have the list all good and working. Now put everything in its proper place!
-
-            if (combinedClumpInfo.Count == 0)
-            {
-                //Call the other one, huge waste of time
-                return EncodeAsRaw(rawData);
-            }
-
-            //OPTIMIZATION: SEE IF PARTING WITH THE FIRST BYTE OF A SMALLER CLUMP CAN MAKE IT EXPAND!
-            for (int i = 0; i < combinedClumpInfo.Count; i++)
-            {
-                //First test case: it's right next to a clump && combined are less than or equal to 19
-                if (i < combinedClumpInfo.Count - 1 && combinedClumpInfo[i].Item3 + combinedClumpInfo[i + 1].Item3 <= maxByteClump + 1 &&
-                    combinedClumpInfo[i].Item1 + combinedClumpInfo[i].Item3 == combinedClumpInfo[i + 1].Item1)
-                {
-                    //Test if removing the first byte combines the two clumps
-                    int startIndex = combinedClumpInfo[i].Item1 + 1;
-                    int idealClumpLength = combinedClumpInfo[i].Item3 + combinedClumpInfo[i + 1].Item3 - 1;
-                    for (int refOffset = startIndex - 1; startIndex - refOffset <= maxReadBack && refOffset >= 0; refOffset--)
-                    {
-                        int matchCount = 0;
-                        while (matchCount < maxByteClump && startIndex + matchCount < rawData.Length && rawData[refOffset + matchCount] == rawData[startIndex + matchCount])
-                            matchCount++;
-
-                        if (matchCount == idealClumpLength)
+                        newClumpOffset++;
+                        //Try to generate new clump
+                        ClumpInfo newClump = FindBestClump(rawData, byteOffset, maxReadBack, maxByteClump, minByteClump);
+                        if (newClump.Offset != -1)
                         {
-                            combinedClumpInfo[i] = new Tuple<int, int, int>(startIndex, startIndex - refOffset, matchCount);
-                            combinedClumpInfo.RemoveAt(i + 1);
-                            break;
+                            //jump into new clump
+                            newClumps.Add(newClump);
+                            newLayoutBitCount++;
+                            newByteCount += 2;
+                        }
+                        else
+                        {
+                            isInNewClump = false;
+                            newLayoutBitCount++;
+                            newByteCount++;
                         }
                     }
                 }
-                else if ((i == combinedClumpInfo.Count - 1 && combinedClumpInfo[i].Item1 + combinedClumpInfo[i].Item2 < rawData.Length - 2) ||
-                    (i < combinedClumpInfo.Count - 1 && combinedClumpInfo[i].Item1 + combinedClumpInfo[i].Item2 < combinedClumpInfo[i + 1].Item1))
+                else
                 {
-                    //Test if removing the first byte merges two or more of the following unclumped bytes into a single clump
-                    //Test if removing the first byte combines the two clumps
-                    int startIndex = combinedClumpInfo[i].Item1 + 1;
-                    int idealClumpLength;
-                    if (i == combinedClumpInfo.Count - 1)
-                        idealClumpLength = rawData.Length - combinedClumpInfo[i].Item1 - 1;
-                    else
-                        idealClumpLength = combinedClumpInfo[i + 1].Item1 - combinedClumpInfo[i].Item1 - 1;
-                    for (int refOffset = startIndex - 1; startIndex - refOffset <= maxReadBack && refOffset >= 0; refOffset--)
+                    //Try to generate.
+                    ClumpInfo newClump = FindBestClump(rawData, byteOffset, maxReadBack, maxByteClump, minByteClump);
+                    if (newClump.Offset != -1)
                     {
-                        int matchCount = 0;
-                        while (matchCount < maxByteClump && startIndex + matchCount < rawData.Length && rawData[refOffset + matchCount] == rawData[startIndex + matchCount])
-                            matchCount++;
-
-                        if (matchCount > combinedClumpInfo[i].Item3 && matchCount <= idealClumpLength)
-                        {
-                            combinedClumpInfo[i] = new Tuple<int, int, int>(startIndex, startIndex - refOffset, matchCount);
-                            combinedClumpInfo.RemoveAt(i + 1);
-                            break;
-                        }
+                        //jump into new clump
+                        newClumps.Add(newClump);
+                        isInNewClump = true;
+                        newLayoutBitCount++;
+                        newByteCount += 2;
+                    }
+                    else
+                    {
+                        newLayoutBitCount++;
+                        newByteCount++;
                     }
                 }
-            }
 
-
-            Tuple<int, int, int> nextCompressedSection = combinedClumpInfo[0];
-            combinedClumpInfo.RemoveAt(0);
-            List<byte> UncompressedInfo = new List<byte>();
-            List<byte> CompressedInfo = new List<byte>();
-            List<byte> LayoutInfo = new List<byte>();
-            byte layoutByte = 0;
-            int layoutByteIndex = 7;
-
-            for (int offset = 0; offset < rawData.Length; )
-            {
-                //If it's the offset from the next compressed section, do the compression. Else add an uncompressed.
-                if (nextCompressedSection != null && offset == nextCompressedSection.Item1)
+                //Handle the old info
+                if (isInOldClump)
                 {
-                    //Write the compressed data
-                    short compressedValues = (short)((((nextCompressedSection.Item3 - 3) & 0xF) << 12) | ((nextCompressedSection.Item2 - 1) & 0xFFF));
-                    CompressedInfo.Add((byte)(compressedValues >> 8));
-                    CompressedInfo.Add((byte)compressedValues);
-
-                    //No writing to the byte, since it's a 0
-
-                    offset += nextCompressedSection.Item3;
-                    if (combinedClumpInfo.Count == 0)
-                        nextCompressedSection = null;
-                    else
+                    //Check if we need to exit
+                    if (origClumps[oldClumpOffset].FollowingByte == byteOffset)
                     {
-                        nextCompressedSection = combinedClumpInfo[0];
-                        combinedClumpInfo.RemoveAt(0);
+                        oldClumpOffset++;
+                        if (oldClumpOffset < origClumps.Count && origClumps[oldClumpOffset].Offset == byteOffset)
+                        {
+                            //jump into new clump
+                            oldLayoutBitCount++;
+                            oldByteCount += 2;
+                        }
+                        else
+                        {
+                            isInOldClump = false;
+                            oldLayoutBitCount++;
+                            oldByteCount++;
+                        }
                     }
                 }
                 else
                 {
-                    UncompressedInfo.Add(rawData[offset]);
-                    layoutByte |= (byte)(1 << layoutByteIndex);
-                    offset++;
+                    //Check if we enter
+                    if (oldClumpOffset < origClumps.Count && origClumps[oldClumpOffset].Offset == byteOffset)
+                    {
+                        isInOldClump = true;
+                        oldLayoutBitCount++;
+                        oldByteCount += 2;
+                    }
+                    else
+                    {
+                        oldLayoutBitCount++;
+                        oldByteCount++;
+                    }
                 }
 
-                layoutByteIndex--;
-                if (layoutByteIndex < 0)
-                {
-                    LayoutInfo.Add(layoutByte);
-                    layoutByte = 0;
-                    layoutByteIndex = 7;
-                }
+                //if (isInNewClump && isInOldClump && origClumps[oldClumpOffset].LastByte == newClumps[newClumpOffset].LastByte)
+                //    break; //We are synced again
+
+                //if (!isInOldClump && !isInNewClump)
+                //    break; //We are synced again
+
+                    byteOffset++;
             }
 
-            //Add the proper end buffers to the lists, put together the header, throw it all to the user here
-            if (layoutByteIndex != 7)
-                LayoutInfo.Add(layoutByte);
+            if (newByteCount > oldByteCount || (newByteCount == oldByteCount && newLayoutBitCount >= oldLayoutBitCount))
+                return false;
 
-            while (LayoutInfo.Count % 4 != 0)
-                LayoutInfo.Add(0);
+            //make sure to go back an index if we're not in a clump
+            if(!isInOldClump)
+                oldClumpOffset--;
 
-            MIO0Header header = new MIO0Header();
-            header.ID = MIO0.MIO0_AS_UINT;
-            header.OutputSize = (uint)rawData.Length;
-            header.CompLoc = 0x10 + (uint)LayoutInfo.Count;
-            header.RawLoc = header.CompLoc + (uint)CompressedInfo.Count;
-            uint fullLength = header.RawLoc + (uint)UncompressedInfo.Count;
-            if (fullLength % 4 != 0)
-                fullLength += 4 - (fullLength % 4);
+            //Apply
+            int j;
+            for (j = oldClumpOffset; j > clumpOffset; j--)
+            {
+                origClumps.RemoveAt(j);
+            }
+            origClumps.RemoveAt(j);
 
-            byte[] finalData = new byte[fullLength];
-            header.WriteToBytes(finalData, 0);
-            Array.Copy(LayoutInfo.ToArray(), 0, finalData, 0x10, LayoutInfo.Count);
-            Array.Copy(CompressedInfo.ToArray(), 0, finalData, header.CompLoc, CompressedInfo.Count);
-            Array.Copy(UncompressedInfo.ToArray(), 0, finalData, header.RawLoc, UncompressedInfo.Count);
+            while (newClumps.Count > 0)
+            {
+                origClumps.Insert(j, newClumps.Last());
+                newClumps.RemoveAt(newClumps.Count - 1);
+            }
 
-            return finalData;
+            return true;
+
+            //Idea: have an algorithm that'll take a given clump, bump one byte off the start and step through bytes, incrementing
+            // the old and new clumps until they match up again. Remember to try to create clumps before ending the algorithm. If
+            // you can't drop it, consider recursively running the alogritm over it again, allowing for one more extra raw byte to be
+            // injected somewhere. If that doesn't work, failure!
         }
 
         public static byte[] EncodeAsRaw(byte[] rawData)
@@ -553,7 +375,8 @@ namespace Cereal64.Common.Utils.Encoding
             return finalOutput;
         }
 
-        public static byte[] Decode(byte[] encodedData)
+        //To do: remove the debug code?
+        public static byte[] Decode(byte[] encodedData, string fileName = null, bool verify = false)
         {
             MIO0Header Header;
             byte MapByte = 0x80, CurMapByte, Length;
@@ -577,6 +400,10 @@ namespace Cereal64.Common.Utils.Encoding
                 return null;
             }
 
+            System.IO.StreamWriter writer = null;
+            if (fileName != null)
+                writer = new System.IO.StreamWriter(fileName);
+
             byte[] MIO0Buffer = new byte[Header.OutputSize];
 
             MapLoc = 0x10;
@@ -591,6 +418,8 @@ namespace Cereal64.Common.Utils.Encoding
                 if ((CurMapByte & MapByte) != 0x0)
                 {
                     MIO0Buffer[OutLoc] = encodedData[RawLoc]; // copy a byte to output.
+                    if (writer != null)
+                        writer.Write("{0:X2}", encodedData[RawLoc]);
                     OutLoc++;
                     RawLoc++;
                     NumBytesOutput++;
@@ -609,14 +438,22 @@ namespace Cereal64.Common.Utils.Encoding
                         return null;
                     }
 
+                    if (writer != null)
+                        writer.Write("[");
+
                     // copy from output
                     for (i = 0; i < Length; i++)
                     {
                         MIO0Buffer[OutLoc] = MIO0Buffer[OutLoc - Dist];
+                        if (writer != null)
+                            writer.Write("{0:X2}", MIO0Buffer[OutLoc]);
                         OutLoc++;
                         NumBytesOutput++;
                         if (NumBytesOutput >= Header.OutputSize) break;
                     }
+
+                    if (writer != null)
+                        writer.Write("]");
                     CompLoc += 2;
                 }
 
@@ -638,6 +475,38 @@ namespace Cereal64.Common.Utils.Encoding
                         return null;
                     }
                 }
+            }
+
+            if (writer != null)
+                writer.Close();
+
+            if (verify)
+            {
+                byte[] recoded = Encode(MIO0Buffer);
+
+                if (recoded.Length > encodedData.Length)
+                {
+                    System.IO.File.WriteAllBytes("BadMIOData.bin",encodedData);
+                    System.IO.File.WriteAllBytes("Fixed.bin", recoded);
+
+                    Decode(encodedData, "diff1.txt");
+                    Decode(recoded, "diff2.txt");
+
+                    throw new Exception();
+                }
+
+                byte[] redecoded = Decode(recoded);
+
+                if (redecoded.Length != MIO0Buffer.Length)
+                    throw new Exception();
+
+                for (int k = 0; k < redecoded.Length; k++)
+                {
+                    if (redecoded[k] != MIO0Buffer[k])
+                        throw new Exception();
+                }
+
+
             }
 
             return MIO0Buffer;
@@ -668,6 +537,26 @@ namespace Cereal64.Common.Utils.Encoding
                 length += 4 - (length % 4);
 
             return length;
+        }
+
+        internal class ClumpInfo
+        {
+            public int Offset;
+            public int CopyOffset;
+            public int Length;
+
+            public ClumpInfo(int offset, int copyOffset, int length)
+            {
+                Offset = offset;
+                CopyOffset = copyOffset;
+                Length = length;
+            }
+
+            public int FollowingByte
+            { get { return Offset + Length; } }
+
+            public int LastByte
+            { get { return FollowingByte - 1; } }
         }
     }
 }
