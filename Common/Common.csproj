@@ -58,6 +58,10 @@
     <Compile Include="Controls\N64DataElementVisualizer.Designer.cs">
       <DependentUpon>N64DataElementVisualizer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\WatermarkTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="DataElements\NestedN64DataElement.cs" />
     <Compile Include="DataElements\IN64ElementReference.cs" />
     <Compile Include="DataElements\N64ElementContainerFactory.cs" />
     <Compile Include="ITreeNodeElement.cs" />
@@ -82,7 +86,7 @@
     <Compile Include="Rom\DmaAddress.cs" />
     <Compile Include="DataElements\N64DataElement.cs" />
     <Compile Include="Utils\Encoding\MIO0.cs" />
-    <Compile Include="Utils\Encoding\MIO0Block.cs" />
+    <Compile Include="DataElements\Encoding\MIO0Block.cs" />
     <Compile Include="Utils\Encoding\VPK.cs" />
     <Compile Include="Utils\HexDataConverter.cs" />
     <Compile Include="Utils\N64Sums.cs" />

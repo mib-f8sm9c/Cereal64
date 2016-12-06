@@ -11,6 +11,81 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 {
     public static class TextureConversion
     {
+        public static bool IsValidFormatCombo(Texture.ImageFormat imageFormat, Texture.PixelInfo pixelFormat)
+        {
+            switch (imageFormat)
+            {
+                case Texture.ImageFormat.RGBA:
+                    switch (pixelFormat)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_32b:
+                            return true;
+
+                    }
+                    break;
+                case Texture.ImageFormat.YUV:
+                    switch (pixelFormat)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return false; //SHOULD BE TRUE, BUT FOR NOW LEAVE FALSE
+                    }
+                    break;
+                case Texture.ImageFormat.CI:
+                    switch (pixelFormat)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_8b:
+                            return true;
+
+                    }
+                    break;
+                case Texture.ImageFormat.IA:
+                    switch (pixelFormat)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_8b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_16b:
+                            return true;
+
+                    }
+                    break;
+                case Texture.ImageFormat.I:
+                    switch (pixelFormat)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_8b:
+                            return true;
+
+                    }
+                    break;
+            }
+
+            return false;
+        }
+
+        //Functions to convert to faster algorithm:
+        //RGBA
+        //-All
+        //YUV
+        //CI
+        //-CI4
+        //!CI8ToBinary
+        //-BinaryToCI8
+        //IA
+        //-All
+        //I
+        //-All
 
         #region RGBA
 
@@ -287,46 +362,32 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
-            
-            //NOTE: Here's some optimization code that will make it much faster, just adapt it to the BinaryToCI8 method
 
-            //BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
-            //int stride = data.Stride;
-            //unsafe
-            //{
-            //    byte* ptr = (byte*)data.Scan0;
-            //    // Check this is not a null area
-            //    if (!areaToPaint.IsEmpty)
-            //    {
-            //        // Go through the draw area and set the pixels as they should be
-            //        for (int y = areaToPaint.Top; y < areaToPaint.Bottom; y++)
-            //        {
-            //            for (int x = areaToPaint.Left; x < areaToPaint.Right; x++)
-            //            {
-            //                // layer.GetBitmap().SetPixel(x, y, m_colour);
-            //                ptr[(x * 3) + y * stride] = m_colour.B;
-            //                ptr[(x * 3) + y * stride + 1] = m_colour.G;
-            //                ptr[(x * 3) + y * stride + 2] = m_colour.R;
-            //            }
-            //        }
-            //    }
-            //}
-            //bmp.UnlockBits(data);
-
-            for (int i = 0; i < width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
+                
+                byte* ptr = (byte*)data.Scan0;
                 for (int j = 0; j < height; j++)
                 {
-                    int index = (i + j * width);
+                    for (int i = 0; i < width; i++)
+                    {
+                        int index = (i + j * width);
 
-                    byte CI = ByteHelper.ReadByte(imgData, index);
+                        byte CI = ByteHelper.ReadByte(imgData, index);
 
-                    if (CI > palette.Colors.Length)
-                        CI = 0;
+                        if (CI > palette.Colors.Length)
+                            CI = 0;
 
-                    bmp.SetPixel(i, j, palette.Colors[CI]);
+                        ptr[(i * 4) + j * stride] = palette.Colors[CI].B;
+                        ptr[(i * 4) + j * stride + 1] = palette.Colors[CI].G;
+                        ptr[(i * 4) + j * stride + 2] = palette.Colors[CI].R;
+                        ptr[(i * 4) + j * stride + 3] = palette.Colors[CI].A;
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return bmp;
         }

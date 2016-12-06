@@ -60,6 +60,8 @@ namespace Cereal64.Microcodes.UnitTests.F3DEX
         [TestMethod]
         public void TestCI4()
         {
+            throw new NotImplementedException();
+
             //Convert from bmp to bytes
             byte[] bytes = TextureConversion.RGBA32ToBinary(Resources.Test_255And0Only_BWOnly);
 
@@ -80,6 +82,8 @@ namespace Cereal64.Microcodes.UnitTests.F3DEX
         [TestMethod]
         public void TestCI8()
         {
+            throw new NotImplementedException();
+
             //Convert from bmp to bytes
             byte[] bytes = TextureConversion.RGBA32ToBinary(Resources.Test_FullRange_BWOnly);
 
@@ -100,6 +104,8 @@ namespace Cereal64.Microcodes.UnitTests.F3DEX
         [TestMethod]
         public void TestIA4()
         {
+            throw new NotImplementedException();
+
             //Convert from bmp to bytes
             byte[] bytes = TextureConversion.RGBA32ToBinary(Resources.Test_255And0Only_BWOnly);
 
@@ -120,6 +126,8 @@ namespace Cereal64.Microcodes.UnitTests.F3DEX
         [TestMethod]
         public void TestIA8()
         {
+            throw new NotImplementedException();
+
             //Convert from bmp to bytes
             byte[] bytes = TextureConversion.RGBA32ToBinary(Resources.Test_255And0Only_BWOnly);
 
@@ -140,6 +148,8 @@ namespace Cereal64.Microcodes.UnitTests.F3DEX
         [TestMethod]
         public void TestIA16()
         {
+            throw new NotImplementedException();
+
             //Convert from bmp to bytes
             byte[] bytes = TextureConversion.RGBA32ToBinary(Resources.Test_FullRange_BWOnly);
 
@@ -160,6 +170,8 @@ namespace Cereal64.Microcodes.UnitTests.F3DEX
         [TestMethod]
         public void TestI4()
         {
+            throw new NotImplementedException();
+
             //Convert from bmp to bytes
             byte[] bytes = TextureConversion.RGBA32ToBinary(Resources.Test_255And0Only_BWOnly);
 
@@ -180,6 +192,8 @@ namespace Cereal64.Microcodes.UnitTests.F3DEX
         [TestMethod]
         public void TestI8()
         {
+            throw new NotImplementedException();
+
             //Convert from bmp to bytes
             byte[] bytes = TextureConversion.RGBA32ToBinary(Resources.Test_FullRange_BWOnly);
 

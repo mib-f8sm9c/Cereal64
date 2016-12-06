@@ -100,6 +100,9 @@ namespace Cereal64.Common.Rom
 
         public bool AddElement(N64DataElement element)
         {
+            if (element == null)
+                return false;
+
             //Detect if the file size has increased due to this addition
             int fileOffsetEnd = element.FileOffset + element.RawDataSize;
 

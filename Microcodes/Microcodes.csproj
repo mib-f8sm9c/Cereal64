@@ -29,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -52,7 +53,7 @@
     <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_MoveMem.cs" />
     <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_Mtx.cs" />
     <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_Vtx.cs" />
-    <Compile Include="F3DEX\DataElements\Commands\0x8\F3DEX_G_Unknown.cs" />
+    <Compile Include="F3DEX\DataElements\Commands\0x8\F3DEX_G_MK64_EndDL.cs" />
     <Compile Include="F3DEX\DataElements\Commands\0xA\F3DEX_G_Load_UCode.cs" />
     <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_ClearGeometryMode.cs" />
     <Compile Include="F3DEX\DataElements\Commands\0xB\F3DEX_G_Branch_Z.cs" />

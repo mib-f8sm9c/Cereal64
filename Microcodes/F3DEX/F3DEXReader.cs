@@ -14,6 +14,8 @@ namespace Cereal64.Microcodes.F3DEX
     public class F3DEXReaderPackage
     {
         public Dictionary<RomFile, List<N64DataElement>> Elements = new Dictionary<RomFile,List<N64DataElement>>();
+        //To consider: since this is going to be converted to VisObj64, think about how best to organize it so it will
+        //              look good : )
     }
 
     public static class F3DEXReader
@@ -234,6 +236,15 @@ namespace Cereal64.Microcodes.F3DEX
             //Here handle extra command things (like if it's referencing textures and such)
             switch (command.CommandID)
             {
+                case F3DEXCommandID.F3DEX_G_DL:
+                    //Need to put another dl on the stack and keep reading. That forceJump option if it's true should purge the stack.
+
+                    break;
+                case F3DEXCommandID.F3DEX_G_MK64_ENDDL:
+                    //Need to end the current level. Pop off the next on the stack. If it's empty, then end for good : )
+
+                    break;
+
                 case F3DEXCommandID.F3DEX_G_TEXTURE:
                     F3DEX_G_Texture textureCmd = (F3DEX_G_Texture)command;
                     tile = TMEM.TileDescriptors[textureCmd.Tile];
@@ -547,7 +558,7 @@ namespace Cereal64.Microcodes.F3DEX
                     widthInTexels, heightInTexels, palette, tile.Palette);
             else
                 newTexture = new Texture(offset, data, tile.ImageFormat, tile.PixelSize,
-                    widthInTexels, heightInTexels, null);
+                    widthInTexels, heightInTexels);
             
             tile.SettingsChanged = false;
 

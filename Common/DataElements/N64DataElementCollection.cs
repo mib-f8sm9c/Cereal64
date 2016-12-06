@@ -171,6 +171,11 @@ namespace Cereal64.Common.DataElements
             return true;
         }
 
+        public void ClearElements()
+        {
+            _elements.Clear();
+        }
+
         public byte[] GetAsBytes()
         {
             if(_elements.Count == 0)

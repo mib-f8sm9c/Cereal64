@@ -102,4 +102,14 @@ namespace Cereal64.Common.DataElements
             //If anything needs to be done post-loading via xml, do it here
         }
     }
+    [AttributeUsage(AttributeTargets.Class)]
+    public class AlternateXMLNamesAttribute : System.Attribute
+    {
+        public string[] Names { get; private set; }
+
+        public AlternateXMLNamesAttribute(string[] names)
+        {
+            this.Names = names;
+        }
+    }
 }

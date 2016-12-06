@@ -8,11 +8,11 @@ using Cereal64.Common.Utils;
 using Cereal64.Common.Utils.Encoding;
 using System.Xml.Linq;
 
-namespace Cereal64.Common.Utils.Encoding
+namespace Cereal64.Common.DataElements.Encoding
 {
     //For now, lets make MIO0Block not editable, you have to create a new one to make it work.
     // Also of note, it will use the same constructor for encoding raw data & decoding compressed data
-    public class MIO0Block : N64DataElement
+    public class MIO0Block : NestedN64DataElement
     {
         [CategoryAttribute("MIO Settings"),
         DescriptionAttribute("Header for the MIO0 block")]
@@ -29,9 +29,7 @@ namespace Cereal64.Common.Utils.Encoding
 
         [BrowsableAttribute(false)]
         public byte[] DecodedData { get; private set; }
-
-        [BrowsableAttribute(false)]
-        public N64DataElement DecodedN64DataElement { get; set; }
+        //To do: when DecodedData changes, allow it to set a _changed flag, and recalculate on the next runthrough?
 
         public MIO0Block(int offset, byte[] rawData)
             : base(offset, rawData)
@@ -47,6 +45,7 @@ namespace Cereal64.Common.Utils.Encoding
             UncompressedBytes = uncompressed;
 
             DecodedData = MIO0.Decode(RawData);
+            SetUpInternalData(DecodedData);
         }
 
         public MIO0Block(XElement xml, byte[] fileData)
@@ -54,11 +53,31 @@ namespace Cereal64.Common.Utils.Encoding
         {
         }
 
-        public static MIO0Block ReadMIO0BlockFrom(byte[] data, int offset)
+        protected override byte[] InternalData
         {
-            int mio0Length = MIO0.FindLengthOfMIO0Block(data, offset);
-            byte[] mio0Data = new byte[mio0Length];
-            Array.Copy(data, offset, mio0Data, 0, mio0Length);
+            get
+            {
+                return DecodedData;
+            }
+        }
+
+        protected override void SetUpInternalData(byte[] rawData)
+        {
+            if (rawData == null)
+                return;
+
+            //Decode
+            DecodedData = MIO0.Decode(rawData);
+
+            InitializeNewInternalData();
+        }
+
+        public static MIO0Block ReadMIO0BlockFrom(byte[] data, int offset, int length = -1)
+        {
+            if(length == -1)
+                length = MIO0.FindLengthOfMIO0Block(data, offset);
+            byte[] mio0Data = new byte[length];
+            Array.Copy(data, offset, mio0Data, 0, length);
 
             return new MIO0Block(offset, mio0Data);
         }

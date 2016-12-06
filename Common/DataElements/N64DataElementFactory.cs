@@ -17,7 +17,8 @@ namespace Cereal64.Common.DataElements
     {
         //Default the element types to the ones that exist in Common
         private static Dictionary<string, Type> _elementTypes = new Dictionary<string, Type>() {
-            { typeof(UnknownData).ToString(), typeof(UnknownData) } };
+            { typeof(UnknownData).ToString(), typeof(UnknownData) },
+            { typeof(Encoding.MIO0Block).ToString(), typeof(Encoding.MIO0Block) } };
 
         public static void AddN64ElementsFromAssembly(Assembly assembly)
         {
@@ -29,6 +30,23 @@ namespace Cereal64.Common.DataElements
             {
                 if (!_elementTypes.ContainsValue(type))
                     _elementTypes.Add(type.ToString(), type);
+
+                object[] attributes = type.GetCustomAttributes(true);
+                foreach (object attribute in attributes)
+                {
+                    if (attribute is AlternateXMLNamesAttribute)
+                    {
+                        AlternateXMLNamesAttribute att = (AlternateXMLNamesAttribute)attribute;
+                        if(att.Names != null)
+                        {
+                            foreach (string name in att.Names)
+                            {
+                                if (!_elementTypes.ContainsKey(name))
+                                    _elementTypes.Add(name, type);
+                            }
+                        }
+                    }
+                }
             }
         }
 

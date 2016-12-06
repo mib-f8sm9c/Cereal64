@@ -100,9 +100,20 @@ namespace Cereal64.Common.Utils
 
         public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
         {
-            if (destinationType == typeof(string) && value.GetType() == typeof(Int32))
+            if (destinationType == typeof(string))
             {
-                return string.Format("0x{0:X8}", value);
+                if(value == null)
+                {
+                    return "null";
+                }
+                else if (value.GetType() == typeof(Int32))
+                {
+                    return string.Format("0x{0:X8}", value);
+                }
+                else
+                {
+                    return base.ConvertTo(context, culture, value, destinationType);
+                }
             }
             else
             {

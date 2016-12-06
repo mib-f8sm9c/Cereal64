@@ -12,7 +12,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements.Commands
         F3DEX_G_MOVEMEM = 0x03,
         F3DEX_G_VTX = 0x04,
         F3DEX_G_DL = 0x06,
-        F3DEX_G_UNKNOWN = 0x80,
+        F3DEX_G_MK64_ENDDL = 0x80,
         F3DEX_G_LOAD_UCODE = 0xAF,
         F3DEX_G_BRANCH_Z = 0xB0,
         F3DEX_G_TRI2 = 0xB1,
@@ -119,8 +119,8 @@ namespace Cereal64.Microcodes.F3DEX.DataElements.Commands
                 case F3DEXCommandID.F3DEX_G_DL:
                     return new F3DEX_G_DL(index, bytes);
 
-                case F3DEXCommandID.F3DEX_G_UNKNOWN:
-                    return new F3DEX_G_Unknown(index, bytes);
+                case F3DEXCommandID.F3DEX_G_MK64_ENDDL:
+                    return new F3DEX_G_MK64_EndDL(index, bytes);
 
                 case F3DEXCommandID.F3DEX_G_ENDDL:
                     return new F3DEX_G_EndDL(index, bytes);
