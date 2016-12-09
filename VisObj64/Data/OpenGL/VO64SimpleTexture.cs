@@ -11,14 +11,14 @@ namespace Cereal64.VisObj64.Data.OpenGL
     {
         //NOTE: THIS WILL ALL BREAK IF TEXTURE IS NULL
 
-        public Bitmap Texture { get; set; }
+        public Bitmap Image { get; set; }
 
         public TextureWrapMode WrapS { get; set; }
         public TextureWrapMode WrapT { get; set; }
 
         public VO64SimpleTexture(Bitmap texture)
         {
-            Texture = texture;
+            Image = texture;
 
             WrapS = TextureWrapMode.Repeat;
             WrapT = TextureWrapMode.Repeat;
@@ -26,7 +26,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
         public VO64SimpleTexture(Bitmap texture, TextureWrapMode wrapS, TextureWrapMode wrapT)
         {
-            Texture = texture;
+            Image = texture;
 
             WrapS = wrapS;
             WrapT = wrapT;

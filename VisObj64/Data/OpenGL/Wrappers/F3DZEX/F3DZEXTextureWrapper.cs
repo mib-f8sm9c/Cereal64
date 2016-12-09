@@ -16,7 +16,7 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
         public F3DZEX_G_SetTile SetTileCommand;
         public F3DZEX_G_Texture TextureCommand;
 
-        public Bitmap Texture {
+        public Bitmap Image {
             get { return (F3DTexture == null ? null : F3DTexture.Image); } 
             set
             { //Finish this later
@@ -105,7 +105,7 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
         {
             if (_updated)
             {
-                _simpleTexture = new VO64SimpleTexture(Texture, WrapS, WrapT);
+                _simpleTexture = new VO64SimpleTexture(Image, WrapS, WrapT);
                 _updated = false;
             }
             return _simpleTexture;
@@ -155,9 +155,9 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
             get { return (float)TextureCommand.ScaleT / (float)ushort.MaxValue; }
         }
 
-        public int TexWidth { get { return Texture.Width; } }
+        public int TexWidth { get { return Image.Width; } }
 
-        public int TexHeight { get { return Texture.Height; } }
+        public int TexHeight { get { return Image.Height; } }
 
     }
 }

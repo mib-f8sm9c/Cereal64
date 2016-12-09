@@ -9,7 +9,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
 {
     public interface IVO64Texture
     {
-        Bitmap Texture { get; set; }
+        Bitmap Image { get; set; }
 
         TextureWrapMode WrapS { get; set; }
         TextureWrapMode WrapT { get; set; }

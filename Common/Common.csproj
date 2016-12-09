@@ -61,6 +61,7 @@
     <Compile Include="Controls\WatermarkTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="DataElements\IUpdatable.cs" />
     <Compile Include="DataElements\NestedN64DataElement.cs" />
     <Compile Include="DataElements\IN64ElementReference.cs" />
     <Compile Include="DataElements\N64ElementContainerFactory.cs" />

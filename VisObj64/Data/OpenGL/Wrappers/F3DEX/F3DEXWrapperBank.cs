@@ -16,19 +16,19 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
         /// Move these into the appropriate wrapper file for each, and remove the constructors???
         /// </summary>
 
-        private static Dictionary<Texture, F3DEXTextureWrapper> _textureWrappers = new Dictionary<Texture, F3DEXTextureWrapper>();
+        private static Dictionary<F3DEXImage, F3DEXTextureWrapper> _textureWrappers = new Dictionary<F3DEXImage, F3DEXTextureWrapper>();
         private static Dictionary<Vertex, F3DEXVertexWrapper> _vertexWrappers = new Dictionary<Vertex, F3DEXVertexWrapper>();
         private static Dictionary<F3DEX_G_Tri1, F3DEXTriangleWrapper> _triangleWrappers = new Dictionary<F3DEX_G_Tri1, F3DEXTriangleWrapper>();
         private static Dictionary<F3DEX_G_Tri2, F3DEXTriangleWrapper> _triangle2FirstWrappers = new Dictionary<F3DEX_G_Tri2, F3DEXTriangleWrapper>();
         private static Dictionary<F3DEX_G_Tri2, F3DEXTriangleWrapper> _triangle2SecondWrappers = new Dictionary<F3DEX_G_Tri2, F3DEXTriangleWrapper>();
 
-        public static F3DEXTextureWrapper GetTextureWrapper(Texture texture, F3DEX_G_SetTile command, F3DEX_G_Texture textureCommand)
+        public static F3DEXTextureWrapper GetTextureWrapper(F3DEXImage image, F3DEX_G_SetTile command, F3DEX_G_Texture textureCommand)
         {
-            if (_textureWrappers.ContainsKey(texture))
-                return _textureWrappers[texture];
+            if (_textureWrappers.ContainsKey(image))
+                return _textureWrappers[image];
 
-            F3DEXTextureWrapper wrapper = new F3DEXTextureWrapper(texture, command, textureCommand);
-            _textureWrappers.Add(texture, wrapper);
+            F3DEXTextureWrapper wrapper = new F3DEXTextureWrapper(image, command, textureCommand);
+            _textureWrappers.Add(image, wrapper);
 
             return wrapper;
         }

@@ -66,7 +66,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements.Commands
         private byte _vertex6;
 
         [BrowsableAttribute(false)]
-        public Texture TextureReference { get; set; }
+        public F3DEXImage ImageReference { get; set; }
 
         [BrowsableAttribute(false)]
         public Vertex Vertex1Reference { get; set; }

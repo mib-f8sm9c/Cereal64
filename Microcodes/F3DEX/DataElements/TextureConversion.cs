@@ -238,11 +238,11 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     byte CI1 = (byte)(CI >> 4);
                     byte CI2 = (byte)(CI & 0x0F);
 
-                    int color1Index = CI1 + 16 * paletteIndex;
+                    int color1Index = CI1 + paletteIndex;
                     if (color1Index >= palette.Colors.Length)
                         color1Index = 0;
 
-                    int color2Index = CI2 + 16 * paletteIndex;
+                    int color2Index = CI2 + paletteIndex;
                     if (color2Index >= palette.Colors.Length)
                         color2Index = 0;
 
@@ -255,7 +255,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             return bmp;
         }
 
-        public static byte[] CI4ToBinary(Bitmap bmp, Palette palette, int paletteIndex, bool generateNewPalette = false)
+        public static byte[] CI4ToBinary(Bitmap bmp, Palette palette, ref int paletteIndex, bool generateNewPalette = false)
         {
             //Pixel size is 1/2 bytes
             if (bmp == null)
@@ -275,7 +275,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             int[] paletteIDs = new int[palette.Colors.Length];
             for (int k = 0; k < palette.Colors.Length; k++)
             {
-                int colorIndex = k + 16 * paletteIndex;
+                int colorIndex = k + paletteIndex;
                 if (colorIndex > palette.Colors.Length)
                     colorIndex = 0;
 
@@ -304,7 +304,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                         else
                         {
                             //Get the dist to the color, and keep track of which is the best representation
-                            double dist = pixel.ColorDistanceFrom(palette.Colors[p + 16 * paletteIndex]);
+                            double dist = pixel.ColorDistanceFrom(palette.Colors[p + paletteIndex]);
 
                             if (dist < closestDist)
                             {
@@ -333,7 +333,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                         else
                         {
                             //Get the dist to the color, and keep track of which is the best representation
-                            double dist = pixel.ColorDistanceFrom(palette.Colors[p + 16 * paletteIndex]);
+                            double dist = pixel.ColorDistanceFrom(palette.Colors[p + paletteIndex]);
 
                             if (dist < closestDist)
                             {
@@ -352,7 +352,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             return imgData;
         }
 
-        public static Bitmap BinaryToCI8(byte[] imgData, Palette palette, int width, int height)
+        public static Bitmap BinaryToCI8(byte[] imgData, Palette palette, int paletteIndex, int width, int height)
         {
             //Pixel size is 1 byte
             if (width * height != imgData.Length)
