@@ -52,6 +52,12 @@
     <Compile Include="Controls\HexEditor.designer.cs">
       <DependentUpon>HexEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\ImagePreviewControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\ImagePreviewControl.Designer.cs">
+      <DependentUpon>ImagePreviewControl.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\N64DataElementVisualizer.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -102,6 +108,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\HexNumericUpDown.resx">
       <DependentUpon>HexNumericUpDown.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\ImagePreviewControl.resx">
+      <DependentUpon>ImagePreviewControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\N64DataElementVisualizer.resx">
       <DependentUpon>N64DataElementVisualizer.cs</DependentUpon>

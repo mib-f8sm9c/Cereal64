@@ -18,9 +18,30 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
         //Any other information stored by the F3DEX_G_XXXXXX commands needs to be stored in here!!
 
-        public Bitmap Image { get; private set; }
+        public Bitmap Image
+        {
+            get
+            {
+                //Create the bitmap only when it needs to be created, to save on memory
+                if (_imageNeedsUpdating)
+                {
+                    Image = GenerateImage();
+                }
+
+                return _image;
+            }
+            private set //Only use post-calculation of image, please
+            {
+                _image = value;
+                ValidImage = (_image != null);
+                _imageNeedsUpdating = false;
+            }
+        }
+        private Bitmap _image;
 
         public bool ValidImage { get; private set; }
+
+        private bool _imageNeedsUpdating = true;
 
         public F3DEXImage(Texture texture)
             : this(texture, new List<Palette>())
@@ -58,7 +79,8 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         public void UpdateImage()
         {
             ValidImage = false;
-            Image = null;
+            _image = null;
+            _imageNeedsUpdating = true;
 
             if (BasePalettes.Count == 0)
                 WorkingPalette = null;
@@ -72,10 +94,102 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     Array.Copy(p.RawData, 0, newPaletteInfo, offset, p.RawDataSize);
                     offset += p.RawDataSize;
                 }
+
+                WorkingPalette = new Palette(-1, newPaletteInfo);
             }
 
             //Create the new image from the texture/working palette combo
-            Image = GenerateImage();
+            //Image = GenerateImage();
+            //ValidImage = (Image != null);
+
+            ValidImage = CheckImageValidity();
+        }
+
+        private bool CheckImageValidity()
+        {
+            if (Texture == null || (Texture.Format == DataElements.Texture.ImageFormat.CI && WorkingPalette == null))
+                return false;
+
+            //Check texture size
+            double multiplier = 1;
+            switch(Texture.PixelSize)
+            {
+                case DataElements.Texture.PixelInfo.Size_4b:
+                    multiplier = 0.5;
+                    break;
+                case DataElements.Texture.PixelInfo.Size_16b:
+                    multiplier = 2;
+                    break;
+                case DataElements.Texture.PixelInfo.Size_32b:
+                    multiplier = 4;
+                    break;
+            }
+            int dataCount = (int)Math.Round(Texture.RawDataSize / multiplier);
+
+            if(dataCount != Texture.Width * Texture.Height)
+                return false;
+
+            //Test pixel size & format compatibility
+            switch (Texture.Format)
+            {
+                case Texture.ImageFormat.RGBA:
+                    switch (Texture.PixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_32b:
+                            return true;
+
+                    }
+                    break;
+                case Texture.ImageFormat.YUV:
+                    switch (Texture.PixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return false;
+                            //return TextureConversion.BinaryToYUV16(bytes, Width, Height);
+                    }
+                    break;
+                case Texture.ImageFormat.CI:
+                    switch (Texture.PixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_8b:
+                            return true;
+
+                    }
+                    break;
+                case Texture.ImageFormat.IA:
+                    switch (Texture.PixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_8b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_16b:
+                            return true;
+
+                    }
+                    break;
+                case Texture.ImageFormat.I:
+                    switch (Texture.PixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return true;
+
+                        case Texture.PixelInfo.Size_8b:
+                            return true;
+
+                    }
+                    break;
+            }
+
+            return false;
         }
 
         private Bitmap GenerateImage()

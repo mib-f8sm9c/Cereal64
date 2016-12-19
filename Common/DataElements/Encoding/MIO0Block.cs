@@ -131,5 +131,9 @@ namespace Cereal64.Common.DataElements.Encoding
             get { return MIO0.MIO0Header.Size + LayoutBytes.Length + CompressedBytes.Length + UncompressedBytes.Length; }
         }
 
+        public override string ToString()
+        {
+            return "0x" + FileOffset.ToString("X");
+        }
     }
 }

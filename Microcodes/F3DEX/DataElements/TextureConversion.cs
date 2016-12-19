@@ -89,6 +89,154 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
         #region RGBA
 
+        public static Bitmap BinaryToImage(Texture.ImageFormat format, Texture.PixelInfo pixelSize, byte[] imgData, int width, int height,
+            Palette palette = null, int paletteIndex = 0)
+        {
+            if (!IsValidFormatCombo(format, pixelSize))
+                return null;
+
+            if (format == Texture.ImageFormat.CI && palette == null)
+                return null;
+
+            if (imgData == null)
+                return null;
+
+            switch (format)
+            {
+                case Texture.ImageFormat.RGBA:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return TextureConversion.BinaryToRGBA16(imgData, width, height);
+
+                        case Texture.PixelInfo.Size_32b:
+                            return TextureConversion.BinaryToRGBA32(imgData, width, height);
+
+                    }
+                    break;
+                case Texture.ImageFormat.YUV:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return null;
+                            //return TextureConversion.BinaryToYUV16(bytes, Width, Height);
+                    }
+                    break;
+                case Texture.ImageFormat.CI:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.BinaryToCI4(imgData, palette, paletteIndex, width, height);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.BinaryToCI8(imgData, palette, paletteIndex, width, height);
+
+                    }
+                    break;
+                case Texture.ImageFormat.IA:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.BinaryToIA4(imgData, width, height);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.BinaryToIA8(imgData, width, height);
+
+                        case Texture.PixelInfo.Size_16b:
+                            return TextureConversion.BinaryToIA16(imgData, width, height);
+
+                    }
+                    break;
+                case Texture.ImageFormat.I:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.BinaryToI4(imgData, width, height);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.BinaryToI8(imgData, width, height);
+
+                    }
+                    break;
+            }
+
+            return null;
+        }
+
+        //UNFINISHED!!!
+        public static byte[] ImageToBinary(Texture.ImageFormat format, Texture.PixelInfo pixelSize, Bitmap image)
+        {
+            if (!IsValidFormatCombo(format, pixelSize))
+                return null;
+
+            if (format == Texture.ImageFormat.CI)
+                return null;
+
+            if (image == null)
+                return null;
+
+            switch (format)
+            {
+                case Texture.ImageFormat.RGBA:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return TextureConversion.RGBA16ToBinary(image);
+
+                        case Texture.PixelInfo.Size_32b:
+                            return TextureConversion.RGBA32ToBinary(image);
+
+                    }
+                    break;
+                case Texture.ImageFormat.YUV:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return null;
+                        //return TextureConversion.BinaryToYUV16(bytes, Width, Height);
+                    }
+                    break;
+                //case Texture.ImageFormat.CI:
+                //    switch (pixelSize)
+                //    {
+                //        case Texture.PixelInfo.Size_4b:
+                //            return TextureConversion.BinaryToCI4(imgData, palette, paletteIndex, width, height);
+
+                //        case Texture.PixelInfo.Size_8b:
+                //            return TextureConversion.BinaryToCI8(imgData, palette, paletteIndex, width, height);
+
+                //    }
+                //    break;
+                case Texture.ImageFormat.IA:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.IA4ToBinary(image);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.IA8ToBinary(image);
+
+                        case Texture.PixelInfo.Size_16b:
+                            return TextureConversion.IA16ToBinary(image);
+
+                    }
+                    break;
+                case Texture.ImageFormat.I:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.I4ToBinary(image);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.I8ToBinary(image);
+
+                    }
+                    break;
+            }
+
+            return null;
+        }
+
         public static Bitmap BinaryToRGBA16(byte[] imgData, int width, int height)
         {
             //Pixel size is 2 bytes
@@ -113,6 +261,8 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     bmp.SetPixel(i, j, Color.FromArgb(A, R, G, B));
                 }
             }
+
+            bmp.Save("test.png");
 
             return bmp;
         }
@@ -471,11 +621,11 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
             Bitmap bmp = new Bitmap(width, height);
 
-            for (int i = 0; i < width; i += 2)
+            for (int j = 0; j < height; j++)
             {
-                for (int j = 0; j < height; j++)
+                for (int i = 0; i < width; i += 2)
                 {
-                    int index = (i + j * width);
+                    int index = (i + j * width) / 2;
 
                     byte byt = ByteHelper.ReadByte(imgData, index);
                     byte halfB1 = (byte)(byt >> 4);
@@ -504,9 +654,9 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
             byte[] imgData = new byte[bmp.Width * bmp.Height / 2];
 
-            for (int i = 0; i < bmp.Width; i += 2)
+            for (int j = 0; j < bmp.Height; j++)
             {
-                for (int j = 0; j < bmp.Height; j++)
+                for (int i = 0; i < bmp.Width; i += 2)
                 {
                     int index = (i + j * bmp.Width) / 2;
 
