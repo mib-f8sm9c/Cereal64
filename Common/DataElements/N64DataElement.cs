@@ -38,7 +38,12 @@ namespace Cereal64.Common.DataElements
             length = int.Parse(att.Value);
 
             rawData = new byte[length];
-            Array.Copy(fileData, offset, rawData, 0, length);
+
+            //if the data passed in is the same length as the needed data, then we can assume the actual data was passed in!
+            if (fileData.Length == length)
+                Array.Copy(fileData, 0, rawData, 0, length);
+            else
+                Array.Copy(fileData, offset, rawData, 0, length);
 
             //Copy of constructor
             FileOffset = offset;

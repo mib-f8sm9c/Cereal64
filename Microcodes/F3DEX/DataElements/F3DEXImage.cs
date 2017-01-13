@@ -3,11 +3,22 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Drawing;
+using System.Xml.Linq;
+using Cereal64.Common;
 
 namespace Cereal64.Microcodes.F3DEX.DataElements
 {
-    public class F3DEXImage
+    public class F3DEXImage : IXMLSerializable
     {
+        public const string F3DEXIMAGE = "F3DEXImage";
+        private const string TEXTURE = "Texture";
+        private const string TEXTURE_DATA = "TextureData";
+        private const string PALETTES = "Palettes";
+        private const string PALETTE = "Palette";
+        private const string PALETTE_DATA = "PaletteData";
+        private const string PALETTE_OFFSET = "PaletteOffset";
+        private const string EXISTING_PALETTE = "ExistingPalette";
+
         public Texture Texture { get; private set; }
 
         public List<Palette> BasePalettes { get; private set; }
@@ -55,15 +66,75 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
         public F3DEXImage(Texture texture, IList<Palette> palettes)
         {
+            SetupImage(texture, palettes, 0);
+        }
+
+        public F3DEXImage(XElement xml)
+        {
+            XElement textureXml = xml.Element(TEXTURE);
+            XElement palettesXml = xml.Element(PALETTES);
+
+            Texture texture = null;
+            List<Palette> palettes = new List<Palette>();
+
+            byte[] textureData = Convert.FromBase64String(textureXml.Attribute(TEXTURE_DATA).Value.ToString());
+            texture = new Texture(textureXml.Element(typeof(Texture).ToString()), textureData);
+
+            foreach (XElement paletteXml in palettesXml.Elements())
+            {
+                byte[] paletteData = Convert.FromBase64String(paletteXml.Attribute(PALETTE_DATA).Value.ToString());
+                Palette palette = new Palette(paletteXml.Element(typeof(Palette).ToString()), paletteData);
+                palettes.Add(palette);
+            }
+
+            int paletteOffset = int.Parse(palettesXml.Attribute(PALETTE_OFFSET).Value.ToString());
+
+            SetupImage(texture, palettes, paletteOffset);
+        }
+
+        public F3DEXImage(XElement xml, Palette existingPalette)
+        {
+            //Specialized constructor for MK64 to help reduce filesize on repeated palettes
+
+            XElement textureXml = xml.Element(TEXTURE);
+            XElement palettesXml = xml.Element(PALETTES);
+
+            Texture texture = null;
+            List<Palette> palettes = new List<Palette>();
+
+            byte[] textureData = Convert.FromBase64String(textureXml.Attribute(TEXTURE_DATA).Value.ToString());
+            texture = new Texture(textureXml.Element(typeof(Texture).ToString()), textureData);
+
+            foreach (XElement paletteXml in palettesXml.Elements())
+            {
+                if (paletteXml.Name.ToString() == EXISTING_PALETTE)
+                {
+                    palettes.Add(existingPalette);
+                }
+                else
+                {
+                    byte[] paletteData = Convert.FromBase64String(paletteXml.Attribute(PALETTE_DATA).Value.ToString());
+                    Palette palette = new Palette(paletteXml.Element(typeof(Palette).ToString()), paletteData);
+                    palettes.Add(palette);
+                }
+            }
+
+            int paletteOffset = int.Parse(palettesXml.Attribute(PALETTE_OFFSET).Value.ToString());
+
+            SetupImage(texture, palettes, paletteOffset);
+        }
+
+        private void SetupImage(Texture texture, IList<Palette> palettes, int paletteOffset)
+        {
             Texture = texture;
             BasePalettes = new List<Palette>();
             foreach (Palette palette in palettes)
             {
                 BasePalettes.Add(palette);
-                palette.Updated -= ImageInfoUpdated;
+                palette.Updated += ImageInfoUpdated;
             }
 
-            PaletteOffset = 0;
+            PaletteOffset = paletteOffset;
 
             texture.Updated += ImageInfoUpdated;
 
@@ -258,6 +329,48 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
             return null;
         }
-        
+
+        public XElement GetAsXML()
+        {
+            return this.GetAsXML(null);
+        }
+
+        public XElement GetAsXML(Palette existingPalette)
+        {
+            //Specialized function for MK64, exclude the existing palette data when writing data out
+            // to the xml.
+
+            //Add the texture xml and each palette xml
+            XElement xml = new XElement(F3DEXIMAGE);
+
+            XElement textureXml = new XElement(TEXTURE);
+            textureXml.Add(new XAttribute(TEXTURE_DATA, Convert.ToBase64String(Texture.RawData)));
+            textureXml.Add(Texture.GetAsXML());
+
+            xml.Add(textureXml);
+
+            XElement palettesXML = new XElement(PALETTES);
+
+            foreach (Palette palette in BasePalettes)
+            {
+                if (palette == existingPalette) //existing palette is defined elsewhere, so just use that
+                {
+                    palettesXML.Add(new XElement(EXISTING_PALETTE));
+                }
+                else
+                {
+                    XElement paletteXML = new XElement(PALETTE);
+                    paletteXML.Add(new XAttribute(PALETTE_DATA, Convert.ToBase64String(palette.RawData)));
+                    paletteXML.Add(palette.GetAsXML());
+
+                    palettesXML.Add(paletteXML);
+                }
+            }
+
+            palettesXML.Add(new XAttribute(PALETTE_OFFSET, PaletteOffset));
+            xml.Add(palettesXML);
+
+            return xml;
+        }
     }
 }

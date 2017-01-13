@@ -203,7 +203,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                     int index1 = -1;
                     byte closestIndex = 0;
                     double closestDist = double.MaxValue;
-                    for (byte p = 0; p < paletteIDs.Length; p++)
+                    for (int p = 0; p < paletteIDs.Length; p++)
                     {
                         if (paletteIDs[p] == pixelID)
                         {
@@ -218,7 +218,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                             if (dist < closestDist)
                             {
                                 closestDist = dist;
-                                closestIndex = p;
+                                closestIndex = (byte)p;
                             }
                         }
                     }
@@ -231,7 +231,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                     int index2 = -1;
                     closestIndex = 0;
                     closestDist = double.MaxValue;
-                    for (byte p = 0; p < paletteIDs.Length; p++)
+                    for (int p = 0; p < paletteIDs.Length; p++)
                     {
                         
                         if (paletteIDs[p] == pixelID)
@@ -247,7 +247,7 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                             if (dist < closestDist)
                             {
                                 closestDist = dist;
-                                closestIndex = p;
+                                closestIndex = (byte)p;
                             }
                         }
                     }
@@ -315,11 +315,11 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
                     int pixelID = pixel.ToArgb();
 
                     byte palIndex = 0x00;
-                    for (byte p = 0; p < paletteIDs.Length; p++)
+                    for (int p = 0; p < paletteIDs.Length; p++)
                     {
                         if (paletteIDs[p] == pixelID)
                         {
-                            palIndex = p;
+                            palIndex = (byte)p;
                             break;
                         }
                     }
