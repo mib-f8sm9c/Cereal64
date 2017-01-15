@@ -296,12 +296,13 @@ namespace Cereal64.Microcodes.F3DZEX
 
                     RomFile file;
                     int offset;
+                    N64DataElement element;
                     if(RomProject.Instance.FindRamOffset(vtx.VertexSourceAddress, out file, out offset))
                     {
-                        if (file.GetElementAt(offset) is VertexCollection)
+                        if (file.HasElementAt(offset, out element) && element is VertexCollection)
                         {
                             //Just update the reference buffer
-                            VertexCollection collection = (VertexCollection)file.GetElementAt(offset);
+                            VertexCollection collection = (VertexCollection)element;
 
                             if(vtx.VertexCount > 0)
                             {

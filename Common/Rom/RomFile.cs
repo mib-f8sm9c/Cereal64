@@ -185,19 +185,14 @@ namespace Cereal64.Common.Rom
             return true;
         }
 
-        public bool HasElementExactlyAt(int offset)
+        public bool HasElementExactlyAt(int offset, out N64DataElement element)
         {
-            return _elements.HasElementExactlyAt(offset);
+            return _elements.GetElementExactlyAt(offset, out  element);
         }
 
-        public bool HasElementAt(int offset)
+        public bool HasElementAt(int offset, out N64DataElement element)
         {
-            return _elements.GetElementAt(offset) != null;
-        }
-
-        public N64DataElement GetElementAt(int offset)
-        {
-            return _elements.GetElementAt(offset);
+            return _elements.GetElementAt(offset, out element);
         }
 
         public byte[] GetAsBytes()
@@ -295,9 +290,9 @@ namespace Cereal64.Common.Rom
             if (newFileSize <= FileLength)
                 return false;
 
-            N64DataElement lastElement = GetElementAt(FileLength - 1);
-            if (lastElement == null)
-                return false;
+            //N64DataElement lastElement = GetElementAt(FileLength - 1);
+            //if (lastElement == null)
+            //    return false;
 
             //Create a new UnknownData element
             byte[] newBytes =  new byte[newFileSize - FileLength];

@@ -5,6 +5,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using System.ComponentModel;
+using Cereal64.Common.Utils;
 
 namespace Cereal64.Common.DataElements
 {
@@ -20,7 +21,7 @@ namespace Cereal64.Common.DataElements
     {
         private const string LOCKED = "Locked";
 
-        private List<byte> _rawData;
+        private ShrinkingList<byte> _rawData;
 
         [CategoryAttribute("Element Settings"),
         DescriptionAttribute("When locked, known data found inside the UnknownData may not extract itself as a new N64Element")]
@@ -47,11 +48,29 @@ namespace Cereal64.Common.DataElements
             }
             set
             {
-                _rawData = value.ToList();
+                _rawData = new ShrinkingList<byte>(value);
             }
         }
 
         public override int RawDataSize { get { return _rawData.Count; } }
+
+        public bool TruncateData(int startIndexToKeep, int lengthToKeep)
+        {
+            if (startIndexToKeep < 0 || lengthToKeep <= 0 || startIndexToKeep + lengthToKeep > _rawData.Count)
+            {
+                return false;
+            }
+
+            int removeAtBeginningCount = startIndexToKeep;
+            int removeAtEndCount = _rawData.Count - (startIndexToKeep + lengthToKeep);
+
+            _rawData.RemoveFromStart(removeAtBeginningCount);
+            _rawData.RemoveFromEnd(removeAtEndCount);
+
+            FileOffset += removeAtBeginningCount;
+
+            return true;
+        }
 
         public override TreeNode GetAsTreeNode()
         {

@@ -101,6 +101,7 @@
     <Compile Include="Rom\RomFile.cs" />
     <Compile Include="DataElements\UnknownData.cs" />
     <Compile Include="Utils\QFixedPoint.cs" />
+    <Compile Include="Utils\ShrinkingList.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Controls\HexEditor.resx">

@@ -24,12 +24,7 @@ namespace Cereal64.Common.DataElements
 
         public bool RemoveElement(N64DataElement element)
         {
-            if (!Elements.Contains(element))
-                return false;
-
-            Elements.Remove(element);
-
-            return true;
+            return Elements.Remove(element);
         }
 
         public TreeNode GetAsTreeNode()
