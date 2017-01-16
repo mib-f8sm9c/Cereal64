@@ -32,24 +32,61 @@ namespace Cereal64.Common.DataElements
             _elements = new List<N64DataElement>();
         }
 
-        public bool HasElement(N64DataElement element)
-        {
-            return _elements.Exists(e => e == element);
-        }
-
         public int GetIndexOfElement(N64DataElement element)
         {
             return _elements.IndexOf(element);
         }
 
-        public bool HasElementExactlyAt(int offset)
+        public bool GetElementExactlyAt(int offset, out N64DataElement element)
         {
-            return _elements.Exists(e => e.FileOffset == offset);
+            element = SearchForOffset(offset, true);
+            return element != null;
         }
 
-        public N64DataElement GetElementAt(int offset)
+        public bool GetElementAt(int offset, out N64DataElement element)
         {
-            return _elements.SingleOrDefault(e => e.ContainsOffset(offset));
+            element = SearchForOffset(offset, false);
+            return element != null;
+        }
+
+        private N64DataElement SearchForOffset(int offset, bool exactMatch)
+        {
+            if (offset < 0)
+                return null;
+
+            if (offset > _elements.Last().RawDataSize + _elements.Last().FileOffset)
+                return null;
+
+            //Binary search, to speed up the process (thanks mom!)
+            int start = 0;
+            int end = _elements.Count - 1;
+
+            //WARNING: THIS WILL BREAK IF THE OBJECT SPANS MULTIPLE OBJECTS AND LANDS ON THE LATTER OBJECTS!!! FIX THIS PLEASE!!
+
+            while (start <= end)
+            {
+                int mid = (start + end) / 2;
+
+                if (_elements[mid].FileOffset > offset)
+                {
+                    end = mid - 1;
+                    continue;
+                }
+                if (_elements[mid].FileOffset + _elements[mid].RawDataSize - 1 < offset)
+                {
+                    start = mid + 1;
+                    continue;
+                }
+                if (_elements[mid].ContainsOffset(offset))
+                {
+                    if (exactMatch && _elements[mid].FileOffset != offset)
+                        return null;
+
+                    return _elements[mid];
+                }
+            }
+
+            return null;
         }
 
         public bool AddElement(N64DataElement element, bool overwriteUnknownData = true)
@@ -64,17 +101,31 @@ namespace Cereal64.Common.DataElements
             int indexToAdd = 0;
             bool insideElement = false;
 
-            for (; indexToAdd < _elements.Count; indexToAdd++)
+            //Binary search, to speed up the process (thanks mom!)
+            int start = 0;
+            int end = _elements.Count - 1;
+
+            while (start <= end)
             {
-                if (endOffset < _elements[indexToAdd].FileOffset)
+                int mid = (start + end) / 2;
+
+                if (_elements[mid].FileOffset > endOffset)
                 {
-                    //Found where to insert the new element
-                    break;
+                    indexToAdd = mid - 1;
+                    end = indexToAdd;
+                    continue;
                 }
-                else if (_elements[indexToAdd].ContainsOffset(startOffset) ||
-                    _elements[indexToAdd].ContainsOffset(endOffset) ||
-                    element.ContainsOffset(_elements[indexToAdd].FileOffset))
+                if (_elements[mid].FileOffset + _elements[mid].RawDataSize - 1 < startOffset)
                 {
+                    indexToAdd = mid + 1;
+                    start = indexToAdd;
+                    continue;
+                }
+                if (_elements[mid].ContainsOffset(startOffset) ||
+                    _elements[mid].ContainsOffset(endOffset) ||
+                    element.ContainsOffset(_elements[mid].FileOffset))
+                {
+                    indexToAdd = mid;
                     insideElement = true;
                     break;
                 }
@@ -88,6 +139,7 @@ namespace Cereal64.Common.DataElements
                 {
                     //Step one: determine how many elements this new one spans
                     int endingIndex = indexToAdd;
+                    int startingIndex = indexToAdd;
                     for (; endingIndex < _elements.Count - 1; endingIndex++)
                     {
                         //If it doesn't run into this next data element, then it stops before it. Break out of the loop
@@ -96,7 +148,19 @@ namespace Cereal64.Common.DataElements
                             break;
 
                         //Only unlocked unknown data may be split
-                        if (!(_elements[endingIndex + 1] is UnknownData) || ((UnknownData)_elements[indexToAdd]).Locked)
+                        if (!(_elements[endingIndex + 1] is UnknownData) || ((UnknownData)_elements[endingIndex + 1]).Locked)
+                            return false;
+                    }
+
+                    for (; startingIndex > 0; startingIndex--)
+                    {
+                        //If it doesn't run into this next data element, then it stops before it. Break out of the loop
+                        if (!_elements[startingIndex - 1].ContainsOffset(startOffset) &&
+                            !element.ContainsOffset(_elements[startingIndex - 1].FileOffset + _elements[startingIndex - 1].RawDataSize - 1))
+                            break;
+
+                        //Only unlocked unknown data may be split
+                        if (!(_elements[startingIndex - 1] is UnknownData) || ((UnknownData)_elements[startingIndex - 1]).Locked)
                             return false;
                     }
 
@@ -104,50 +168,80 @@ namespace Cereal64.Common.DataElements
                     bool startUnknownLeftOver = false;
                     bool endUnknownLeftOver = false;
 
-                    if (_elements[indexToAdd].ContainsOffset(startOffset) &&
-                        _elements[indexToAdd].FileOffset != startOffset)
+                    if (_elements[startingIndex].ContainsOffset(startOffset) &&
+                        _elements[startingIndex].FileOffset != startOffset)
                         startUnknownLeftOver = true;
 
                     if (_elements[endingIndex].ContainsOffset(endOffset) &&
                         _elements[endingIndex].FileOffset + _elements[endingIndex].RawDataSize - 1 != endOffset)
                         endUnknownLeftOver = true;
 
-                    if (startUnknownLeftOver)
+                    //Splitting a single file in half here!
+                    if (startUnknownLeftOver && endUnknownLeftOver && startingIndex == endingIndex)
                     {
-                        byte[] unknownData = new byte[startOffset - _elements[indexToAdd].FileOffset];
-                        Array.Copy(_elements[indexToAdd].RawData, 0, unknownData, 0, unknownData.Length);
+                        //Determine which unknown data is bigger, then create the smaller one as a new UnknownData to 
+                        int firstUnknownStart = 0;
+                        int firstUnknownLength = startOffset - _elements[startingIndex].FileOffset;
+                        int secondUnknownStart = (endOffset + 1) - _elements[endingIndex].FileOffset;
+                        int secondUnknownLength = _elements[endingIndex].RawDataSize - secondUnknownStart;
 
-                        UnknownData newData = new UnknownData(_elements[indexToAdd].FileOffset, unknownData);
-                        _elements.Insert(indexToAdd, newData);
+                        UnknownData newUnknown;
+                        if (firstUnknownLength > secondUnknownLength)
+                        {
+                            byte[] unknownData = new byte[secondUnknownLength];
+                            Array.Copy(_elements[startingIndex].RawData, secondUnknownStart, unknownData, 0, secondUnknownLength);
+                            newUnknown = new UnknownData(_elements[startingIndex].FileOffset + secondUnknownStart, unknownData);
+                            _elements.Insert(startingIndex + 1, newUnknown);
 
-                        if (UnknownDataAdded != null)
-                            UnknownDataAdded(newData);
+                            _elements.Insert(startingIndex + 1, element);
 
-                        indexToAdd++;
-                        endingIndex++;
+                            ((UnknownData)_elements[startingIndex]).TruncateData(firstUnknownStart, firstUnknownLength);
+
+                            if (UnknownDataAdded != null)
+                                UnknownDataAdded(newUnknown);
+                        }
+                        else
+                        {
+                            byte[] unknownData = new byte[firstUnknownLength];
+                            Array.Copy(_elements[startingIndex].RawData, firstUnknownStart, unknownData, 0, firstUnknownLength);
+                            newUnknown = new UnknownData(_elements[startingIndex].FileOffset + firstUnknownStart, unknownData);
+
+                            ((UnknownData)_elements[startingIndex]).TruncateData(secondUnknownStart, secondUnknownLength);
+
+                            _elements.Insert(startingIndex, element);
+
+                            _elements.Insert(startingIndex, newUnknown);
+
+                            if (UnknownDataAdded != null)
+                                UnknownDataAdded(newUnknown);
+                        }
                     }
-
-                    if (endUnknownLeftOver)
+                    else
                     {
-                        byte[] unknownData = new byte[_elements[endingIndex].FileOffset + _elements[endingIndex].RawDataSize - (endOffset + 1)];
-                        Array.Copy(_elements[endingIndex].RawData, (endOffset + 1) - _elements[endingIndex].FileOffset, unknownData, 0, unknownData.Length);
+                        if (startUnknownLeftOver)
+                        {
+                            ((UnknownData)_elements[startingIndex]).TruncateData(0, startOffset - _elements[startingIndex].FileOffset);
+                            
+                            startingIndex++;
+                        }
+                        if (endUnknownLeftOver)
+                        {
+                            ((UnknownData)_elements[startingIndex]).TruncateData((endOffset + 1) - _elements[endingIndex].FileOffset, _elements[endingIndex].FileOffset + _elements[endingIndex].RawDataSize - (endOffset + 1));
+                            
+                            endingIndex--;
+                        }
 
-                        UnknownData newData = new UnknownData(endOffset + 1, unknownData);
-                        _elements.Insert(endingIndex + 1, newData);
+                        //Step 3: Remove the overlapping unknowns, insert the new data
+                        for (int i = 0; i <= endingIndex - startingIndex; i++)
+                        {
+                            if (UnknownDataRemoved != null)
+                                UnknownDataRemoved((UnknownData)_elements[startingIndex]);
 
-                        if (UnknownDataAdded != null)
-                            UnknownDataAdded(newData);
+                            _elements.RemoveAt(startingIndex);
+                        }
+
+                        _elements.Insert(startingIndex, element);
                     }
-
-                    //Step 3: Remove the overlapping unknowns, insert the new data
-                    for (int i = 0; i <= endingIndex - indexToAdd; i++)
-                    {
-                        if (UnknownDataRemoved != null)
-                            UnknownDataRemoved((UnknownData)_elements[indexToAdd]);
-
-                        _elements.RemoveAt(indexToAdd);
-                    }
-                    _elements.Insert(indexToAdd, element);
 
                     return true;
                 }
@@ -164,11 +258,7 @@ namespace Cereal64.Common.DataElements
 
         public bool RemoveElement(N64DataElement element)
         {
-            if (!HasElement(element))
-                return false;
-
-            _elements.Remove(element);
-            return true;
+            return _elements.Remove(element);
         }
 
         public void ClearElements()

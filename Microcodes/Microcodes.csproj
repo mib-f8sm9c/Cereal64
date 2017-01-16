@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -101,6 +102,7 @@
     <Compile Include="F3DEX\DataElements\Commands\F3DEXCommandFactory.cs" />
     <Compile Include="F3DEX\DataElements\Commands\F3DEXCommand.cs" />
     <Compile Include="F3DEX\DataElements\Commands\F3DEXTypeConverter.cs" />
+    <Compile Include="F3DEX\DataElements\F3DEXImage.cs" />
     <Compile Include="F3DEX\DataElements\ReversedVertex.cs" />
     <Compile Include="F3DEX\DataElements\F3DEXCommandCollection.cs" />
     <Compile Include="F3DEX\DataElements\Palette.cs" />

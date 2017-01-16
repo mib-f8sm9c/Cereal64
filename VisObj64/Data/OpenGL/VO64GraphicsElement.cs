@@ -76,9 +76,9 @@ namespace Cereal64.VisObj64.Data.OpenGL
         {
             if (_updatedTexture)
             {
-                if (_texture != null && _texture.Texture != null)
+                if (_texture != null && _texture.Image != null)
                 {
-                    BitmapData bmp_data = _texture.Texture.LockBits(new Rectangle(0, 0, _texture.Texture.Width, _texture.Texture.Height),
+                    BitmapData bmp_data = _texture.Image.LockBits(new Rectangle(0, 0, _texture.Image.Width, _texture.Image.Height),
                         ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
 
                     if (_textureID != 0)
@@ -98,7 +98,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
                     GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
-                    _texture.Texture.UnlockBits(bmp_data);
+                    _texture.Image.UnlockBits(bmp_data);
 
                     GL.BindTexture(TextureTarget.Texture2D, 0);
                     GL.Disable(EnableCap.Texture2D);

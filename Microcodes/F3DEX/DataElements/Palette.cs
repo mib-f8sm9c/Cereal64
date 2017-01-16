@@ -12,7 +12,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 {
     //Palettes are usually 16-bit RGBA values, either 16 or 256 of them
 
-    public class Palette : N64DataElement
+    public class Palette : N64DataElement, IUpdatable
     {
         [CategoryAttribute("Palette Settings"),
         ReadOnlyAttribute(true),
@@ -58,6 +58,10 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         }
 
         public override int RawDataSize { get { return 2 * Colors.Length; } }
+
+        public UpdateEvent Updated { get { return _updated; } set { _updated = value; } }
+
+        private UpdateEvent _updated = delegate { };
 
     }
 }

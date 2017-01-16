@@ -12,12 +12,12 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
     public class F3DEXTextureWrapper : IVO64Texture
     {
         //NOTE: THIS WILL ALL BREAK IF TEXTURE/COMMANDS ARE NULL
-        public Texture F3DTexture;
+        public F3DEXImage F3DImage;
         public F3DEX_G_SetTile SetTileCommand;
         public F3DEX_G_Texture TextureCommand;
 
-        public Bitmap Texture {
-            get { return (F3DTexture == null ? null : F3DTexture.Image); } 
+        public Bitmap Image {
+            get { return (F3DImage == null ? null : F3DImage.Image); } 
             set
             { //Finish this later
             //    byte[] rawData = TextureConversion.CI4ToBinary(value, F3DTexture.ImagePalette, F3DTexture.PaletteIndex, true);
@@ -94,9 +94,9 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
         private bool _updated = true;
         private VO64SimpleTexture _simpleTexture;
 
-        public F3DEXTextureWrapper(Texture texture, F3DEX_G_SetTile command, F3DEX_G_Texture textureCommand)
+        public F3DEXTextureWrapper(F3DEXImage image, F3DEX_G_SetTile command, F3DEX_G_Texture textureCommand)
         {
-            F3DTexture = texture;
+            F3DImage = image;
             SetTileCommand = command;
             TextureCommand = textureCommand;
         }
@@ -105,7 +105,7 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
         {
             if (_updated)
             {
-                _simpleTexture = new VO64SimpleTexture(Texture, WrapS, WrapT);
+                _simpleTexture = new VO64SimpleTexture(Image, WrapS, WrapT);
                 _updated = false;
             }
             return _simpleTexture;
@@ -161,9 +161,9 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
             get { return (float)TextureCommand.ScaleT / (float)ushort.MaxValue; }
         }
 
-        public int TexWidth { get { if(Texture == null) return 32; return Texture.Width; } }
+        public int TexWidth { get { if(Image == null) return 32; return Image.Width; } }
 
-        public int TexHeight { get { if(Texture == null) return 32; return Texture.Height; } }
+        public int TexHeight { get { if(Image == null) return 32; return Image.Height; } }
 
     }
 }

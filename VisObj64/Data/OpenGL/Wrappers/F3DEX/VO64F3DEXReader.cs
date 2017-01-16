@@ -18,7 +18,7 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
             VO64GraphicsCollection collection = new VO64GraphicsCollection();
             VO64GraphicsElement element = VO64GraphicsElement.CreateNewElement();
 
-            Texture lastTexture = null;
+            F3DEXImage lastImage = null;
             F3DEX_G_SetTile lastSetTile = null;
             F3DEX_G_Texture lastTextureCommand = null;
 
@@ -58,8 +58,8 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
                         break;
                     case F3DEXCommandID.F3DEX_G_TRI1:
 
-                        if (((F3DEX_G_Tri1)command).TextureReference != null &&
-                            lastTexture != ((F3DEX_G_Tri1)command).TextureReference)
+                        if (((F3DEX_G_Tri1)command).ImageReference != null &&
+                            lastImage != ((F3DEX_G_Tri1)command).ImageReference)
                         {
                             //save the element
                             if (!element.IsEmpty)
@@ -70,8 +70,8 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
                             vertices.Clear();
 
                             //Set the texture here
-                            lastTexture = ((F3DEX_G_Tri1)command).TextureReference;
-                            newTexture = new F3DEXTextureWrapper(lastTexture, lastSetTile, lastTextureCommand);
+                            lastImage = ((F3DEX_G_Tri1)command).ImageReference;
+                            newTexture = new F3DEXTextureWrapper(lastImage, lastSetTile, lastTextureCommand);
                             element.SetTexture(newTexture);
                         }
 
@@ -110,8 +110,8 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
                         break;
                     case F3DEXCommandID.F3DEX_G_TRI2:
 
-                        if (((F3DEX_G_Tri2)command).TextureReference != null &&
-                            lastTexture != ((F3DEX_G_Tri2)command).TextureReference)
+                        if (((F3DEX_G_Tri2)command).ImageReference != null &&
+                            lastImage != ((F3DEX_G_Tri2)command).ImageReference)
                         {
                             //save the element
                             if (!element.IsEmpty)
@@ -122,8 +122,8 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
                             vertices.Clear();
 
                             //Set the texture here
-                            lastTexture = ((F3DEX_G_Tri2)command).TextureReference;
-                            newTexture = F3DEXWrapperBank.GetTextureWrapper(lastTexture, lastSetTile, lastTextureCommand);
+                            lastImage = ((F3DEX_G_Tri2)command).ImageReference;
+                            newTexture = F3DEXWrapperBank.GetTextureWrapper(lastImage, lastSetTile, lastTextureCommand);
                             element.SetTexture(newTexture);
                         }
 

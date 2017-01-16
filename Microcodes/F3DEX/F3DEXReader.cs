@@ -29,7 +29,7 @@ namespace Cereal64.Microcodes.F3DEX
 
         private static int DefaultTextureTile = 0;
 
-        private static Texture _currentTexture;
+        private static F3DEXImage _currentImage;
 
         private static TMem TMEM;
 
@@ -46,7 +46,7 @@ namespace Cereal64.Microcodes.F3DEX
 
             foreach (F3DEXCommand command in commands)
             {
-                ParseCommand(command);
+                //ParseCommand(command);
             }
         }
 
@@ -57,7 +57,7 @@ namespace Cereal64.Microcodes.F3DEX
             _foundTextures.Clear();
             _foundVertices.Clear();
 
-            _currentTexture = null;
+            _currentImage = null;
 
             _vertexBuffer.Clear();
             for (int i = 0; i < 32; i++)
@@ -74,6 +74,8 @@ namespace Cereal64.Microcodes.F3DEX
             _lastLoadTLut = null;
         }
 
+        #region OLD BROKEN READING CODE
+        /*
         //public static 
         public static F3DEXReaderPackage ReadF3DEXAt(RomFile file, int offset)
         {
@@ -368,7 +370,7 @@ namespace Cereal64.Microcodes.F3DEX
                     if (TMEM.TileDescriptors[DefaultTextureTile].SettingsChanged)
                     {
                         //Try seeing if the texture has been loaded before
-                        if (!TryLoadExistingTexture(TMEM.TileDescriptors[DefaultTextureTile], out _currentTexture) &&
+                        if (!TryLoadExistingTexture(TMEM.TileDescriptors[DefaultTextureTile], out _currentImage) &&
                             TMEM.LoadedData.ContainsKey(TMEM.TileDescriptors[DefaultTextureTile].TMem))
                         {
                             LoadedTMemData tmemInfo = TMEM.LoadedData[TMEM.TileDescriptors[DefaultTextureTile].TMem];
@@ -392,15 +394,15 @@ namespace Cereal64.Microcodes.F3DEX
                             }
 
                             //Load up new Texture
-                            _currentTexture = ReadTextureFromTMem(TMEM.TileDescriptors[DefaultTextureTile], palette);
+                            _currentImage = ReadTextureFromTMem(TMEM.TileDescriptors[DefaultTextureTile], palette);
 
-                            if (_currentTexture != null)
+                            if (_currentImage != null)
                             {
                                 //Store in the found variables
                                 if (!_foundTextures.ContainsKey(tmemInfo.SourceFile))
                                     _foundTextures.Add(tmemInfo.SourceFile, new List<Texture>());
 
-                                _foundTextures[tmemInfo.SourceFile].Add(_currentTexture);
+                                _foundTextures[tmemInfo.SourceFile].Add(_currentImage);
 
                             }
                         }
@@ -409,7 +411,7 @@ namespace Cereal64.Microcodes.F3DEX
                     if (command.CommandID == F3DEXCommandID.F3DEX_G_TRI1)
                     {
                         F3DEX_G_Tri1 tri = (F3DEX_G_Tri1)command;
-                        tri.TextureReference = _currentTexture;
+                        tri.ImageReference = _currentImage;
 
                         tri.Vertex1Reference = _vertexBuffer[tri.Vertex1];
                         tri.Vertex2Reference = _vertexBuffer[tri.Vertex2];
@@ -418,7 +420,7 @@ namespace Cereal64.Microcodes.F3DEX
                     else if (command.CommandID == F3DEXCommandID.F3DEX_G_TRI2)
                     {
                         F3DEX_G_Tri2 tri = (F3DEX_G_Tri2)command;
-                        tri.TextureReference = _currentTexture;
+                        tri.ImageReference = _currentImage;
 
 
                         tri.Vertex1Reference = _vertexBuffer[tri.Vertex1];
@@ -442,8 +444,8 @@ namespace Cereal64.Microcodes.F3DEX
             {
                 texture = (TMEM.LoadedElements[TMEM.TileDescriptors[DefaultTextureTile].TMem] as Texture);
                 Palette newPalette;
-                if (TryLoadExistingPalette(out newPalette))
-                    texture.ImagePalette = newPalette;
+              //  if (TryLoadExistingPalette(out newPalette))
+             //       texture.ImagePalette = newPalette;
                 return true;
             }
 
@@ -564,6 +566,10 @@ namespace Cereal64.Microcodes.F3DEX
 
             return newTexture;
         }
+
+*/
+    #endregion
+
     }
 
     ///Helper classes to allow duplicate data to be removed

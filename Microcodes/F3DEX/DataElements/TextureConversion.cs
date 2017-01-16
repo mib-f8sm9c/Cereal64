@@ -74,18 +74,156 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             return false;
         }
 
-        //Functions to convert to faster algorithm:
-        //RGBA
-        //-All
-        //YUV
-        //CI
-        //-CI4
-        //!CI8ToBinary
-        //-BinaryToCI8
-        //IA
-        //-All
-        //I
-        //-All
+        public static Bitmap BinaryToImage(Texture.ImageFormat format, Texture.PixelInfo pixelSize, byte[] imgData, int width, int height,
+            Palette palette = null, int paletteIndex = 0)
+        {
+            if (!IsValidFormatCombo(format, pixelSize))
+                return null;
+
+            if (format == Texture.ImageFormat.CI && palette == null)
+                return null;
+
+            if (imgData == null)
+                return null;
+
+            switch (format)
+            {
+                case Texture.ImageFormat.RGBA:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return TextureConversion.BinaryToRGBA16(imgData, width, height);
+
+                        case Texture.PixelInfo.Size_32b:
+                            return TextureConversion.BinaryToRGBA32(imgData, width, height);
+
+                    }
+                    break;
+                case Texture.ImageFormat.YUV:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return null;
+                        //return TextureConversion.BinaryToYUV16(bytes, Width, Height);
+                    }
+                    break;
+                case Texture.ImageFormat.CI:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.BinaryToCI4(imgData, palette, paletteIndex, width, height);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.BinaryToCI8(imgData, palette, paletteIndex, width, height);
+
+                    }
+                    break;
+                case Texture.ImageFormat.IA:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.BinaryToIA4(imgData, width, height);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.BinaryToIA8(imgData, width, height);
+
+                        case Texture.PixelInfo.Size_16b:
+                            return TextureConversion.BinaryToIA16(imgData, width, height);
+
+                    }
+                    break;
+                case Texture.ImageFormat.I:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.BinaryToI4(imgData, width, height);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.BinaryToI8(imgData, width, height);
+
+                    }
+                    break;
+            }
+
+            return null;
+        }
+
+        public static byte[] ImageToBinary(Texture.ImageFormat format, Texture.PixelInfo pixelSize, Bitmap image)
+        {
+            Palette tempPalette = new Palette(-1, new byte[0x200]);
+            return ImageToBinary(format, pixelSize, image, ref tempPalette, true);
+        }
+
+        public static byte[] ImageToBinary(Texture.ImageFormat format, Texture.PixelInfo pixelSize, Bitmap image, ref Palette palette, bool createNewPalette = true)
+        {
+            if (!IsValidFormatCombo(format, pixelSize))
+                return null;
+
+            if (image == null)
+                return null;
+
+            switch (format)
+            {
+                case Texture.ImageFormat.RGBA:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return TextureConversion.RGBA16ToBinary(image);
+
+                        case Texture.PixelInfo.Size_32b:
+                            return TextureConversion.RGBA32ToBinary(image);
+
+                    }
+                    break;
+                case Texture.ImageFormat.YUV:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_16b:
+                            return null;
+                        //return TextureConversion.BinaryToYUV16(bytes, Width, Height);
+                    }
+                    break;
+                case Texture.ImageFormat.CI:
+                    int refPal = 0;
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.CI4ToBinary(image, palette, ref refPal, createNewPalette);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.CI8ToBinary(image, palette, ref refPal, createNewPalette);
+
+                    }
+                    break;
+                case Texture.ImageFormat.IA:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.IA4ToBinary(image);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.IA8ToBinary(image);
+
+                        case Texture.PixelInfo.Size_16b:
+                            return TextureConversion.IA16ToBinary(image);
+
+                    }
+                    break;
+                case Texture.ImageFormat.I:
+                    switch (pixelSize)
+                    {
+                        case Texture.PixelInfo.Size_4b:
+                            return TextureConversion.I4ToBinary(image);
+
+                        case Texture.PixelInfo.Size_8b:
+                            return TextureConversion.I8ToBinary(image);
+
+                    }
+                    break;
+            }
+
+            return null;
+        }
 
         #region RGBA
 
@@ -97,22 +235,31 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
-
-            for (int j = 0; j < height; j++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int i = 0; i < width; i++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int j = 0; j < height; j++)
                 {
-                    int index = (i + j * width) * 2;
-                    byte R, G, B, A;
+                    for (int i = 0; i < width; i++)
+                    {
+                        int index = (i + j * width) * 2;
+                        byte R, G, B, A;
 
-                    R = (byte)Math.Round(((((ushort)ByteHelper.ReadByte(imgData, index)) >> 3) & 0x1F) * 255.0 / 31.0);
-                    G = (byte)Math.Round(((((ushort)ByteHelper.ReadUShort(imgData, index)) >> 6) & 0x1F) * 255.0 / 31.0);
-                    B = (byte)Math.Round(((((ushort)ByteHelper.ReadByte(imgData, index + 1)) >> 1) & 0x1F) * 255.0 / 31.0);
-                    A = (byte)((ByteHelper.ReadByte(imgData, index + 1) & 0x01) * 0xFF);
+                        R = (byte)Math.Round(((((ushort)ByteHelper.ReadByte(imgData, index)) >> 3) & 0x1F) * 255.0 / 31.0);
+                        G = (byte)Math.Round(((((ushort)ByteHelper.ReadUShort(imgData, index)) >> 6) & 0x1F) * 255.0 / 31.0);
+                        B = (byte)Math.Round(((((ushort)ByteHelper.ReadByte(imgData, index + 1)) >> 1) & 0x1F) * 255.0 / 31.0);
+                        A = (byte)((ByteHelper.ReadByte(imgData, index + 1) & 0x01) * 0xFF);
 
-                    bmp.SetPixel(i, j, Color.FromArgb(A, R, G, B));
+                        ptr[(i * 4) + j * stride] = B;
+                        ptr[(i * 4) + j * stride + 1] = G;
+                        ptr[(i * 4) + j * stride + 2] = R;
+                        ptr[(i * 4) + j * stride + 3] = A;
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return bmp;
         }
@@ -120,33 +267,42 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         public static byte[] RGBA16ToBinary(Bitmap bmp)
         {
             //Pixel size is 2 bytes
-
             if (bmp == null)
                 return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height * 2];
-
-            for (int j = 0; j < bmp.Height; j++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int i = 0; i < bmp.Width; i++)
+                byte* ptr = (byte*)data.Scan0;
+
+                for (int j = 0; j < bmp.Height; j++)
                 {
-                    int index = (i + j * bmp.Width) * 2;
+                    for (int i = 0; i < bmp.Width; i++)
+                    {
+                        int index = (i + j * bmp.Width) * 2;
 
-                    Color pixel = bmp.GetPixel(i, j);
+                        Color pixel = Color.FromArgb((ptr[(i * 4) + j * stride]) |
+                                        (ptr[(i * 4) + j * stride + 1] << 8) |
+                                        (ptr[(i * 4) + j * stride + 2] << 16) |
+                                        (ptr[(i * 4) + j * stride + 3] << 24));
 
-                    byte byte1, byte2;
-                    byte R = (byte)Math.Round(pixel.R * 31.0 / 255.0);
-                    byte G = (byte)Math.Round(pixel.G * 31.0 / 255.0);
-                    byte B = (byte)Math.Round(pixel.B * 31.0 / 255.0);
-                    byte A = (byte)(pixel.A == 0x00 ? 0x00 : 0x01);
+                        byte byte1, byte2;
+                        byte R = (byte)Math.Round(pixel.R * 31.0 / 255.0);
+                        byte G = (byte)Math.Round(pixel.G * 31.0 / 255.0);
+                        byte B = (byte)Math.Round(pixel.B * 31.0 / 255.0);
+                        byte A = (byte)(pixel.A == 0x00 ? 0x00 : 0x01);
 
-                    byte1 = (byte)((R << 3) | (G >> 2));
-                    byte2 = (byte)((G << 6) | (B << 1) | (A));
+                        byte1 = (byte)((R << 3) | (G >> 2));
+                        byte2 = (byte)((G << 6) | (B << 1) | (A));
 
-                    ByteHelper.WriteByte(byte1, imgData, index);
-                    ByteHelper.WriteByte(byte2, imgData, index + 1);
+                        ByteHelper.WriteByte(byte1, imgData, index);
+                        ByteHelper.WriteByte(byte2, imgData, index + 1);
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return imgData;
         }
@@ -154,27 +310,35 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         public static Bitmap BinaryToRGBA32(byte[] imgData, int width, int height)
         {
             //Pixel size is 4 bytes
-
             if (width * height * 4 != imgData.Length)
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
-
-            for (int i = 0; i < width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < width; i++)
                 {
-                    int index = (i + j * width) * 4;
-                    byte R, G, B, A;
+                    for (int j = 0; j < height; j++)
+                    {
+                        int index = (i + j * width) * 4;
+                        byte R, G, B, A;
 
-                    R = ByteHelper.ReadByte(imgData, index);
-                    G = ByteHelper.ReadByte(imgData, index + 1);
-                    B = ByteHelper.ReadByte(imgData, index + 2);
-                    A = ByteHelper.ReadByte(imgData, index + 3);
-                    
-                    bmp.SetPixel(i, j, Color.FromArgb(A, R, G, B));
+                        R = ByteHelper.ReadByte(imgData, index);
+                        G = ByteHelper.ReadByte(imgData, index + 1);
+                        B = ByteHelper.ReadByte(imgData, index + 2);
+                        A = ByteHelper.ReadByte(imgData, index + 3);
+
+                        ptr[(i * 4) + j * stride] = B;
+                        ptr[(i * 4) + j * stride + 1] = G;
+                        ptr[(i * 4) + j * stride + 2] = R;
+                        ptr[(i * 4) + j * stride + 3] = A;
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return bmp;
         }
@@ -187,21 +351,30 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height * 4];
-
-            for (int i = 0; i < bmp.Width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < bmp.Height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < bmp.Width; i++)
                 {
-                    int index = (i + j * bmp.Width) * 4;
-                    
-                    Color pixel = bmp.GetPixel(i, j);
+                    for (int j = 0; j < bmp.Height; j++)
+                    {
+                        int index = (i + j * bmp.Width) * 4;
 
-                    ByteHelper.WriteByte(pixel.R, imgData, index);
-                    ByteHelper.WriteByte(pixel.G, imgData, index + 1);
-                    ByteHelper.WriteByte(pixel.B, imgData, index + 2);
-                    ByteHelper.WriteByte(pixel.A, imgData, index + 3);
+                        Color pixel = Color.FromArgb((ptr[(i * 4) + j * stride] |
+                                        (ptr[(i * 4) + j * stride + 1] << 8) |
+                                        (ptr[(i * 4) + j * stride + 2] << 16) |
+                                        (ptr[(i * 4) + j * stride + 3] << 24)));
+
+                        ByteHelper.WriteByte(pixel.R, imgData, index);
+                        ByteHelper.WriteByte(pixel.G, imgData, index + 1);
+                        ByteHelper.WriteByte(pixel.B, imgData, index + 2);
+                        ByteHelper.WriteByte(pixel.A, imgData, index + 3);
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return imgData;
         }
@@ -227,132 +400,158 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
             
             Bitmap bmp = new Bitmap(width, height);
-
-            for (int i = 0; i < width; i += 2)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < width; i += 2)
                 {
-                    int index = (i + j * width) / 2;
+                    for (int j = 0; j < height; j++)
+                    {
+                        int index = (i + j * width) / 2;
 
-                    byte CI = ByteHelper.ReadByte(imgData, index);
-                    byte CI1 = (byte)(CI >> 4);
-                    byte CI2 = (byte)(CI & 0x0F);
+                        byte CI = ByteHelper.ReadByte(imgData, index);
+                        byte CI1 = (byte)(CI >> 4);
+                        byte CI2 = (byte)(CI & 0x0F);
 
-                    int color1Index = CI1 + 16 * paletteIndex;
-                    if (color1Index >= palette.Colors.Length)
-                        color1Index = 0;
+                        int color1Index = CI1 + paletteIndex;
+                        if (color1Index >= palette.Colors.Length)
+                            color1Index = 0;
 
-                    int color2Index = CI2 + 16 * paletteIndex;
-                    if (color2Index >= palette.Colors.Length)
-                        color2Index = 0;
+                        int color2Index = CI2 + paletteIndex;
+                        if (color2Index >= palette.Colors.Length)
+                            color2Index = 0;
 
-                    bmp.SetPixel(i, j, palette.Colors[color1Index]);
-                    bmp.SetPixel(i + 1, j, palette.Colors[color2Index]);
+                        ptr[(i * 4) + j * stride] = palette.Colors[color1Index].B;
+                        ptr[(i * 4) + j * stride + 1] = palette.Colors[color1Index].G;
+                        ptr[(i * 4) + j * stride + 2] = palette.Colors[color1Index].R;
+                        ptr[(i * 4) + j * stride + 3] = palette.Colors[color1Index].A;
+                        
+                        ptr[((i + 1) * 4) + j * stride] = palette.Colors[color2Index].B;
+                        ptr[((i + 1) * 4) + j * stride + 1] = palette.Colors[color2Index].G;
+                        ptr[((i + 1) * 4) + j * stride + 2] = palette.Colors[color2Index].R;
+                        ptr[((i + 1) * 4) + j * stride + 3] = palette.Colors[color2Index].A;
 
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return bmp;
         }
 
-        public static byte[] CI4ToBinary(Bitmap bmp, Palette palette, int paletteIndex, bool generateNewPalette = false)
+        public static byte[] CI4ToBinary(Bitmap bmp, Palette palette, ref int paletteIndex, bool generateNewPalette = false)
         {
             //Pixel size is 1/2 bytes
             if (bmp == null)
                 return null;
 
-            if (palette == null || palette.Colors.Length < 1)
-                return null;
-
             if (generateNewPalette)
             {
-                GenerateNewPalette(palette, bmp, 16);
+                GenerateNewPalette(palette, bmp, palette.Colors.Length);
                 paletteIndex = 0;
             }
+
+            if (palette == null || palette.Colors.Length < 1)
+                return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height / 2];
 
             int[] paletteIDs = new int[palette.Colors.Length];
             for (int k = 0; k < palette.Colors.Length; k++)
             {
-                int colorIndex = k + 16 * paletteIndex;
+                int colorIndex = k + paletteIndex;
                 if (colorIndex > palette.Colors.Length)
                     colorIndex = 0;
 
                 paletteIDs[k] = palette.Colors[colorIndex].ToArgb();
             }
 
-            for (int i = 0; i < bmp.Width; i+=2)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < bmp.Height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < bmp.Width; i+=2)
                 {
-                    int index = (i + j * bmp.Width) / 2;
-
-                    Color pixel = bmp.GetPixel(i, j);
-                    int pixelID = pixel.ToArgb();
-
-                    int index1 = -1;
-                    byte closestIndex = 0;
-                    double closestDist = double.MaxValue;
-                    for (byte p = 0; p < paletteIDs.Length; p++)
+                    for (int j = 0; j < bmp.Height; j++)
                     {
-                        if (paletteIDs[p] == pixelID)
-                        {
-                            index1 = p;
-                            break;
-                        }
-                        else
-                        {
-                            //Get the dist to the color, and keep track of which is the best representation
-                            double dist = pixel.ColorDistanceFrom(palette.Colors[p + 16 * paletteIndex]);
+                        int index = (i + j * bmp.Width) / 2;
 
-                            if (dist < closestDist)
+                        int pixelID = ((ptr[(i * 4) + j * stride]) |
+                                        (ptr[(i * 4) + j * stride + 1] << 8) |
+                                        (ptr[(i * 4) + j * stride + 2] << 16) |
+                                        (ptr[(i * 4) + j * stride + 3] << 24));
+                        Color pixel = Color.FromArgb(pixelID);
+
+                        int index1 = -1;
+                        byte closestIndex = 0;
+                        double closestDist = double.MaxValue;
+                        for (int p = 0; p < paletteIDs.Length; p++)
+                        {
+                            if (paletteIDs[p] == pixelID)
                             {
-                                closestDist = dist;
-                                closestIndex = p;
+                                index1 = p;
+                                break;
+                            }
+                            else
+                            {
+                                //Get the dist to the color, and keep track of which is the best representation
+                                double dist = pixel.ColorDistanceFrom(palette.Colors[p + paletteIndex]);
+
+                                if (dist < closestDist)
+                                {
+                                    closestDist = dist;
+                                    closestIndex = (byte)p;
+                                }
                             }
                         }
-                    }
-                    if (index1 == -1)
-                        index1 = closestIndex;
+                        if (index1 == -1)
+                            index1 = closestIndex;
 
-                    pixel = bmp.GetPixel(i + 1, j);
-                    pixelID = pixel.ToArgb();
+                        pixelID = ((ptr[((i + 1) * 4) + j * stride]) |
+                                        (ptr[((i + 1) * 4) + j * stride + 1] << 8) |
+                                        (ptr[((i + 1) * 4) + j * stride + 2] << 16) |
+                                        (ptr[((i + 1) * 4) + j * stride + 3] << 24));
+                        pixel = Color.FromArgb(pixelID);
 
-                    int index2 = -1;
-                    closestIndex = 0;
-                    closestDist = double.MaxValue;
-                    for (byte p = 0; p < paletteIDs.Length; p++)
-                    {
+                        int index2 = -1;
+                        closestIndex = 0;
+                        closestDist = double.MaxValue;
+                        for (int p = 0; p < paletteIDs.Length; p++)
+                        {
                         
-                        if (paletteIDs[p] == pixelID)
-                        {
-                            index2 = p;
-                            break;
-                        }
-                        else
-                        {
-                            //Get the dist to the color, and keep track of which is the best representation
-                            double dist = pixel.ColorDistanceFrom(palette.Colors[p + 16 * paletteIndex]);
-
-                            if (dist < closestDist)
+                            if (paletteIDs[p] == pixelID)
                             {
-                                closestDist = dist;
-                                closestIndex = p;
+                                index2 = p;
+                                break;
+                            }
+                            else
+                            {
+                                //Get the dist to the color, and keep track of which is the best representation
+                                double dist = pixel.ColorDistanceFrom(palette.Colors[p + paletteIndex]);
+
+                                if (dist < closestDist)
+                                {
+                                    closestDist = dist;
+                                    closestIndex = (byte)p;
+                                }
                             }
                         }
-                    }
-                    if (index2 == -1)
-                        index2 = closestIndex;
+                        if (index2 == -1)
+                            index2 = closestIndex;
 
-                    ByteHelper.WriteByte((byte)((index1 << 4) | index2), imgData, index);
+                        ByteHelper.WriteByte((byte)((index1 << 4) | index2), imgData, index);
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return imgData;
         }
 
-        public static Bitmap BinaryToCI8(byte[] imgData, Palette palette, int width, int height)
+        public static Bitmap BinaryToCI8(byte[] imgData, Palette palette, int paletteIndex, int width, int height)
         {
             //Pixel size is 1 byte
             if (width * height != imgData.Length)
@@ -367,7 +566,6 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             int stride = data.Stride;
             unsafe
             {
-                
                 byte* ptr = (byte*)data.Scan0;
                 for (int j = 0; j < height; j++)
                 {
@@ -392,12 +590,17 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             return bmp;
         }
 
-        public static byte[] CI8ToBinary(Bitmap bmp, Palette palette)
+        public static byte[] CI8ToBinary(Bitmap bmp, Palette palette, ref int paletteIndex, bool generateNewPalette = false)
         {
             //Pixel size is 1 byte
-
             if (bmp == null)
                 return null;
+
+            if (generateNewPalette)
+            {
+                GenerateNewPalette(palette, bmp, palette.Colors.Length);
+                paletteIndex = 0;
+            }
 
             if (palette == null || palette.Colors.Length < 1)
                 return null;
@@ -410,48 +613,58 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 paletteIDs[k] = palette.Colors[k].ToArgb();
             }
 
-            for (int i = 0; i < bmp.Width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < bmp.Height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < bmp.Width; i++)
                 {
-                    int index = i + j * bmp.Width;
-
-                    Color pixel = bmp.GetPixel(i, j);
-                    int pixelID = pixel.ToArgb();
-
-                    byte palIndex = 0x00;
-                    bool foundExactMatch = false;
-
-                    double closestDist = double.MaxValue;
-                    byte closestIndex = 0;
-
-                    for (byte p = 0; p < paletteIDs.Length; p++)
+                    for (int j = 0; j < bmp.Height; j++)
                     {
-                        if (paletteIDs[p] == pixelID)
-                        {
-                            palIndex = p;
-                            foundExactMatch = true;
-                            break;
-                        }
-                        else
-                        {
-                            //Get the dist to the color, and keep track of which is the best representation
-                            double dist = pixel.ColorDistanceFrom(palette.Colors[p]);
+                        int index = i + j * bmp.Width;
 
-                            if (dist < closestDist)
+                        int pixelID = ((ptr[(i * 4) + j * stride]) |
+                                        (ptr[(i * 4) + j * stride + 1] << 8) |
+                                        (ptr[(i * 4) + j * stride + 2] << 16) |
+                                        (ptr[(i * 4) + j * stride + 3] << 24));
+                        Color pixel = Color.FromArgb(pixelID);
+
+                        byte palIndex = 0x00;
+                        bool foundExactMatch = false;
+
+                        double closestDist = double.MaxValue;
+                        byte closestIndex = 0;
+
+                        for (int p = 0; p < paletteIDs.Length; p++)
+                        {
+                            if (paletteIDs[p] == pixelID)
                             {
-                                closestDist = dist;
-                                closestIndex = p;
+                                palIndex = (byte)p;
+                                foundExactMatch = true;
+                                break;
+                            }
+                            else
+                            {
+                                //Get the dist to the color, and keep track of which is the best representation
+                                double dist = pixel.ColorDistanceFrom(palette.Colors[p]);
+
+                                if (dist < closestDist)
+                                {
+                                    closestDist = dist;
+                                    closestIndex = (byte)p;
+                                }
                             }
                         }
-                    }
 
-                    if(foundExactMatch)
-                        ByteHelper.WriteByte(palIndex, imgData, index);
-                    else
-                        ByteHelper.WriteByte(closestIndex, imgData, index);
+                        if (foundExactMatch)
+                            ByteHelper.WriteByte(palIndex, imgData, index);
+                        else
+                            ByteHelper.WriteByte(closestIndex, imgData, index);
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return imgData;
         }
@@ -470,27 +683,39 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
-
-            for (int i = 0; i < width; i += 2)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
+                byte* ptr = (byte*)data.Scan0;
                 for (int j = 0; j < height; j++)
                 {
-                    int index = (i + j * width);
+                    for (int i = 0; i < width; i += 2)
+                    {
+                        int index = (i + j * width) / 2;
 
-                    byte byt = ByteHelper.ReadByte(imgData, index);
-                    byte halfB1 = (byte)(byt >> 4);
-                    byte halfB2 = (byte)(byt & 0x0F);
+                        byte byt = ByteHelper.ReadByte(imgData, index);
+                        byte halfB1 = (byte)(byt >> 4);
+                        byte halfB2 = (byte)(byt & 0x0F);
 
-                    byte C1 = (byte)Math.Round((halfB1 >> 1) * 255.0 / 7.0);
-                    byte A1 = (byte)Math.Round((halfB1 & 0x01) * 255.0);
-                    byte C2 = (byte)Math.Round((halfB2 >> 1) * 255.0 / 7.0);
-                    byte A2 = (byte)Math.Round((halfB2 & 0x01) * 255.0);
+                        byte C1 = (byte)Math.Round((halfB1 >> 1) * 255.0 / 7.0);
+                        byte A1 = (byte)Math.Round((halfB1 & 0x01) * 255.0);
+                        byte C2 = (byte)Math.Round((halfB2 >> 1) * 255.0 / 7.0);
+                        byte A2 = (byte)Math.Round((halfB2 & 0x01) * 255.0);
 
-                    bmp.SetPixel(i, j, Color.FromArgb(A1, C1, C1, C1));
-                    bmp.SetPixel(i, j, Color.FromArgb(A2, C2, C2, C2));
+                        ptr[(i * 4) + j * stride] = C1;
+                        ptr[(i * 4) + j * stride + 1] = C1;
+                        ptr[(i * 4) + j * stride + 2] = C1;
+                        ptr[(i * 4) + j * stride + 3] = A1;
 
+                        ptr[((i + 1) * 4) + j * stride] = C2;
+                        ptr[((i + 1) * 4) + j * stride + 1] = C2;
+                        ptr[((i + 1) * 4) + j * stride + 2] = C2;
+                        ptr[((i + 1) * 4) + j * stride + 3] = A2;
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return bmp;
         }
@@ -503,24 +728,36 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height / 2];
-
-            for (int i = 0; i < bmp.Width; i += 2)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
+                byte* ptr = (byte*)data.Scan0;
                 for (int j = 0; j < bmp.Height; j++)
                 {
-                    int index = (i + j * bmp.Width) / 2;
+                    for (int i = 0; i < bmp.Width; i += 2)
+                    {
+                        int index = (i + j * bmp.Width) / 2;
 
-                    Color pixel = bmp.GetPixel(i, j);
+                        Color pixel = Color.FromArgb((ptr[(i * 4) + j * stride]) |
+                                        (ptr[(i * 4) + j * stride + 1] << 8) |
+                                        (ptr[(i * 4) + j * stride + 2] << 16) |
+                                        (ptr[(i * 4) + j * stride + 3] << 24));
 
-                    byte halfB1 = (byte)(((uint)Math.Round(pixel.R * 7.0 / 255.0) << 1) | (byte)(pixel.A >> 7));
-                    
-                    pixel = bmp.GetPixel(i + 1, j);
+                        byte halfB1 = (byte)(((uint)Math.Round(pixel.R * 7.0 / 255.0) << 1) | (byte)(pixel.A >> 7));
 
-                    byte halfB2 = (byte)(((uint)Math.Round(pixel.R * 7.0 / 255.0) << 1) | (byte)(pixel.A >> 7));
+                        pixel = Color.FromArgb((ptr[((i + 1) * 4) + j * stride]) |
+                                        (ptr[((i + 1) * 4) + j * stride + 1] << 8) |
+                                        (ptr[((i + 1) * 4) + j * stride + 2] << 16) |
+                                        (ptr[((i + 1) * 4) + j * stride + 3] << 24));
 
-                    ByteHelper.WriteByte((byte)((halfB1 << 4) | halfB2), imgData, index);
+                        byte halfB2 = (byte)(((uint)Math.Round(pixel.R * 7.0 / 255.0) << 1) | (byte)(pixel.A >> 7));
+
+                        ByteHelper.WriteByte((byte)((halfB1 << 4) | halfB2), imgData, index);
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return imgData;
         }
@@ -533,24 +770,32 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
-
-            for (int i = 0; i < width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < width; i++)
                 {
-                    int index = (i + j * width);
+                    for (int j = 0; j < height; j++)
+                    {
+                        int index = (i + j * width);
 
-                    byte byt = ByteHelper.ReadByte(imgData, index);
-                    byte halfB1 = (byte)(byt >> 4);
-                    byte halfB2 = (byte)(byt & 0x0F);
+                        byte byt = ByteHelper.ReadByte(imgData, index);
+                        byte halfB1 = (byte)(byt >> 4);
+                        byte halfB2 = (byte)(byt & 0x0F);
 
-                    byte C = (byte)Math.Round(halfB1 * 255.0 / 15.0);
-                    byte A = (byte)Math.Round(halfB2 * 255.0 / 15.0);
+                        byte C = (byte)Math.Round(halfB1 * 255.0 / 15.0);
+                        byte A = (byte)Math.Round(halfB2 * 255.0 / 15.0);
 
-                    bmp.SetPixel(i, j, Color.FromArgb(A, C, C, C));
-
+                        ptr[(i * 4) + j * stride] = C;
+                        ptr[(i * 4) + j * stride + 1] = C;
+                        ptr[(i * 4) + j * stride + 2] = C;
+                        ptr[(i * 4) + j * stride + 3] = A;
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return bmp;
         }
@@ -563,21 +808,30 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height];
-
-            for (int i = 0; i < bmp.Width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < bmp.Height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < bmp.Width; i++)
                 {
-                    int index = (i + j * bmp.Width);
+                    for (int j = 0; j < bmp.Height; j++)
+                    {
+                        int index = (i + j * bmp.Width);
 
-                    Color pixel = bmp.GetPixel(i, j);
+                        Color pixel = Color.FromArgb((ptr[(i * 4) + j * stride]) |
+                                            (ptr[(i * 4) + j * stride + 1] << 8) |
+                                            (ptr[(i * 4) + j * stride + 2] << 16) |
+                                            (ptr[(i * 4) + j * stride + 3] << 24));
 
-                    byte halfB1 = (byte)Math.Round(pixel.R * 15.0 / 255.0);
-                    byte halfB2 = (byte)Math.Round(pixel.A * 15.0 / 255.0);
+                        byte halfB1 = (byte)Math.Round(pixel.R * 15.0 / 255.0);
+                        byte halfB2 = (byte)Math.Round(pixel.A * 15.0 / 255.0);
 
-                    ByteHelper.WriteByte((byte)((halfB1 << 4) | halfB2), imgData, index);
+                        ByteHelper.WriteByte((byte)((halfB1 << 4) | halfB2), imgData, index);
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return imgData;
         }
@@ -590,19 +844,28 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
-
-            for (int i = 0; i < width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < width; i++)
                 {
-                    int index = (i + j * width) * 2;
+                    for (int j = 0; j < height; j++)
+                    {
+                        int index = (i + j * width) * 2;
 
-                    byte C = ByteHelper.ReadByte(imgData, index);
-                    byte A = ByteHelper.ReadByte(imgData, index + 1);
+                        byte C = ByteHelper.ReadByte(imgData, index);
+                        byte A = ByteHelper.ReadByte(imgData, index + 1);
 
-                    bmp.SetPixel(i, j, Color.FromArgb(A, C, C, C));
+                        ptr[(i * 4) + j * stride] = C;
+                        ptr[(i * 4) + j * stride + 1] = C;
+                        ptr[(i * 4) + j * stride + 2] = C;
+                        ptr[(i * 4) + j * stride + 3] = A;
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return bmp;
         }
@@ -615,19 +878,28 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height * 2];
-
-            for (int i = 0; i < bmp.Width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < bmp.Height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < bmp.Width; i++)
                 {
-                    int index = (i + j * bmp.Width) * 2;
+                    for (int j = 0; j < bmp.Height; j++)
+                    {
+                        int index = (i + j * bmp.Width) * 2;
 
-                    Color pixel = bmp.GetPixel(i, j);
+                        Color pixel = Color.FromArgb((ptr[(i * 4) + j * stride]) |
+                                        (ptr[(i * 4) + j * stride + 1] << 8) |
+                                        (ptr[(i * 4) + j * stride + 2] << 16) |
+                                        (ptr[(i * 4) + j * stride + 3] << 24));
 
-                    ByteHelper.WriteByte(pixel.R, imgData, index);
-                    ByteHelper.WriteByte(pixel.A, imgData, index + 1);
+                        ByteHelper.WriteByte(pixel.R, imgData, index);
+                        ByteHelper.WriteByte(pixel.A, imgData, index + 1);
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return imgData;
         }
@@ -646,24 +918,36 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
-
-            for (int i = 0; i < width; i+=2)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < width; i += 2)
                 {
-                    int index = (i + j * width) / 2;
+                    for (int j = 0; j < height; j++)
+                    {
+                        int index = (i + j * width) / 2;
 
-                    byte I = ByteHelper.ReadByte(imgData, index);
-                    byte I1 = (byte)Math.Round((I >> 4) * 255.0 / 15.0);
-                    byte I2 = (byte)Math.Round((I & 0x0F) * 255.0 / 15.0);
-                    byte A1 = (byte)(I1 == 0 ? byte.MinValue : byte.MaxValue);
-                    byte A2 = (byte)(I2 == 0 ? byte.MinValue : byte.MaxValue);
+                        byte I = ByteHelper.ReadByte(imgData, index);
+                        byte I1 = (byte)Math.Round((I >> 4) * 255.0 / 15.0);
+                        byte I2 = (byte)Math.Round((I & 0x0F) * 255.0 / 15.0);
+                        byte A1 = (byte)(I1 == 0 ? byte.MinValue : byte.MaxValue);
+                        byte A2 = (byte)(I2 == 0 ? byte.MinValue : byte.MaxValue);
 
-                    bmp.SetPixel(i, j, Color.FromArgb(A1, I1, I1, I1));
-                    bmp.SetPixel(i, j, Color.FromArgb(A2, I2, I2, I2));
+                        ptr[(i * 4) + j * stride] = I1;
+                        ptr[(i * 4) + j * stride + 1] = I1;
+                        ptr[(i * 4) + j * stride + 2] = I1;
+                        ptr[(i * 4) + j * stride + 3] = A1;
 
+                        ptr[((i + 1) * 4) + j * stride] = I2;
+                        ptr[((i + 1) * 4) + j * stride + 1] = I2;
+                        ptr[((i + 1) * 4) + j * stride + 2] = I2;
+                        ptr[((i + 1) * 4) + j * stride + 3] = A2;
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return bmp;
         }
@@ -676,22 +960,31 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height / 2];
-
-            for (int i = 0; i < bmp.Width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < bmp.Height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < bmp.Width; i++)
                 {
-                    int index = (i + j * bmp.Width) / 2;
+                    for (int j = 0; j < bmp.Height; j++)
+                    {
+                        int index = (i + j * bmp.Width) / 2;
 
-                    Color pixel = bmp.GetPixel(i, j);
+                        Color pixel = Color.FromArgb((ptr[(i * 4) + j * stride]) |
+                                        (ptr[(i * 4) + j * stride + 1] << 8) |
+                                        (ptr[(i * 4) + j * stride + 2] << 16) |
+                                        (ptr[(i * 4) + j * stride + 3] << 24));
 
-                    byte I = (byte)Math.Round(pixel.R * 15.0 / 255.0);
-                    if (i % 2 == 0)
-                        I = (byte)(I << 4);
+                        byte I = (byte)Math.Round(pixel.R * 15.0 / 255.0);
+                        if (i % 2 == 0)
+                            I = (byte)(I << 4); //This is to overlap the next data point on this one
 
-                    ByteHelper.WriteByte((byte)(imgData[index] | I), imgData, index);
+                        ByteHelper.WriteByte((byte)(imgData[index] | I), imgData, index);
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return imgData;
         }
@@ -704,19 +997,28 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             Bitmap bmp = new Bitmap(width, height);
-
-            for (int i = 0; i < width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < width; i++)
                 {
-                    int index = i + j * width;
+                    for (int j = 0; j < height; j++)
+                    {
+                        int index = i + j * width;
 
-                    byte I = ByteHelper.ReadByte(imgData, index);
-                    byte A = (byte)(I == 0 ? byte.MinValue : byte.MaxValue);
+                        byte I = ByteHelper.ReadByte(imgData, index);
+                        byte A = (byte)(I == 0 ? byte.MinValue : byte.MaxValue);
 
-                    bmp.SetPixel(i, j, Color.FromArgb(A, I, I, I));
+                        ptr[(i * 4) + j * stride] = I;
+                        ptr[(i * 4) + j * stride + 1] = I;
+                        ptr[(i * 4) + j * stride + 2] = I;
+                        ptr[(i * 4) + j * stride + 3] = A;
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return bmp;
         }
@@ -729,18 +1031,27 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 return null;
 
             byte[] imgData = new byte[bmp.Width * bmp.Height];
-
-            for (int i = 0; i < bmp.Width; i++)
+            BitmapData data = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int j = 0; j < bmp.Height; j++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int i = 0; i < bmp.Width; i++)
                 {
-                    int index = i + j * bmp.Width;
+                    for (int j = 0; j < bmp.Height; j++)
+                    {
+                        int index = i + j * bmp.Width;
 
-                    Color pixel = bmp.GetPixel(i, j);
+                        Color pixel = Color.FromArgb((ptr[(i * 4) + j * stride]) |
+                                        (ptr[(i * 4) + j * stride + 1] << 8) |
+                                        (ptr[(i * 4) + j * stride + 2] << 16) |
+                                        (ptr[(i * 4) + j * stride + 3] << 24));
 
-                    ByteHelper.WriteByte(pixel.R, imgData, index);
+                        ByteHelper.WriteByte(pixel.R, imgData, index);
+                    }
                 }
             }
+            bmp.UnlockBits(data);
 
             return imgData;
         }
@@ -754,15 +1065,25 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         {
             //This can take a long time (not optimized), so be careful
             List<Color> colors = new List<Color>();
-
-            for (int j = 0; j < image.Height; j++)
+            BitmapData data = image.LockBits(new Rectangle(0, 0, image.Width, image.Height), ImageLockMode.ReadWrite, PixelFormat.Format32bppArgb);
+            int stride = data.Stride;
+            unsafe
             {
-                for (int i = 0; i < image.Width; i++)
+                byte* ptr = (byte*)data.Scan0;
+                for (int j = 0; j < image.Height; j++)
                 {
-                    if (!colors.Contains(image.GetPixel(i, j)))
-                        colors.Add(image.GetPixel(i, j));
+                    for (int i = 0; i < image.Width; i++)
+                    {
+                        Color pixel = Color.FromArgb((ptr[(i * 4) + j * stride]) |
+                                        (ptr[(i * 4) + j * stride + 1] << 8) |
+                                        (ptr[(i * 4) + j * stride + 2] << 16) |
+                                        (ptr[(i * 4) + j * stride + 3] << 24));
+                        if (!colors.Contains(pixel))
+                            colors.Add(pixel);
+                    }
                 }
             }
+            image.UnlockBits(data);
 
             //Now that we have a huge list of colors, let's start going through them rapidly
             //List<double> minDist = new List<double>();
@@ -797,7 +1118,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 analyzer.AddColor(color);
 
             //Now make the new palette
-            byte[] newData = PaletteToBinary(analyzer.GetPalette(16));
+            byte[] newData = PaletteToBinary(analyzer.GetPalette(colorCount));
 
             palette.RawData = newData;
         }

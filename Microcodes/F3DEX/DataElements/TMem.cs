@@ -56,14 +56,15 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
             if (RomProject.Instance.FindRamOffset(LastTImgCommand.ImageAddress, out file, out offset))
             {
-                if (file.GetElementAt(offset) is Palette)
+                N64DataElement element;
+                if (file.HasElementExactlyAt(offset, out element) && element is Palette)
                 {
-                    Palette palette = (Palette)file.GetElementAt(offset);
+                    Palette palette = (Palette)element;
                     LoadedElements[tile.TMem] = palette;
                 }
-                else if (file.GetElementAt(offset) is Texture)
+                if (file.HasElementExactlyAt(offset, out element) && element is Texture)
                 {
-                    Texture texture = (Texture)file.GetElementAt(offset);
+                    Texture texture = (Texture)element;
                     LoadedElements[tile.TMem] = texture;
                 }
                 else
@@ -101,17 +102,18 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
             RomFile file;
             int offset;
             TileDescriptor tile = TileDescriptors[loadTLut.Tile];
+            N64DataElement element;
 
             if (RomProject.Instance.FindRamOffset(LastTImgCommand.ImageAddress, out file, out offset))
             {
-                if (file.GetElementAt(offset) is Palette)
+                if (file.HasElementExactlyAt(offset, out element) && element is Palette)
                 {
-                    Palette palette = (Palette)file.GetElementAt(offset);
+                    Palette palette = (Palette)element;
                     LoadedElements[tile.TMem] = palette;
                 }
-                else if (file.GetElementAt(offset) is Texture)
+                else if (file.HasElementExactlyAt(offset, out element) && element is Texture)
                 {
-                    Texture texture = (Texture)file.GetElementAt(offset);
+                    Texture texture = (Texture)element;
                     LoadedElements[tile.TMem] = texture;
                 }
                 else
