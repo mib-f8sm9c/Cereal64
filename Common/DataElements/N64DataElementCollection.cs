@@ -59,33 +59,30 @@ namespace Cereal64.Common.DataElements
 
             //Binary search, to speed up the process (thanks mom!)
             int start = 0;
-            int end = _elements.Count;
+            int end = _elements.Count - 1;
 
             //WARNING: THIS WILL BREAK IF THE OBJECT SPANS MULTIPLE OBJECTS AND LANDS ON THE LATTER OBJECTS!!! FIX THIS PLEASE!!
 
-            if (start != end)
+            while (start <= end)
             {
-                while (start <= end)
+                int mid = (start + end) / 2;
+
+                if (_elements[mid].FileOffset > offset)
                 {
-                    int mid = (start + end) / 2;
+                    end = mid - 1;
+                    continue;
+                }
+                if (_elements[mid].FileOffset + _elements[mid].RawDataSize - 1 < offset)
+                {
+                    start = mid + 1;
+                    continue;
+                }
+                if (_elements[mid].ContainsOffset(offset))
+                {
+                    if (exactMatch && _elements[mid].FileOffset != offset)
+                        return null;
 
-                    if (_elements[mid].FileOffset > offset)
-                    {
-                        end = mid - 1;
-                        continue;
-                    }
-                    if (_elements[mid].FileOffset + _elements[mid].RawDataSize - 1 < offset)
-                    {
-                        start = mid + 1;
-                        continue;
-                    }
-                    if (_elements[mid].ContainsOffset(offset))
-                    {
-                        if (exactMatch && _elements[mid].FileOffset != offset)
-                            return null;
-
-                        return _elements[mid];
-                    }
+                    return _elements[mid];
                 }
             }
 
@@ -106,34 +103,31 @@ namespace Cereal64.Common.DataElements
 
             //Binary search, to speed up the process (thanks mom!)
             int start = 0;
-            int end = _elements.Count;
+            int end = _elements.Count - 1;
 
-            if(start != end)
+            while (start <= end)
             {
-                while (start <= end)
-                {
-                    int mid = (start + end) / 2;
+                int mid = (start + end) / 2;
 
-                    if (_elements[mid].FileOffset > endOffset)
-                    {
-                        indexToAdd = mid - 1;
-                        end = indexToAdd;
-                        continue;
-                    }
-                    if (_elements[mid].FileOffset + _elements[mid].RawDataSize - 1 < startOffset)
-                    {
-                        indexToAdd = mid + 1;
-                        start = indexToAdd;
-                        continue;
-                    }
-                    if (_elements[mid].ContainsOffset(startOffset) ||
-                        _elements[mid].ContainsOffset(endOffset) ||
-                        element.ContainsOffset(_elements[mid].FileOffset))
-                    {
-                        indexToAdd = mid;
-                        insideElement = true;
-                        break;
-                    }
+                if (_elements[mid].FileOffset > endOffset)
+                {
+                    indexToAdd = mid - 1;
+                    end = indexToAdd;
+                    continue;
+                }
+                if (_elements[mid].FileOffset + _elements[mid].RawDataSize - 1 < startOffset)
+                {
+                    indexToAdd = mid + 1;
+                    start = indexToAdd;
+                    continue;
+                }
+                if (_elements[mid].ContainsOffset(startOffset) ||
+                    _elements[mid].ContainsOffset(endOffset) ||
+                    element.ContainsOffset(_elements[mid].FileOffset))
+                {
+                    indexToAdd = mid;
+                    insideElement = true;
+                    break;
                 }
             }
 
