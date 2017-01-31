@@ -63,6 +63,18 @@ namespace VisObj64.Visualization.OpenGL
             _selectedElements = new List<VO64GraphicsElement>();
 
             _mouseFunction = MouseFunction.Camera;
+            
+            _glDisplay.MouseWheel += new MouseEventHandler(_glDisplay_MouseWheel);
+        }
+
+        private void _glDisplay_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (!OpenGLLoaded)
+                return;
+
+            MakeCurrent();
+
+            Camera.OnMouseScroll(e);
         }
 
         public void ClearGraphics()

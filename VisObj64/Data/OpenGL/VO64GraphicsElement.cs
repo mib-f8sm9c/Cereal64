@@ -30,6 +30,8 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
         public bool Selected;
 
+        public PrimitiveType RenderType = PrimitiveType.Triangles;
+
         private VO64GraphicsElement(int vaIndex, int vbIndex, int ibIndex)
         {
             _vertices = new List<IVO64Vertex>();
@@ -179,7 +181,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
                 GL.Enable(EnableCap.Texture2D);
             }
 
-            GL.DrawElements(PrimitiveType.Triangles, _indices.Count * 3, DrawElementsType.UnsignedShort, IntPtr.Zero);
+            GL.DrawElements(RenderType, _indices.Count * 3, DrawElementsType.UnsignedShort, IntPtr.Zero);
 
             if (_textureID != 0)
                 GL.Disable(EnableCap.Texture2D);

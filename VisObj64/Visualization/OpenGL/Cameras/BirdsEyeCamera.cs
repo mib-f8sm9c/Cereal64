@@ -8,7 +8,7 @@ using OpenTK;
 
 namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
 {
-    public class NewCamera : ICamera
+    public class BirdsEyeCamera : ICamera
     {
         /// <summary>
         /// Position of the camera in 3d space
@@ -85,7 +85,7 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
             }
         }
 
-        public NewCamera()
+        public BirdsEyeCamera()
         {
             Reset();
         }
@@ -95,9 +95,9 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
         /// </summary>
         public void Reset()
         {
-            Position = new Vector3(0f, 0f, -5f);
-            Target = new Vector3(0f, 0f, 1f);
-            Up = new Vector3(0f, 1f, 0f);
+            Position = new Vector3(0, 100f, 0);
+            Target = new Vector3(0, 0f, 0);
+            Up = new Vector3(1f, 0f, 0f);
 
             LockUp = true;
         }
@@ -163,7 +163,7 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
 
         public void OnKeyDown(KeyEventArgs e)
         {
-            float speed = 0.25f;
+            float speed = 51f;
             if (((int)e.Modifiers & (int)Keys.Shift) == (int)Keys.Shift) //Doesn't work
                 speed = 1;
 
@@ -191,6 +191,12 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
 
             if (e.KeyData == Keys.C)
                 Rotate(Up, 0.1f);
+
+            if (e.KeyData == Keys.X)
+                Rotate(LeftDirection, -0.1f);
+
+            if (e.KeyData == Keys.V)
+                Rotate(LeftDirection, 0.1f);
         }
 
         public void OnMouseDown(MouseEventArgs e)
@@ -208,22 +214,24 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
         {
             if (MouseClicked)
             {
-                float angleChangeX = FOV * (float)Math.PI / 180 * (e.X - MousePosition.X) / 200; //Needs to be width/height?
-                float angleChangeY = -FOV * (float)Math.PI / 180 * (e.Y - MousePosition.Y) / 200; //There's probably a good way to do this
+                float distChangedX = (e.Y - MousePosition.Y) * Position.Y / 100;
+                float distChangedZ = -(e.X - MousePosition.X) * Position.Y / 100;
+                Translate(new Vector3(distChangedX, 0, distChangedZ));
+                //float angleChangeX = FOV * (float)Math.PI / 180 * (e.X - MousePosition.X) / 200; //Needs to be width/height?
+                //float angleChangeY = -FOV * (float)Math.PI / 180 * (e.Y - MousePosition.Y) / 200; //There's probably a good way to do this
 
-                if (Math.Abs(angleChangeX) > 0)
-                {
-                    Rotate(UpDirection, angleChangeX, true);
-                }
+                //if (Math.Abs(angleChangeX) > 0)
+                //{
+                //    Rotate(UpDirection, angleChangeX, true);
+                //}
 
+                //if (Math.Abs(angleChangeY) > 0)
+                //{
+                //    Rotate(LeftDirection, angleChangeY, true);
+                //}
 
-                if (Math.Abs(angleChangeY) > 0)
-                {
-                    Rotate(LeftDirection, angleChangeY, true);
-                }
-
-                if (Math.Abs(angleChangeX) > 0 || Math.Abs(angleChangeY) > 0)
-                    updateCamera();
+                //if (Math.Abs(angleChangeX) > 0 || Math.Abs(angleChangeY) > 0)
+                //    updateCamera();
 
                 MousePosition = new Vector2(e.X, e.Y);
             }
@@ -231,6 +239,18 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
 
         public void OnMouseScroll(MouseEventArgs e)
         {
+            double yMod = 1;
+            if (e.Delta > 0)
+            {
+                yMod = Math.Pow(0.9, e.Delta / 120);
+                Translate(new Vector3(0, Position.Y * (float)(yMod - 1), 0));
+            }
+            else
+            {
+                yMod = Math.Pow(1.1, e.Delta / 120);
+                Translate(new Vector3(0, Position.Y * (float)(1 - yMod), 0));
+            }
         }
+
     }
 }

@@ -12,6 +12,7 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
         void OnMouseDown(MouseEventArgs e);
         void OnMouseUp(MouseEventArgs e);
         void OnMouseMove(MouseEventArgs e);
+        void OnMouseScroll(MouseEventArgs e);
 
         event EventHandler CameraUpdated;
 

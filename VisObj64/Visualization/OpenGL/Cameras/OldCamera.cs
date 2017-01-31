@@ -89,6 +89,11 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
 
         }
 
+        public void OnMouseScroll(MouseEventArgs e)
+        {
+
+        }
+
         public void Focus()
         {
             GL.LoadIdentity();

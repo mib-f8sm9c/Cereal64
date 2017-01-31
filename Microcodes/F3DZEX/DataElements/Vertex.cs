@@ -92,7 +92,9 @@ namespace Cereal64.Microcodes.F3DZEX.DataElements
             }
         }
 
-        public override int RawDataSize { get { return 0x10; } }
+        public static int Vertex_Length = 0x10;
+
+        public override int RawDataSize { get { return Vertex_Length; } }
 
         public void CallUpdate()
         {

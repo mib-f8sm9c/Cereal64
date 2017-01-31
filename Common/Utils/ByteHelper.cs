@@ -146,6 +146,22 @@ namespace Cereal64.Common.Utils
             return (sbyte)data[position];
         }
 
+        public static byte[] ReadBytes(byte[] data, uint position, int count, Endianness endian = Endianness.BigEndian)
+        {
+            return ReadBytes(data, (int)position, count, endian);
+        }
+
+        public static byte[] ReadBytes(byte[] data, int position, int count, Endianness endian = Endianness.BigEndian)
+        {
+            if (data == null || data.Length < position)
+                throw new Exception();
+
+            byte[] bytes = new byte[count];
+            Array.Copy(data, position, bytes, 0, count);
+
+            return bytes;
+        }
+
         public static float ReadFloat(byte[] data, uint position, Endianness endian = Endianness.BigEndian)
         {
             return ReadFloat(data, (int)position, endian);
@@ -340,6 +356,8 @@ namespace Cereal64.Common.Utils
         public static byte[] CombineIntoBytes(Endianness endian, params object[] values)
         {
             //WARNING: IT LOOKS LIKE THE ENDIANNESS PARAMETER WILL ALSO ACCEPT INTEGERS
+
+            //I was having issues with this earlier. Make sure it's not doing it incorrectly!
 
             List<byte> bytes = new List<byte>();
 

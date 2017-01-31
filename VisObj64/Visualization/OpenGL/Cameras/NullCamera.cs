@@ -35,6 +35,10 @@ namespace Cereal64.VisObj64.Visualization.OpenGL.Cameras
 
         }
 
+        public void OnMouseScroll(MouseEventArgs e)
+        {
+        }
+
         public event EventHandler CameraUpdated;
 
         public void Focus()

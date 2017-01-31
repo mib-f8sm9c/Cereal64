@@ -8,7 +8,6 @@ using Cereal64.Common.DataElements;
 
 namespace Cereal64.Common.Rom
 {
-    //To do: Delete this, I don't need it with the way DMAManager is implemented
     [TypeConverter(typeof(ExpandableObjectConverter))]
     public class DmaAddress
     {
@@ -71,6 +70,8 @@ namespace Cereal64.Common.Rom
 
             return bytes;
         }
+
+        public const int DMA_ADDRESS_SIZE = 0x4;
 
         public override string ToString()
         {

@@ -9,7 +9,6 @@ namespace Cereal64.VisObj64.Data.OpenGL
 {
     [StructLayout(LayoutKind.Sequential)]
     public struct VO64SimpleTriangle : IVO64Triangle
-
     {
         public ushort T1 { get; set; }
         public ushort T2 { get; set; }
