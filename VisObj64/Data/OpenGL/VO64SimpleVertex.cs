@@ -40,9 +40,15 @@ namespace Cereal64.VisObj64.Data.OpenGL
             
             GL.TexCoordPointer(2, TexCoordPointerType.Float, 8 * sizeof(float), (IntPtr)(3 * sizeof(float)));
             GL.EnableClientState(ArrayCap.TextureCoordArray);
+			
+			//TODO: RESOLVE THE NORMAL/COLOR MIXUP
+
+
+            GL.ColorPointer(3, ColorPointerType.Float, 8 * sizeof(float), (IntPtr)(5 * sizeof(float)));
+            GL.EnableClientState(ArrayCap.ColorArray);
             
-            GL.NormalPointer(NormalPointerType.Float, 8 * sizeof(float), (IntPtr)(5 * sizeof(float)));
-            GL.EnableClientState(ArrayCap.NormalArray);
+            //GL.NormalPointer(NormalPointerType.Float, 8 * sizeof(float), (IntPtr)(5 * sizeof(float)));
+            //GL.EnableClientState(ArrayCap.NormalArray);
         }
 
         public static byte Size

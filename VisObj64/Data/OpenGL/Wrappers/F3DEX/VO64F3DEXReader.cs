@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Cereal64.Microcodes.F3DEX.DataElements;
 using Cereal64.Microcodes.F3DEX.DataElements.Commands;
+using Cereal64.Common.Rom;
+using Cereal64.Common.DataElements;
 
 namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
 {
@@ -12,7 +14,7 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
     /// </summary>
     public static class VO64F3DEXReader
     {
-        public static VO64GraphicsCollection ReadCommands(F3DEXCommandCollection commands)
+        public static VO64GraphicsCollection ReadCommands(F3DEXCommandCollection commands, int index)
         {
             //Set up the VO64 graphics
             VO64GraphicsCollection collection = new VO64GraphicsCollection();
@@ -29,8 +31,15 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
             bool recordTileCommands = true; //Use RDPLoadSync and RDPTileSync to determine when it's okay to pick up SetTile commands
             //Note: Not guaranteed for all ways of using F3DEX!!
 
-            foreach(F3DEXCommand command in commands.Commands)
+            bool finished = false;
+
+            for(; index < commands.Commands.Count; index++)
             {
+                if (finished)
+                    break;
+
+                F3DEXCommand command = commands.Commands[index];
+
                 switch (command.CommandID)
                 {
                     case F3DEXCommandID.F3DEX_G_RDPLOADSYNC:
@@ -40,6 +49,22 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
                         recordTileCommands = true;
                         break;
                     case F3DEXCommandID.F3DEX_G_DL: //ignore this one for now
+                        F3DEX_G_DL dlCommand = (F3DEX_G_DL)command;
+
+                        int offset;
+                        RomFile file;
+
+                        RomProject.Instance.FindRamOffset(dlCommand.DLAddress, out file, out offset);
+
+                        N64DataElement el;
+
+                        if (file.HasElementAt(offset, out el) && el is F3DEXCommandCollection)
+                        {
+                            int fileOffset = (offset - el.FileOffset) / 0x8;
+                            collection.Add(ReadCommands((F3DEXCommandCollection)el, fileOffset));
+                        }
+                        if (dlCommand.ForceJump)
+                            finished = true;
                         break;
                     case F3DEXCommandID.F3DEX_G_SETTILE:
                         if (((F3DEX_G_SetTile)command).Line != 0)//recordTileCommands)
@@ -192,10 +217,17 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
                         }
 
                         break;
+                    case F3DEXCommandID.F3DEX_G_ENDDL:
+                    case F3DEXCommandID.F3DEX_G_MK64_ENDDL:
+                        finished = true;
+                        break;
                 }
             }
 
-            collection.Add(element);
+            if (element.IsEmpty)
+                VO64GraphicsElement.ReleaseElement(element);
+            else
+                collection.Add(element);
 
             return collection;
         }

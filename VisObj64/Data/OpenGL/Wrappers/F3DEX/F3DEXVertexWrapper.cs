@@ -32,9 +32,9 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
             set { Vertex.T = (short)Math.Round(value / _texture.ScaleT / _texture.ShiftScaleT * 32.0f * _texture.TexHeight); }
         }
 
-        public float NX { get { return Vertex.R / 127.0f; } set { Vertex.R = (sbyte)Math.Round(value * 127.0f); _updated = true; } }
-        public float NY { get { return Vertex.G / 127.0f; } set { Vertex.G = (sbyte)Math.Round(value * 127.0f); _updated = true; } }
-        public float NZ { get { return Vertex.B / 127.0f; } set { Vertex.B = (sbyte)Math.Round(value * 127.0f); _updated = true; } }
+        public float NX { get { return Vertex.R / 127.0f; } set { Vertex.R = (byte)Math.Round(value * 127.0f); _updated = true; } }
+        public float NY { get { return Vertex.G / 127.0f; } set { Vertex.G = (byte)Math.Round(value * 127.0f); _updated = true; } }
+        public float NZ { get { return Vertex.B / 127.0f; } set { Vertex.B = (byte)Math.Round(value * 127.0f); _updated = true; } }
 
         private bool _updated = true;
         private VO64SimpleVertex _simpleVertex;

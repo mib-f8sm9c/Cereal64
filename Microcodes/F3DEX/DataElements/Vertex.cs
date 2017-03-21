@@ -42,18 +42,18 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
 
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Red color component of the vertex (also can be X coordinate of the vertex normal)")]
-        public sbyte R { get { return _r; } set { _r = value; Updated(); } }
-        private sbyte _r;
+        public byte R { get { return _r; } set { _r = value; Updated(); } }
+        private byte _r;
 
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Green color component of the vertex (also can be Y coordinate of the vertex normal)")]
-        public sbyte G { get { return _g; } set { _g = value; Updated(); } }
-        private sbyte _g;
+        public byte G { get { return _g; } set { _g = value; Updated(); } }
+        private byte _g;
 
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Blue color component of the vertex (also can be Z coordinate of the vertex normal)")]
-        public sbyte B { get { return _b; } set { _b = value; Updated(); } }
-        private sbyte _b;
+        public byte B { get { return _b; } set { _b = value; Updated(); } }
+        private byte _b;
 
         [CategoryAttribute("Vertex Settings"),
         DescriptionAttribute("Alpha color component of the vertex")]
@@ -85,9 +85,9 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 //6 is 0x00
                 S = ByteHelper.ReadShort(value, 8);
                 T = ByteHelper.ReadShort(value, 10);
-                R = ByteHelper.ReadSByte(value, 12);
-                G = ByteHelper.ReadSByte(value, 13);
-                B = ByteHelper.ReadSByte(value, 14);
+                R = ByteHelper.ReadByte(value, 12);
+                G = ByteHelper.ReadByte(value, 13);
+                B = ByteHelper.ReadByte(value, 14);
                 A = ByteHelper.ReadByte(value, 15);
             }
         }

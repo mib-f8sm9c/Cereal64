@@ -37,9 +37,9 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                 S = ByteHelper.ReadShort(value, 6);
                 T = ByteHelper.ReadShort(value, 8);
                 //10 is 0x0000
-                R = ByteHelper.ReadSByte(value, 12);
-                G = ByteHelper.ReadSByte(value, 13);
-                B = ByteHelper.ReadSByte(value, 14);
+                R = ByteHelper.ReadByte(value, 12);
+                G = ByteHelper.ReadByte(value, 13);
+                B = ByteHelper.ReadByte(value, 14);
                 A = ByteHelper.ReadByte(value, 15);
             }
         }

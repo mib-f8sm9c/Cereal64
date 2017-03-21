@@ -32,7 +32,7 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         public TileDescriptor[] TileDescriptors;
 
         public F3DEX_G_SetTImg LastTImgCommand;
-
+        
         public Dictionary<int, LoadedTMemData> LoadedData; //Info of blocks of data loaded into TMEM
         public Dictionary<int, N64DataElement> LoadedElements; //Info of existing elements loaded into TMEM (used when parsing previously parsed data)
 
@@ -67,33 +67,34 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     Texture texture = (Texture)element;
                     LoadedElements[tile.TMem] = texture;
                 }
-                else
+                else if (LoadedElements.ContainsKey(tile.TMem))
                 {
-                    byte[] data = file.GetAsBytes();
-
-                    double texelSizeInBytes = 1;
-                    switch (tile.PixelSize)
-                    {
-                        case Texture.PixelInfo.Size_4b:
-                            texelSizeInBytes = 0.5;
-                            break;
-                        case Texture.PixelInfo.Size_16b:
-                            texelSizeInBytes = 2;
-                            break;
-                        case Texture.PixelInfo.Size_32b:
-                            texelSizeInBytes = 4;
-                            break;
-                    }
-
-                    int size = (int)Math.Round(loadBlock.Texels * texelSizeInBytes);
-                    byte[] newData = new byte[size];
-
-                    Array.Copy(data, offset, newData, 0, size);
-                    Array.Copy(newData, 0, this.Data, tile.TMemInBytes, size);
-
-                    LoadedData[tile.TMem] = new LoadedTMemData(file,
-                        offset, size, newData);
+                    LoadedElements.Remove(tile.TMem);
                 }
+                byte[] data = file.GetAsBytes();
+
+                double texelSizeInBytes = 1;
+                switch (tile.PixelSize)
+                {
+                    case Texture.PixelInfo.Size_4b:
+                        texelSizeInBytes = 0.5;
+                        break;
+                    case Texture.PixelInfo.Size_16b:
+                        texelSizeInBytes = 2;
+                        break;
+                    case Texture.PixelInfo.Size_32b:
+                        texelSizeInBytes = 4;
+                        break;
+                }
+
+                int size = (int)Math.Round(loadBlock.Texels * texelSizeInBytes);
+                byte[] newData = new byte[size];
+
+                Array.Copy(data, offset, newData, 0, size);
+                Array.Copy(newData, 0, this.Data, tile.TMemInBytes, size);
+
+                LoadedData[tile.TMem] = new LoadedTMemData(file,
+                    offset, size, newData);
             }
         }
 
@@ -116,30 +117,24 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
                     Texture texture = (Texture)element;
                     LoadedElements[tile.TMem] = texture;
                 }
-                else
+                else if (LoadedElements.ContainsKey(tile.TMem))
                 {
-                    byte[] data = file.GetAsBytes();
-
-                    double texelSizeInBytes = 2; //Hardcoded?
-
-                    int size = (int)Math.Round(loadTLut.Count * texelSizeInBytes);
-                    byte[] newData = new byte[size];
-
-                    Array.Copy(data, offset, newData, 0, size);
-                    Array.Copy(newData, 0, this.Data, tile.TMemInBytes, size);
-
-                    LoadedData[tile.TMem] = new LoadedTMemData(file,
-                        offset, size, newData);
+                    LoadedElements.Remove(tile.TMem);
                 }
+
+                byte[] data = file.GetAsBytes();
+
+                double texelSizeInBytes = 2; //Hardcoded?
+
+                int size = (int)Math.Round(loadTLut.Count * texelSizeInBytes);
+                byte[] newData = new byte[size];
+
+                Array.Copy(data, offset, newData, 0, size);
+                Array.Copy(newData, 0, this.Data, tile.TMemInBytes, size);
+
+                LoadedData[tile.TMem] = new LoadedTMemData(file,
+                    offset, size, newData);
             }
-        }
-
-        public LoadedTMemData GetTexturePaletteInfo(TileDescriptor tile)
-        {
-            if (LoadedData.ContainsKey(tile.TMem))
-                return null;
-
-            return LoadedData[tile.TMem];
         }
 
     }

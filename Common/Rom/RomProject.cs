@@ -352,7 +352,7 @@ namespace Cereal64.Common.Rom
                 if (address.Offset >= segment.RamStartOffset && address.Offset < segment.RamEndOffset)
                 {
                     file = segment.File;
-                    fileOffset = address.Offset - segment.RamStartOffset;
+                    fileOffset = address.Offset - segment.RamStartOffset + segment.FileStartOffset;
                     return true;
                 }
             }

@@ -538,7 +538,7 @@ namespace Cereal64.Microcodes.F3DZEX
             }
 
             int widthInTexels = (int)Math.Round(widthInBytes / texelSize);
-            int heightInTexels = sizeOfData / widthInTexels;
+            int heightInTexels = sizeOfData / widthInBytes;
 
             byte[] data = new byte[sizeOfData];
             Array.Copy(TMEM.Data, tile.TMemInBytes, data, 0, sizeOfData);

@@ -119,7 +119,7 @@ namespace VisObj64.Visualization.OpenGL
             GL.ClearColor(ClearColor);
             gl_DrawScene();
 
-            GL.Enable(EnableCap.Texture2D);
+            GL.Enable(EnableCap.ColorArray);
             GL.Enable(EnableCap.Lighting);
 
             _glDisplay.SwapBuffers();
@@ -321,9 +321,13 @@ namespace VisObj64.Visualization.OpenGL
 
 	        GL.Enable(EnableCap.Lighting);
 	        GL.Enable(EnableCap.Normalize);
+            GL.Enable(EnableCap.ColorArray);
 
 	        GL.Disable(EnableCap.CullFace);
 	        //GL.CullFace(CullFaceMode.FrontAndBack);
+
+            GL.ColorMaterial(MaterialFace.FrontAndBack, ColorMaterialParameter.AmbientAndDiffuse);
+            GL.Enable(EnableCap.ColorMaterial);
 
 	        //GL.Enable(EnableCap.Blend);
 	        //GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);

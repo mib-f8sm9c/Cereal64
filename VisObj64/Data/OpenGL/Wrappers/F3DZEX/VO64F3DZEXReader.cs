@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using Cereal64.Microcodes.F3DZEX.DataElements;
 using Cereal64.Microcodes.F3DZEX.DataElements.Commands;
+using Cereal64.Common.Rom;
+using Cereal64.Common.DataElements;
 
 namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
 {
@@ -12,7 +14,7 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
     /// </summary>
     public static class VO64F3DZEXReader
     {
-        public static VO64GraphicsCollection ReadCommands(F3DZEXCommandCollection commands)
+        public static VO64GraphicsCollection ReadCommands(F3DZEXCommandCollection commands, int index)
         {
             //Set up the VO64 graphics
             VO64GraphicsCollection collection = new VO64GraphicsCollection();
@@ -28,9 +30,16 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
             F3DZEXTextureWrapper newTexture = null;
             bool recordTileCommands = false; //Use RDPLoadSync and RDPTileSync to determine when it's okay to pick up SetTile commands
             //Note: Not guaranteed for all ways of using F3DZEX!!
+            
+            bool finished = false;
 
-            foreach(F3DZEXCommand command in commands.Commands)
+            for(; index < commands.Commands.Count; index++)
             {
+                if (finished)
+                    break;
+
+                F3DZEXCommand command = commands.Commands[index];
+
                 switch (command.CommandID)
                 {
                     case F3DZEXCommandID.F3DZEX_G_RDPLOADSYNC:
@@ -40,9 +49,28 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
                         recordTileCommands = false;
                         break;
                     case F3DZEXCommandID.F3DZEX_G_DL: //ignore this one for now
+                        F3DZEX_G_DL dlCommand = (F3DZEX_G_DL)command;
+
+                        int offset;
+                        RomFile file;
+
+                        RomProject.Instance.FindRamOffset(dlCommand.DLAddress, out file, out offset);
+
+                        if (file == null)
+                            break;
+
+                        N64DataElement el;
+
+                        if (file.HasElementAt(offset, out el) && el is F3DZEXCommandCollection)
+                        {
+                            int fileOffset = (offset - el.FileOffset) / 0x8;
+                            collection.Add(ReadCommands((F3DZEXCommandCollection)el, fileOffset));
+                        }
+                        if (dlCommand.ForceJump)
+                            finished = true;
                         break;
                     case F3DZEXCommandID.F3DZEX_G_SETTILE:
-                        if (recordTileCommands)
+                        if (((F3DZEX_G_SetTile)command).Line != 0)//recordTileCommands)
                         {
                             //keep track of this command when setting up the texture
                             lastSetTile = (F3DZEX_G_SetTile)command;
@@ -58,8 +86,8 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
                         break;
                     case F3DZEXCommandID.F3DZEX_G_TRI1:
 
-                        if (((F3DZEX_G_Tri2)command).TextureReference != null &&
-                            lastTexture != ((F3DZEX_G_Tri2)command).TextureReference)
+                        if (((F3DZEX_G_Tri1)command).TextureReference != null &&
+                            lastTexture != ((F3DZEX_G_Tri1)command).TextureReference)
                         {
                             //save the element
                             if (!element.IsEmpty)
@@ -70,39 +98,42 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
                             vertices.Clear();
 
                             //Set the texture here
-                            lastTexture = ((F3DZEX_G_Tri2)command).TextureReference;
+                            lastTexture = ((F3DZEX_G_Tri1)command).TextureReference;
                             newTexture = new F3DZEXTextureWrapper(lastTexture, lastSetTile, lastTextureCommand);
                             element.SetTexture(newTexture);
                         }
 
                         F3DZEX_G_Tri1 tri = (F3DZEX_G_Tri1)command;
-                        if (!vertices.Contains(tri.Vertex1Reference))
+                        if (tri.Vertex1Reference != null && tri.Vertex2Reference != null && tri.Vertex3Reference != null)
                         {
-                            vertices.Add(tri.Vertex1Reference);
-                            newVertex = new F3DZEXVertexWrapper(tri.Vertex1Reference);
-                            newVertex.SetTextureProperties(newTexture);
-                            element.AddVertex(newVertex);
-                        }
-                        if (!vertices.Contains(tri.Vertex2Reference))
-                        {
-                            vertices.Add(tri.Vertex2Reference);
-                            newVertex = new F3DZEXVertexWrapper(tri.Vertex2Reference);
-                            newVertex.SetTextureProperties(newTexture);
-                            element.AddVertex(newVertex);
-                        }
-                        if (!vertices.Contains(tri.Vertex3Reference))
-                        {
-                            vertices.Add(tri.Vertex3Reference);
-                            newVertex = new F3DZEXVertexWrapper(tri.Vertex3Reference);
-                            newVertex.SetTextureProperties(newTexture);
-                            element.AddVertex(newVertex);
-                        }
+                            if (!vertices.Contains(tri.Vertex1Reference))
+                            {
+                                vertices.Add(tri.Vertex1Reference);
+                                newVertex = new F3DZEXVertexWrapper(tri.Vertex1Reference);
+                                newVertex.SetTextureProperties(newTexture);
+                                element.AddVertex(newVertex);
+                            }
+                            if (!vertices.Contains(tri.Vertex2Reference))
+                            {
+                                vertices.Add(tri.Vertex2Reference);
+                                newVertex = new F3DZEXVertexWrapper(tri.Vertex2Reference);
+                                newVertex.SetTextureProperties(newTexture);
+                                element.AddVertex(newVertex);
+                            }
+                            if (!vertices.Contains(tri.Vertex3Reference))
+                            {
+                                vertices.Add(tri.Vertex3Reference);
+                                newVertex = new F3DZEXVertexWrapper(tri.Vertex3Reference);
+                                newVertex.SetTextureProperties(newTexture);
+                                element.AddVertex(newVertex);
+                            }
 
-                        VO64SimpleTriangle triangle = new VO64SimpleTriangle((ushort)vertices.IndexOf(tri.Vertex1Reference),
-                            (ushort)vertices.IndexOf(tri.Vertex2Reference),
-                                (ushort)vertices.IndexOf(tri.Vertex3Reference));//new F3DZEXTriangleWrapper((F3DZEX_G_Tri1)command);
+                            VO64SimpleTriangle triangle = new VO64SimpleTriangle((ushort)vertices.IndexOf(tri.Vertex1Reference),
+                                (ushort)vertices.IndexOf(tri.Vertex2Reference),
+                                    (ushort)vertices.IndexOf(tri.Vertex3Reference));//new F3DZEXTriangleWrapper((F3DZEX_G_Tri1)command);
 
-                        element.AddTriangle(triangle);
+                            element.AddTriangle(triangle);
+                        }
 
                         break;
                     case F3DZEXCommandID.F3DZEX_G_TRI2:
@@ -125,68 +156,77 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
                         }
 
                         F3DZEX_G_Tri2 tri2 = (F3DZEX_G_Tri2)command;
-                        if (!vertices.Contains(tri2.Vertex1Reference))
-                        {
-                            vertices.Add(tri2.Vertex1Reference);
-                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex1Reference);
-                            newVertex.SetTextureProperties(newTexture);
-                            element.AddVertex(newVertex);
-                        }
-                        if (!vertices.Contains(tri2.Vertex2Reference))
-                        {
-                            vertices.Add(tri2.Vertex2Reference);
-                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex2Reference);
-                            newVertex.SetTextureProperties(newTexture);
-                            element.AddVertex(newVertex);
-                        }
-                        if (!vertices.Contains(tri2.Vertex3Reference))
-                        {
-                            vertices.Add(tri2.Vertex3Reference);
-                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex3Reference);
-                            newVertex.SetTextureProperties(newTexture);
-                            element.AddVertex(newVertex);
-                        }
-
-                        VO64SimpleTriangle triangle2 = new VO64SimpleTriangle((ushort)vertices.IndexOf(tri2.Vertex1Reference),
-                            (ushort)vertices.IndexOf(tri2.Vertex2Reference),
-                                (ushort)vertices.IndexOf(tri2.Vertex3Reference));//new F3DZEXTriangleWrapper((F3DZEX_G_Tri1)command);
-
-                        element.AddTriangle(triangle2);
-
                         
-                        if (!vertices.Contains(tri2.Vertex4Reference))
+                        if (tri2.Vertex1Reference != null && tri2.Vertex2Reference != null && tri2.Vertex3Reference != null)
                         {
-                            vertices.Add(tri2.Vertex4Reference);
-                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex4Reference);
-                            newVertex.SetTextureProperties(newTexture);
-                            element.AddVertex(newVertex);
-                        }
-                        if (!vertices.Contains(tri2.Vertex5Reference))
-                        {
-                            vertices.Add(tri2.Vertex5Reference);
-                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex5Reference);
-                            newVertex.SetTextureProperties(newTexture);
-                            element.AddVertex(newVertex);
-                        }
-                        if (!vertices.Contains(tri2.Vertex6Reference))
-                        {
-                            vertices.Add(tri2.Vertex6Reference);
-                            newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex6Reference);
-                            newVertex.SetTextureProperties(newTexture);
-                            element.AddVertex(newVertex);
+                            if (!vertices.Contains(tri2.Vertex1Reference))
+                            {
+                                vertices.Add(tri2.Vertex1Reference);
+                                newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex1Reference);
+                                newVertex.SetTextureProperties(newTexture);
+                                element.AddVertex(newVertex);
+                            }
+                            if (!vertices.Contains(tri2.Vertex2Reference))
+                            {
+                                vertices.Add(tri2.Vertex2Reference);
+                                newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex2Reference);
+                                newVertex.SetTextureProperties(newTexture);
+                                element.AddVertex(newVertex);
+                            }
+                            if (!vertices.Contains(tri2.Vertex3Reference))
+                            {
+                                vertices.Add(tri2.Vertex3Reference);
+                                newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex3Reference);
+                                newVertex.SetTextureProperties(newTexture);
+                                element.AddVertex(newVertex);
+                            }
+
+                            VO64SimpleTriangle triangle2 = new VO64SimpleTriangle((ushort)vertices.IndexOf(tri2.Vertex1Reference),
+                                (ushort)vertices.IndexOf(tri2.Vertex2Reference),
+                                    (ushort)vertices.IndexOf(tri2.Vertex3Reference));//new F3DZEXTriangleWrapper((F3DZEX_G_Tri1)command);
+
+                            element.AddTriangle(triangle2);
                         }
 
-                        triangle2 = new VO64SimpleTriangle((ushort)vertices.IndexOf(tri2.Vertex4Reference),
-                            (ushort)vertices.IndexOf(tri2.Vertex5Reference),
-                                (ushort)vertices.IndexOf(tri2.Vertex6Reference));//new F3DZEXTriangleWrapper((F3DZEX_G_Tri1)command);
+                        if (tri2.Vertex4Reference != null && tri2.Vertex5Reference != null && tri2.Vertex6Reference != null)
+                        {
+                            if (!vertices.Contains(tri2.Vertex4Reference))
+                            {
+                                vertices.Add(tri2.Vertex4Reference);
+                                newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex4Reference);
+                                newVertex.SetTextureProperties(newTexture);
+                                element.AddVertex(newVertex);
+                            }
+                            if (!vertices.Contains(tri2.Vertex5Reference))
+                            {
+                                vertices.Add(tri2.Vertex5Reference);
+                                newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex5Reference);
+                                newVertex.SetTextureProperties(newTexture);
+                                element.AddVertex(newVertex);
+                            }
+                            if (!vertices.Contains(tri2.Vertex6Reference))
+                            {
+                                vertices.Add(tri2.Vertex6Reference);
+                                newVertex = F3DZEXWrapperBank.GetVertexWrapper(tri2.Vertex6Reference);
+                                newVertex.SetTextureProperties(newTexture);
+                                element.AddVertex(newVertex);
+                            }
 
-                        element.AddTriangle(triangle2);
+                            VO64SimpleTriangle triangle2 = new VO64SimpleTriangle((ushort)vertices.IndexOf(tri2.Vertex4Reference),
+                                (ushort)vertices.IndexOf(tri2.Vertex5Reference),
+                                    (ushort)vertices.IndexOf(tri2.Vertex6Reference));//new F3DZEXTriangleWrapper((F3DZEX_G_Tri1)command);
+
+                            element.AddTriangle(triangle2);
+                        }
 
                         break;
                 }
             }
 
-            collection.Add(element);
+            if (element.IsEmpty)
+                VO64GraphicsElement.ReleaseElement(element);
+            else
+                collection.Add(element);
 
             return collection;
         }

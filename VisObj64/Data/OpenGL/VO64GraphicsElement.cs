@@ -10,6 +10,8 @@ namespace Cereal64.VisObj64.Data.OpenGL
 {
     public class VO64GraphicsElement
     {
+        //TO DO: PROPERLY DISPOSE POST-USE
+
         private int _vaoIndex; //vertex array object (handy handle for everything)
         private int _vboIndex; //vertex buffer object (vertex information)
         private int _iboIndex; //index buffer object (references to indexes for the triangles
@@ -54,6 +56,13 @@ namespace Cereal64.VisObj64.Data.OpenGL
             GL.GenBuffers(1, out newibIndex);
 
             return new VO64GraphicsElement(newvaIndex, newvbIndex, newibIndex);
+        }
+
+        public static void ReleaseElement(VO64GraphicsElement element)
+        {
+            GL.DeleteVertexArrays(1, ref element._vaoIndex);
+            GL.DeleteBuffers(1, ref element._vboIndex);
+            GL.DeleteBuffers(1, ref element._iboIndex);
         }
 
         public void AddVertex(IVO64Vertex vertex)
@@ -101,7 +110,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
                     GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
 
                     _texture.Image.UnlockBits(bmp_data);
-
+                    
                     GL.BindTexture(TextureTarget.Texture2D, 0);
                     GL.Disable(EnableCap.Texture2D);
                 }
@@ -173,6 +182,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
             GL.BindVertexArray(_vaoIndex);
 
             GL.EnableVertexAttribArray(0);
+            GL.EnableClientState(ArrayCap.ColorArray);
 
             if (_textureID != 0)
             {
@@ -188,6 +198,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
             GL.BindTexture(TextureTarget.Texture2D, 0);
 
+            GL.DisableClientState(ArrayCap.ColorArray);
             GL.DisableVertexAttribArray(0);
 
             GL.BindVertexArray(0);

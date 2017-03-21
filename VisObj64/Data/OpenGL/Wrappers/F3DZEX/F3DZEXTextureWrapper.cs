@@ -147,17 +147,17 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DZEX
 
         public float ScaleS
         {
-            get { return (float)TextureCommand.ScaleS / (float)ushort.MaxValue; }
+            get { if (TextureCommand == null) return 1.0f; return (float)TextureCommand.ScaleS / (float)ushort.MaxValue; }
         }
 
         public float ScaleT
         {
-            get { return (float)TextureCommand.ScaleT / (float)ushort.MaxValue; }
+            get { if (TextureCommand == null) return 1.0f; return (float)TextureCommand.ScaleT / (float)ushort.MaxValue; }
         }
 
-        public int TexWidth { get { return Image.Width; } }
+        public int TexWidth { get { if (Image == null) return 1; return Image.Width; } }
 
-        public int TexHeight { get { return Image.Height; } }
+        public int TexHeight { get { if (Image == null) return 1;  return Image.Height; } }
 
     }
 }

@@ -38,17 +38,23 @@ namespace Cereal64.Microcodes.F3DEX
         private static Dictionary<RomFile, List<Vertex>> _foundVertices = new Dictionary<RomFile,List<Vertex>>();
         private static Dictionary<RomFile, List<F3DEXCommand>> _foundCommands = new Dictionary<RomFile,List<F3DEXCommand>>();
 
+        private static List<F3DEXImage> _foundImages = new List<F3DEXImage>();
+        private static Dictionary<Texture, List<F3DEXImage>> _imagesByTexture = new Dictionary<Texture, List<F3DEXImage>>();
+        private static Dictionary<Palette, List<F3DEXImage>> _imagesByPalette = new Dictionary<Palette, List<F3DEXImage>>();
+
         private static List<Vertex> _vertexBuffer = new List<Vertex>();
 
-        public static void ParseF3DEXCommands(IList<F3DEXCommand> commands)
-        {
-            ResetReaderVariables();
+        private static Stack<int> _dlPointerStack = new Stack<int>();
+        //Can this work without the RomProject backing? Probably best not to use this
+        //public static void ParseF3DEXCommands(IList<F3DEXCommand> commands)
+        //{
+        //    ResetReaderVariables();
 
-            foreach (F3DEXCommand command in commands)
-            {
-                //ParseCommand(command);
-            }
-        }
+        //    foreach (F3DEXCommand command in commands)
+        //    {
+        //        //ParseCommand(command);
+        //    }
+        //}
 
         private static void ResetReaderVariables()
         {
@@ -56,6 +62,10 @@ namespace Cereal64.Microcodes.F3DEX
             _foundPalettes.Clear();
             _foundTextures.Clear();
             _foundVertices.Clear();
+
+            _foundImages.Clear();
+            _imagesByTexture.Clear();
+            _imagesByPalette.Clear();
 
             _currentImage = null;
 
@@ -72,11 +82,10 @@ namespace Cereal64.Microcodes.F3DEX
             _lastSetTileSize = null;
             _lastLoadBlock = null;
             _lastLoadTLut = null;
+
+            _dlPointerStack.Clear();
         }
 
-        #region OLD BROKEN READING CODE
-        /*
-        //public static 
         public static F3DEXReaderPackage ReadF3DEXAt(RomFile file, int offset)
         {
             ResetReaderVariables();
@@ -91,27 +100,58 @@ namespace Cereal64.Microcodes.F3DEX
             //Reset/Initialize what needs to be initialized/reset
 
             byte[] command = new byte[8];
+            N64DataElement el;
+            F3DEXCommand f3Command;
 
-            while (offset < data.Length)
+            //A bit backwards to add it in here and then immediately pop it off, but it'll help structurally later
+            _dlPointerStack.Push(offset);
+
+            //OPTIMIZE THIS BY FINDING THE F3DEXCOMMANDCOLLECTION ONCE ONLY
+
+            while (_dlPointerStack.Count > 0)
             {
-                //read the command
-                Array.Copy(data, offset, command, 0, 8);
+                offset = _dlPointerStack.Pop();
 
-                F3DEXCommand f3Command = F3DEXCommandFactory.ReadCommand(offset, command);
-                if (f3Command == null)
-                    break;
+                while (offset < data.Length && offset >= 0)
+                {
+                    f3Command = null;
 
-                if (!_foundCommands.ContainsKey(file))
-                    _foundCommands.Add(file, new List<F3DEXCommand>());
+                    if (file.HasElementAt(offset, out el))
+                    {
+                        if (el is F3DEXCommand)
+                        {
+                            f3Command = (F3DEXCommand)el;
+                        }
+                        else if (el is F3DEXCommandCollection)
+                        {
+                            int index = (offset - el.FileOffset) / 0x8;
+                            f3Command = ((F3DEXCommandCollection)el).Commands[index];
+                        }
+                    }
+                    
+                    if(f3Command == null)
+                    {
+                        //read the command
+                        Array.Copy(data, offset, command, 0, 8);
 
-                _foundCommands[file].Add(f3Command);
+                        f3Command = F3DEXCommandFactory.ReadCommand(offset, command);
+                        if (f3Command == null)
+                            break;
 
-                ParseCommand(f3Command);
+                        if (!_foundCommands.ContainsKey(file))
+                            _foundCommands.Add(file, new List<F3DEXCommand>());
 
-                offset += 8;
+                        _foundCommands[file].Add(f3Command);
+                    }
+                    
+                    //Increment before so the DL jump code doesn't get confusing
+                    offset += 8;
 
-                if (f3Command is F3DEX_G_EndDL)
-                    break;
+                    ParseCommand(f3Command, ref offset, file);
+
+                    if (f3Command is F3DEX_G_EndDL || f3Command is F3DEX_G_MK64_EndDL) //Need to handle other end types too, like MK64EndType?
+                        break;
+                }
             }
 
             //Sort what needs to be sorted
@@ -232,19 +272,37 @@ namespace Cereal64.Microcodes.F3DEX
             return package;
         }
 
-        private static void ParseCommand(F3DEXCommand command)
+        private static void ParseCommand(F3DEXCommand command, ref int dlOffset, RomFile refFile)
         {
             TileDescriptor tile;
+            N64DataElement el;
+            RomFile file;
+            int offset;
+
             //Here handle extra command things (like if it's referencing textures and such)
             switch (command.CommandID)
             {
                 case F3DEXCommandID.F3DEX_G_DL:
                     //Need to put another dl on the stack and keep reading. That forceJump option if it's true should purge the stack.
 
-                    break;
-                case F3DEXCommandID.F3DEX_G_MK64_ENDDL:
-                    //Need to end the current level. Pop off the next on the stack. If it's empty, then end for good : )
+                    //For now, disable the chance to jump to a different file. We'll need to set that up soon
+                    F3DEX_G_DL dlCommand = (F3DEX_G_DL)command;
 
+                    RomProject.Instance.FindRamOffset(dlCommand.DLAddress, out file, out offset);
+
+                    if (file != refFile)
+                        offset = -1;
+
+                    _dlPointerStack.Push(dlOffset);
+
+                    dlOffset = offset;
+
+                    if (dlCommand.ForceJump)
+                        _dlPointerStack.Clear();
+                    break;
+                case F3DEXCommandID.F3DEX_G_ENDDL:
+                case F3DEXCommandID.F3DEX_G_MK64_ENDDL:
+                    //Need to stop reading the current dl, jump back up the stack
                     break;
 
                 case F3DEXCommandID.F3DEX_G_TEXTURE:
@@ -307,32 +365,21 @@ namespace Cereal64.Microcodes.F3DEX
                 case F3DEXCommandID.F3DEX_G_VTX:
                     F3DEX_G_Vtx vtx = (F3DEX_G_Vtx)command;
 
-                    RomFile file;
-                    int offset;
                     if(RomProject.Instance.FindRamOffset(vtx.VertexSourceAddress, out file, out offset))
                     {
-                        if (file.GetElementAt(offset) is VertexCollection)
+                        if (file.HasElementAt(offset, out el) && el is VertexCollection)
                         {
                             //Just update the reference buffer
-                            VertexCollection collection = (VertexCollection)file.GetElementAt(offset);
+                            VertexCollection collection = (VertexCollection)el;
 
                             if (vtx.VertexCount > 0)
                             {
-                                int startIndex = 0;
-                                bool foundVertices = false;
-                                for (int i = 0; i < collection.Vertices.Count; i++)
+                                int startIndex = (offset - el.FileOffset) / Vertex.Vertex_Length;
+                                if (collection.Vertices.Count >= startIndex + vtx.VertexCount)
                                 {
-                                    if (collection.Vertices[i].FileOffset == offset)
+                                    for (int i = 0; i < vtx.VertexCount; i++)
                                     {
-                                        startIndex = i;
-                                        foundVertices = true;
-                                    }
-
-                                    if (foundVertices)
-                                    {
-                                        _vertexBuffer[vtx.TargetBufferIndex + (i - startIndex)] = collection.Vertices[i];
-                                        if (i - startIndex + 1 >= vtx.VertexCount)
-                                            break;
+                                        _vertexBuffer[vtx.TargetBufferIndex + (i)] = collection.Vertices[i + startIndex];
                                     }
                                 }
                             }
@@ -369,43 +416,10 @@ namespace Cereal64.Microcodes.F3DEX
                 case F3DEXCommandID.F3DEX_G_TRI2:
                     if (TMEM.TileDescriptors[DefaultTextureTile].SettingsChanged)
                     {
-                        //Try seeing if the texture has been loaded before
-                        if (!TryLoadExistingTexture(TMEM.TileDescriptors[DefaultTextureTile], out _currentImage) &&
-                            TMEM.LoadedData.ContainsKey(TMEM.TileDescriptors[DefaultTextureTile].TMem))
-                        {
-                            LoadedTMemData tmemInfo = TMEM.LoadedData[TMEM.TileDescriptors[DefaultTextureTile].TMem];
+                        LoadCurrentImage();
 
-                            //First try loading up the palette
-                            Palette palette = null;
-                            if (!TryLoadExistingPalette(out palette) &&
-                                TMEM.LoadedData.ContainsKey(PALETTE_TMEM_OFFSET))
-                            {
-                                palette = ReadPaletteFromTMem();
+                        //////////
 
-                                if (palette != null)
-                                {
-                                    tmemInfo = TMEM.LoadedData[PALETTE_TMEM_OFFSET];
-
-                                    if (!_foundPalettes.ContainsKey(tmemInfo.SourceFile))
-                                        _foundPalettes.Add(tmemInfo.SourceFile, new List<Palette>());
-
-                                    _foundPalettes[tmemInfo.SourceFile].Add(palette);
-                                }
-                            }
-
-                            //Load up new Texture
-                            _currentImage = ReadTextureFromTMem(TMEM.TileDescriptors[DefaultTextureTile], palette);
-
-                            if (_currentImage != null)
-                            {
-                                //Store in the found variables
-                                if (!_foundTextures.ContainsKey(tmemInfo.SourceFile))
-                                    _foundTextures.Add(tmemInfo.SourceFile, new List<Texture>());
-
-                                _foundTextures[tmemInfo.SourceFile].Add(_currentImage);
-
-                            }
-                        }
                         TMEM.TileDescriptors[0].SettingsChanged = false;
                     }
                     if (command.CommandID == F3DEXCommandID.F3DEX_G_TRI1)
@@ -422,7 +436,6 @@ namespace Cereal64.Microcodes.F3DEX
                         F3DEX_G_Tri2 tri = (F3DEX_G_Tri2)command;
                         tri.ImageReference = _currentImage;
 
-
                         tri.Vertex1Reference = _vertexBuffer[tri.Vertex1];
                         tri.Vertex2Reference = _vertexBuffer[tri.Vertex2];
                         tri.Vertex3Reference = _vertexBuffer[tri.Vertex3];
@@ -436,67 +449,134 @@ namespace Cereal64.Microcodes.F3DEX
             }
         }
 
-        private static bool TryLoadExistingTexture(TileDescriptor tile, out Texture texture)
+        private static void LoadCurrentImage()
         {
-            texture = null;
-
-            if (TMEM.LoadedElements.ContainsKey(TMEM.TileDescriptors[DefaultTextureTile].TMem))
+            //Try to load the F3DEXImage if it already has been loaded
+            if (!TryLoadExistingImage(TMEM.TileDescriptors[DefaultTextureTile], out _currentImage))
             {
-                texture = (TMEM.LoadedElements[TMEM.TileDescriptors[DefaultTextureTile].TMem] as Texture);
-                Palette newPalette;
-              //  if (TryLoadExistingPalette(out newPalette))
-             //       texture.ImagePalette = newPalette;
-                return true;
+                //If not, find or convert stuff to Texture & Palette, & make a new F3DEXImage
+                Texture newTexture = ReadTextureFromTMem(TMEM.TileDescriptors[DefaultTextureTile]);
+
+                if (newTexture != null && TMEM.LoadedData.ContainsKey(TMEM.TileDescriptors[DefaultTextureTile].TMem))
+                {
+                    LoadedTMemData tmemInfo = TMEM.LoadedData[TMEM.TileDescriptors[DefaultTextureTile].TMem];
+
+                    //Store in the found variables
+                    if (!_foundTextures.ContainsKey(tmemInfo.SourceFile))
+                        _foundTextures.Add(tmemInfo.SourceFile, new List<Texture>());
+
+                    if (!_foundTextures[tmemInfo.SourceFile].Contains(newTexture))
+                        _foundTextures[tmemInfo.SourceFile].Add(newTexture);
+
+                    if (newTexture.Format == Texture.ImageFormat.CI)
+                    {
+                        Palette newPalette = ReadPaletteFromTMem();
+
+                        if (newPalette != null &&
+                            TMEM.LoadedData.ContainsKey(PALETTE_TMEM_OFFSET))
+                        {
+                            tmemInfo = TMEM.LoadedData[PALETTE_TMEM_OFFSET];
+
+                            if (!_foundPalettes.ContainsKey(tmemInfo.SourceFile))
+                                _foundPalettes.Add(tmemInfo.SourceFile, new List<Palette>());
+
+                            if (!_foundPalettes[tmemInfo.SourceFile].Contains(newPalette))
+                                _foundPalettes[tmemInfo.SourceFile].Add(newPalette);
+
+                            //Make new F3DEXImage here!
+                            _currentImage = new F3DEXImage(newTexture, newPalette);
+                        }
+                        else
+                            _currentImage = null;
+                    }
+                    else
+                    {
+                        //Make new F3DEXImage for the texture
+                        _currentImage = new F3DEXImage(newTexture);
+                    }
+                }
+                else
+                    _currentImage = null;
             }
 
-            if (!TMEM.LoadedData.ContainsKey(TMEM.TileDescriptors[DefaultTextureTile].TMem))
-                return false;
-
-            LoadedTMemData tmemInfo = TMEM.LoadedData[TMEM.TileDescriptors[DefaultTextureTile].TMem];
-
-            if(tmemInfo.SourceFile == null || !_foundTextures.ContainsKey(tmemInfo.SourceFile))
-                return false;
-
-            for (int i = 0; i < _foundTextures[tmemInfo.SourceFile].Count; i++)
+            //Check if image needs to be added to the list
+            if (_currentImage != null && !_foundImages.Contains(_currentImage))
             {
-                if (_foundTextures[tmemInfo.SourceFile][i].FileOffset == tmemInfo.FileOffset)
+                _foundImages.Add(_currentImage);
+
+                if (!_imagesByTexture.ContainsKey(_currentImage.Texture))
+                    _imagesByTexture.Add(_currentImage.Texture, new List<F3DEXImage>());
+                _imagesByTexture[_currentImage.Texture].Add(_currentImage);
+                foreach (Palette p in _currentImage.BasePalettes)
                 {
-                    texture = _foundTextures[tmemInfo.SourceFile][i];
-                    return true;
+                    if (!_imagesByPalette.ContainsKey(p))
+                        _imagesByPalette.Add(p, new List<F3DEXImage>());
+                    _imagesByPalette[p].Add(_currentImage);
                 }
             }
-
-            return false;
         }
 
-        private static bool TryLoadExistingPalette(out Palette palette)
+        private static bool TryLoadExistingImage(TileDescriptor tile, out F3DEXImage image)
         {
-            palette = null;
+            image = null;
 
-            if (TMEM.LoadedElements.ContainsKey(PALETTE_TMEM_OFFSET))
+            N64DataElement el;
+            Texture texture;
+
+            if(TMEM.LoadedElements.ContainsKey(tile.TMem) && TMEM.LoadedElements[tile.TMem] is Texture)
+                texture = (Texture)TMEM.LoadedElements[tile.TMem];
+            else if (TMEM.LoadedData.ContainsKey(tile.TMem))
             {
-                palette = (TMEM.LoadedElements[PALETTE_TMEM_OFFSET] as Palette);
+                LoadedTMemData data = TMEM.LoadedData[tile.TMem];
+                if (data.SourceFile.HasElementExactlyAt(data.FileOffset, out el) && el is Texture)
+                    texture = (Texture)el;
+                else
+                    return false;
+            }
+            else
+                return false;
+
+            if (!_imagesByTexture.ContainsKey(texture) || _imagesByTexture[texture].Count == 0)
+                return false;
+
+            if (texture.Format == Texture.ImageFormat.CI)
+            {
+                Palette palette;
+
+                //Handle palette stuff here, just in case same texture but different palettes are available
+                if (TMEM.LoadedElements.ContainsKey(PALETTE_TMEM_OFFSET) && TMEM.LoadedElements[PALETTE_TMEM_OFFSET] is Palette)
+                    palette = (Palette)TMEM.LoadedElements[PALETTE_TMEM_OFFSET];
+                else if (TMEM.LoadedData.ContainsKey(PALETTE_TMEM_OFFSET))
+                {
+                    LoadedTMemData paletteData = TMEM.LoadedData[PALETTE_TMEM_OFFSET];
+                    if (paletteData.SourceFile.HasElementExactlyAt(paletteData.FileOffset, out el) && el is Palette)
+                        palette = (Palette)el;
+                    else
+                        return false;
+                }
+                else
+                    return false;
+
+                if (!_imagesByPalette.ContainsKey(palette) || _imagesByPalette[palette].Count == 0)
+                    return false;
+
+                List<F3DEXImage> mixedImages = _imagesByPalette[palette].Intersect(_imagesByTexture[texture]).ToList();
+
+                //in the future, can there be more than 1 F3DEXImage??
+
+                if (mixedImages.Count == 0)
+                    return false;
+
+                image = mixedImages[0];
                 return true;
             }
-
-            if (!TMEM.LoadedData.ContainsKey(PALETTE_TMEM_OFFSET))
-                return false;
-
-            LoadedTMemData tmemInfo = TMEM.LoadedData[PALETTE_TMEM_OFFSET];
-
-            if (tmemInfo.SourceFile == null || !_foundPalettes.ContainsKey(tmemInfo.SourceFile))
-                return false;
-
-            for (int i = 0; i < _foundPalettes[tmemInfo.SourceFile].Count; i++)
+            else
             {
-                if (_foundPalettes[tmemInfo.SourceFile][i].FileOffset == tmemInfo.FileOffset)
-                {
-                    palette = _foundPalettes[tmemInfo.SourceFile][i];
-                    return true;
-                }
-            }
+                //in the future, can there be more than 1 F3DEXImage on a texture without palettes??
 
-            return false;
+                image = _imagesByTexture[texture][0];
+                return true;
+            }
         }
 
         private const int PALETTE_TMEM_OFFSET = 0x100;
@@ -509,6 +589,12 @@ namespace Cereal64.Microcodes.F3DEX
             if (!TMEM.LoadedData.ContainsKey(PALETTE_TMEM_OFFSET))
                 return null;
 
+            //If it's already loaded, return it
+            if (TMEM.LoadedElements.ContainsKey(PALETTE_TMEM_OFFSET) &&
+                TMEM.LoadedElements[PALETTE_TMEM_OFFSET] is Palette)
+                return (Palette)TMEM.LoadedElements[PALETTE_TMEM_OFFSET];
+
+            //Else create it
             int offset = TMEM.LoadedData[PALETTE_TMEM_OFFSET].FileOffset;
             int sizeOfData = TMEM.LoadedData[PALETTE_TMEM_OFFSET].Size;
 
@@ -519,13 +605,20 @@ namespace Cereal64.Microcodes.F3DEX
 
             return newPalette;
         }
-
-        private static Texture ReadTextureFromTMem(TileDescriptor tile, Palette palette = null)
+        
+        private static Texture ReadTextureFromTMem(TileDescriptor tile)
         {
+            //NOTE: THIS WON'T WORK IF ALL TEXTURES/PALETTES AREN'T PRELOADED. SINCE NEW TEXTURES/PALETTES ARE STORED IN
+            //       _FOUNDTEXTURES INSTEAD OF THE ROMFILE, A SECOND TIME ITS LOADED THE TMEM WILL NOT FIND THE FIRST ONE!!
             Texture newTexture;
 
             if (!TMEM.LoadedData.ContainsKey(tile.TMem))
                 return null;
+
+            //If it's already loaded, return it
+            if (TMEM.LoadedElements.ContainsKey(tile.TMem) &&
+                TMEM.LoadedElements[tile.TMem] is Texture)
+                return (Texture)TMEM.LoadedElements[tile.TMem];
 
             //if (!tile.On)   //Not sure if used??
             //    return null;
@@ -555,20 +648,12 @@ namespace Cereal64.Microcodes.F3DEX
             byte[] data = new byte[sizeOfData];
             Array.Copy(TMEM.Data, tile.TMemInBytes, data, 0, sizeOfData);
             
-            if(tile.ImageFormat == Texture.ImageFormat.CI)
-                newTexture = new Texture(offset, data, tile.ImageFormat, tile.PixelSize,
-                    widthInTexels, heightInTexels, palette, tile.Palette);
-            else
-                newTexture = new Texture(offset, data, tile.ImageFormat, tile.PixelSize,
-                    widthInTexels, heightInTexels);
+            newTexture = new Texture(offset, data, tile.ImageFormat, tile.PixelSize, widthInTexels, heightInTexels);
             
             tile.SettingsChanged = false;
 
             return newTexture;
         }
-
-*/
-    #endregion
 
     }
 
