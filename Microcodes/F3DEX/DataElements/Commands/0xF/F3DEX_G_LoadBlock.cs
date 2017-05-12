@@ -60,6 +60,9 @@ namespace Cereal64.Microcodes.F3DEX.DataElements.Commands
         DescriptionAttribute("True if the command was loaded without errors")]
         public override bool IsValid { get; protected set; }
 
+        [BrowsableAttribute(false)]
+        public F3DEXImage ImageReference { get; set; }
+
         public F3DEX_G_LoadBlock(int index, byte[] rawBytes)
             : base (index, rawBytes)
         {

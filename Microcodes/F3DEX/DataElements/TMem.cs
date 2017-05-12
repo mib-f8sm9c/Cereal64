@@ -144,21 +144,21 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         public Texture.PixelInfo PixelSize
         {
             get { return _pixelSize; }
-            set { _pixelSize = value; SettingsChanged = true; }
+            set { if (_pixelSize != value) { _pixelSize = value; SettingsChanged = true; } }
         }
         private Texture.PixelInfo _pixelSize;
 
         public Texture.ImageFormat ImageFormat
         {
             get { return _imageFormat; }
-            set { _imageFormat = value; SettingsChanged = true; }
+            set { if (_imageFormat != value) { _imageFormat = value; SettingsChanged = true; } }
         }
         private Texture.ImageFormat _imageFormat;
 
         public ushort Line
         {
             get { return _line; }
-            set { _line = value; SettingsChanged = true; }
+            set { if (_line != value) { _line = value; SettingsChanged = true; } }
         }
         private ushort _line;
 
@@ -170,133 +170,133 @@ namespace Cereal64.Microcodes.F3DEX.DataElements
         public ushort TMem
         {
             get { return _tMem; }
-            set { _tMem = value; SettingsChanged = true; }
+            set { if (_tMem != value) { _tMem = value; SettingsChanged = true; } }
         }
         private ushort _tMem;
 
         public byte Tile
         {
             get { return _tile; }
-            set { _tile = value; SettingsChanged = true; }
+            set { if (_tile != value) { _tile = value; SettingsChanged = true; } }
         }
         private byte _tile;
 
         public byte Palette
         {
             get { return _palette; }
-            set { _palette = value; SettingsChanged = true; }
+            set { if (_palette != value) { _palette = value; SettingsChanged = true; } }
         }
         private byte _palette;
 
         public Commands.F3DEX_G_SetTile.TextureMirrorSetting CMTMirror
         {
             get { return _cmtMirror; }
-            set { _cmtMirror = value; SettingsChanged = true; }
+            set { if (_cmtMirror != value) {  _cmtMirror = value; SettingsChanged = true; } }
         }
         private Commands.F3DEX_G_SetTile.TextureMirrorSetting _cmtMirror;
 
         public Commands.F3DEX_G_SetTile.TextureMirrorSetting CMSMirror
         {
             get { return _cmsMirror; }
-            set { _cmsMirror = value; SettingsChanged = true; }
+            set { if (_cmsMirror != value) {  _cmsMirror = value; SettingsChanged = true; } }
         }
         private Commands.F3DEX_G_SetTile.TextureMirrorSetting _cmsMirror;
 
         public Commands.F3DEX_G_SetTile.TextureWrapSetting CMTWrap
         {
             get { return _cmtWrap; }
-            set { _cmtWrap = value; SettingsChanged = true; }
+            set { if (_cmtWrap != value) {  _cmtWrap = value; SettingsChanged = true; } }
         }
         private Commands.F3DEX_G_SetTile.TextureWrapSetting _cmtWrap;
 
         public Commands.F3DEX_G_SetTile.TextureWrapSetting CMSWrap
         {
             get { return _cmsWrap; }
-            set { _cmsWrap = value; SettingsChanged = true; }
+            set { if (_cmsWrap != value) {  _cmsWrap = value; SettingsChanged = true; } }
         }
         private Commands.F3DEX_G_SetTile.TextureWrapSetting _cmsWrap;
 
         public byte MaskT
         {
             get { return _maskT; }
-            set { _maskT = value; SettingsChanged = true; }
+            set { if (_maskT != value) {  _maskT = value; SettingsChanged = true; } }
         }
         private byte _maskT;
 
         public byte ShiftT
         {
             get { return _shiftT; }
-            set { _shiftT = value; SettingsChanged = true; }
+            set { if (_shiftT != value) {  _shiftT = value; SettingsChanged = true; } }
         }
         private byte _shiftT;
 
         public byte MaskS
         {
             get { return _maskS; }
-            set { _maskS = value; SettingsChanged = true; }
+            set { if (_maskS != value) {  _maskS = value; SettingsChanged = true; } }
         }
         private byte _maskS;
 
         public byte ShiftS
         {
             get { return _shiftS; }
-            set { _shiftS = value; SettingsChanged = true; }
+            set { if (_shiftS != value) {  _shiftS = value; SettingsChanged = true; } }
         }
         private byte _shiftS;
 
         public qushort ULS
         {
             get { return _uls; }
-            set { _uls = value; SettingsChanged = true; }
+            set { if (_uls.RawValue != value.RawValue) { _uls = value; SettingsChanged = true; } }
         }
         private qushort _uls;
 
         public qushort ULT
         {
             get { return _ult; }
-            set { _ult = value; SettingsChanged = true; }
+            set { if (_ult.RawValue != value.RawValue) { _ult = value; SettingsChanged = true; } }
         }
         private qushort _ult;
 
         public qushort LRS
         {
             get { return _lrs; }
-            set { _lrs = value; SettingsChanged = true; }
+            set { if (_lrs.RawValue != value.RawValue) { _lrs = value; SettingsChanged = true; } }
         }
         private qushort _lrs;
 
         public qushort LRT
         {
             get { return _lrt; }
-            set { _lrt = value; SettingsChanged = true; }
+            set { if (_lrt.RawValue != value.RawValue) { _lrt = value; SettingsChanged = true; } }
         }
         private qushort _lrt;
 
         public bool On
         {
             get { return _on; }
-            set { _on = value; SettingsChanged = true; }
+            set { if (_on != value) {  _on = value; SettingsChanged = true; } }
         }
         private bool _on;
 
         public byte Level
         {
             get { return _level; }
-            set { _level = value; SettingsChanged = true; }
+            set { if (_level != value) {  _level = value; SettingsChanged = true; } }
         }
         private byte _level;
 
         public ushort ScaleS
         {
             get { return _scaleS; }
-            set { _scaleS = value; SettingsChanged = true; }
+            set { if (_scaleS != value) { _scaleS = value; SettingsChanged = true; } }
         }
         private ushort _scaleS;
 
         public ushort ScaleT
         {
             get { return _scaleT; }
-            set { _scaleT = value; SettingsChanged = true; }
+            set { if (_scaleT != value) {  _scaleT = value; SettingsChanged = true; } }
         }
         private ushort _scaleT;
 

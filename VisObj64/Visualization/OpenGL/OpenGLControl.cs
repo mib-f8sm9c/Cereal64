@@ -22,7 +22,7 @@ namespace VisObj64.Visualization.OpenGL
             Select
         }
 
-        private MouseFunction _mouseFunction;
+        public MouseFunction MouseMode { get; set; }
 
         public bool OpenGLLoaded { get; private set; }
 
@@ -33,6 +33,13 @@ namespace VisObj64.Visualization.OpenGL
             get { return _selectedElements.AsReadOnly(); }
         }
         private List<VO64GraphicsElement> _selectedElements;
+
+        private float _minSelectBoxX, _minSelectBoxY, _minSelectBoxZ, _maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ;
+
+        private bool CanDisplaySelectBox()
+        {
+            return !(_minSelectBoxX == _maxSelectBoxX || _minSelectBoxY == _maxSelectBoxY || _minSelectBoxZ == _maxSelectBoxZ);
+        }
 
         public ICamera Camera
         {
@@ -62,7 +69,7 @@ namespace VisObj64.Visualization.OpenGL
             GraphicsCollections = new List<VO64GraphicsCollection>();
             _selectedElements = new List<VO64GraphicsElement>();
 
-            _mouseFunction = MouseFunction.Camera;
+            MouseMode = MouseFunction.Camera;
             
             _glDisplay.MouseWheel += new MouseEventHandler(_glDisplay_MouseWheel);
         }
@@ -153,19 +160,176 @@ namespace VisObj64.Visualization.OpenGL
 
         private uint[] selectBuffer = new uint[16];
 
-        private void SelectAtMouse(bool addSelection)
+        private void SelectAtMouse(MouseEventArgs e, bool addSelection)
         {
-            //http://www.glprogramming.com/red/chapter13.html
-            GL.SelectBuffer(16, selectBuffer);
-            GL.RenderMode(RenderingMode.Select);
-            int hits;
-            gl_DrawScene();
-            hits = GL.RenderMode(RenderingMode.Render);
+            int[] viewport = new int[4];
+            Matrix4 modelMatrix, projMatrix;
 
-            //look through the select buffer for the closest object to the camera?
+            GL.GetFloat(GetPName.ModelviewMatrix, out modelMatrix);
+            GL.GetFloat(GetPName.ProjectionMatrix, out projMatrix);
+            GL.GetInteger(GetPName.Viewport, viewport);
+
+            Vector3 start = UnProject(new Vector3(e.X, e.Y, 0.0f), projMatrix, modelMatrix, new Size(viewport[2], viewport[3]));
+            Vector3 end = UnProject(new Vector3(e.X, e.Y, 1.0f), projMatrix, modelMatrix, new Size(viewport[2], viewport[3]));
+            Vector3 dist = end - start;
+
+            //Now we just need to be able to go through each triangle and figure out if it intersects!
+            List<VO64GraphicsCollection> graphicsObjects = new List<VO64GraphicsCollection>();
+            graphicsObjects.AddRange(this.GraphicsCollections);
+
+            float t, minEl = float.MaxValue;
+            VO64GraphicsElement selectedEl = null;
+
+            while (graphicsObjects.Count > 0)
+            {
+                VO64GraphicsCollection coll = graphicsObjects.Last();
+                graphicsObjects.RemoveAt(graphicsObjects.Count - 1);
+
+                graphicsObjects.AddRange(coll.Collections);
+
+                foreach (VO64GraphicsElement el in coll.Elements)
+                {
+                    if (el.Enabled)
+                    {
+                        foreach (IVO64Triangle tri in el.Triangles)
+                        {
+                            if(rayIntersectsTriangle(start, dist, 
+                                new Vector3(el.Vertices[tri.T1].X, el.Vertices[tri.T1].Y, el.Vertices[tri.T1].Z),
+                                new Vector3(el.Vertices[tri.T2].X, el.Vertices[tri.T2].Y, el.Vertices[tri.T2].Z),
+                                new Vector3(el.Vertices[tri.T3].X, el.Vertices[tri.T3].Y, el.Vertices[tri.T3].Z),
+                                out t))
+                            {
+                                if(t < minEl)
+                                {
+                                    minEl = t;
+                                    selectedEl = el;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (selectedEl != null)
+            {
+                if(!addSelection)
+                    this.ClearSelectedElements();
+                this._selectedElements.Add(selectedEl);
+
+                //Handle the select box
+                ClearSelectBox();
+
+                float minX = float.MaxValue, maxX = float.MinValue, minZ = float.MaxValue, maxZ = float.MinValue, minY = float.MaxValue, maxY = float.MinValue;
+
+                foreach (VO64GraphicsElement el in _selectedElements)
+                {
+                    foreach (IVO64Vertex vtx in el.Vertices)
+                    {
+                        if (minX > vtx.X)
+                            minX = vtx.X;
+                        if (maxX < vtx.X)
+                            maxX = vtx.X;
+                        if (minY > vtx.Y)
+                            minY = vtx.Y;
+                        if (maxY < vtx.Y)
+                            maxY = vtx.Y;
+                        if (minZ > vtx.Z)
+                            minZ = vtx.Z;
+                        if (maxZ < vtx.Z)
+                            maxZ = vtx.Z;
+                    }
+                }
+
+                SetSelectBox(minX, minY, minZ, maxX, maxY, maxZ);
+                //ReRender();
+                RefreshGraphics();
+            }
         }
 
-        private void SelectElement(VO64GraphicsElement element)
+        public static Vector3 UnProject(Vector3 mouse, Matrix4 projection, Matrix4 view, Size viewport)
+        {
+            Vector4 vec;
+
+            vec.X = 2.0f * mouse.X / (float)viewport.Width - 1;
+            vec.Y = -(2.0f * mouse.Y / (float)viewport.Height - 1);
+            vec.Z = mouse.Z;
+            vec.W = 1.0f;
+
+            Matrix4 viewInv = Matrix4.Invert(view);
+            Matrix4 projInv = Matrix4.Invert(projection);
+
+            Vector4.Transform(ref vec, ref projInv, out vec);
+            Vector4.Transform(ref vec, ref viewInv, out vec);
+
+            if (vec.W > 0.000001f || vec.W < -0.000001f)
+            {
+                vec.X /= vec.W;
+                vec.Y /= vec.W;
+                vec.Z /= vec.W;
+            }
+
+            return vec.Xyz;
+        }
+
+        //http://www.lighthouse3d.com/tutorials/maths/ray-triangle-intersection/
+        bool rayIntersectsTriangle(Vector3 p, Vector3 d,
+			        Vector3 v0, Vector3 v1, Vector3 v2, out float t)
+        {
+	        Vector3 e1,e2,h,s,q = Vector3.Zero;
+	        float a,f,u,v;
+            e1 = v1 - v0;
+            e2 = v2 - v0;
+            t = 0;
+
+            h = Vector3.Cross(d, e2);
+            a = Vector3.Dot(e1, h);
+
+	        if (a > -0.00001 && a < 0.00001)
+		        return(false);
+
+	        f = 1/a;
+            s = p - v0;
+            u = f * (Vector3.Dot(s, h));
+
+	        if (u < 0.0 || u > 1.0)
+		        return(false);
+
+            q = Vector3.Cross(s, e1);
+            v = f * Vector3.Dot(d, q);
+
+	        if (v < 0.0 || u + v > 1.0)
+		        return(false);
+
+	        // at this stage we can compute t to find out where
+	        // the intersection point is on the line
+            t = f * Vector3.Dot(e2, q);
+
+            if (t > 0.00001) // ray intersection
+            {
+                //t is distance from p along d!!
+                return (true);
+            }
+
+            else // this means that there is a line intersection
+            // but not a ray intersection
+            {
+                t = 0;
+                return (false);
+            }
+
+        }
+
+        public void ClearSelectedElements()
+        {
+            while(_selectedElements.Count > 0)
+            {
+                _selectedElements[0].Selected = false;
+                _selectedElements.RemoveAt(0);
+            }
+        }
+
+        public void SelectElement(VO64GraphicsElement element)
         {
             //Check if element exists?
             if (!_selectedElements.Contains(element))
@@ -175,7 +339,7 @@ namespace VisObj64.Visualization.OpenGL
             }
         }
 
-        private void UnselectElement(VO64GraphicsElement element)
+        public void UnselectElement(VO64GraphicsElement element)
         {
             //Check if element exists?
             if (_selectedElements.Contains(element))
@@ -183,6 +347,26 @@ namespace VisObj64.Visualization.OpenGL
                 _selectedElements.Remove(element);
                 element.Selected = false;
             }
+        }
+
+        public void SetSelectBox(float minX, float minY, float minZ, float maxX, float maxY, float maxZ)
+        {
+            _minSelectBoxX = minX;
+            _minSelectBoxY = minY;
+            _minSelectBoxZ = minZ;
+            _maxSelectBoxX = maxX;
+            _maxSelectBoxY = maxY;
+            _maxSelectBoxZ = maxZ;
+        }
+
+        public void ClearSelectBox()
+        {
+            _minSelectBoxX = 0;
+            _minSelectBoxY = 0;
+            _minSelectBoxZ = 0;
+            _maxSelectBoxX = 0;
+            _maxSelectBoxY = 0;
+            _maxSelectBoxZ = 0;
         }
 
         private void OpenGLControl_Resize(object sender, EventArgs e)
@@ -232,14 +416,17 @@ namespace VisObj64.Visualization.OpenGL
             MakeCurrent();
 
             //Any camera code or interaction code goes here
-            switch(_mouseFunction)
+            switch (MouseMode)
             {
                 case MouseFunction.Camera:
                     Camera.OnMouseDown(e);
                     break;
                 case MouseFunction.Select:
-                    OpenTK.Input.KeyboardState keyboard = OpenTK.Input.Keyboard.GetState();
-                    SelectAtMouse(keyboard.IsKeyDown(OpenTK.Input.Key.ShiftLeft) || keyboard.IsKeyDown(OpenTK.Input.Key.ShiftRight));
+                    if (e.Button == System.Windows.Forms.MouseButtons.Left)
+                    {
+                        OpenTK.Input.KeyboardState keyboard = OpenTK.Input.Keyboard.GetState();
+                        SelectAtMouse(e, keyboard.IsKeyDown(OpenTK.Input.Key.ShiftLeft) || keyboard.IsKeyDown(OpenTK.Input.Key.ShiftRight));
+                    }
                     break;
             }
         }
@@ -370,8 +557,54 @@ namespace VisObj64.Visualization.OpenGL
                 collection.Draw();
             }
 
+            //Selection box
+            if (CanDisplaySelectBox())
+            {
+                DrawSelectBox();
+            }
+
             // Restore the state
             GL.PopMatrix();
+        }
+
+        private void DrawSelectBox()
+        {
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.Begin(BeginMode.Quads);
+
+            GL.Color3((byte)255, (byte)255, (byte)0);
+            GL.Vertex3(_minSelectBoxX, _minSelectBoxY, _minSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _minSelectBoxY, _minSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
+            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
+
+            GL.Vertex3(_minSelectBoxX, _minSelectBoxY, _maxSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _minSelectBoxY, _maxSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
+            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
+
+            GL.Vertex3(_minSelectBoxX, _minSelectBoxY, _minSelectBoxZ);
+            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
+            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
+            GL.Vertex3(_minSelectBoxX, _minSelectBoxY, _maxSelectBoxZ);
+
+            GL.Vertex3(_maxSelectBoxX, _minSelectBoxY, _minSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _minSelectBoxY, _maxSelectBoxZ);
+
+            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
+            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
+
+            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
+            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
+            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
+
+            GL.End();
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
         }
 
         #endregion

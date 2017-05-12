@@ -16,12 +16,15 @@ namespace Cereal64.VisObj64.Data.OpenGL
         private int _vboIndex; //vertex buffer object (vertex information)
         private int _iboIndex; //index buffer object (references to indexes for the triangles
 
+        public IVO64Texture Texture { get { return _texture; } }
         private IVO64Texture _texture;
         private uint _textureID;
 
         //Texture information goes here too
 
+        public List<IVO64Triangle> Triangles { get { return _indices; } }
         private List<IVO64Triangle> _indices;
+        public List<IVO64Vertex> Vertices { get { return _vertices; } }
         private List<IVO64Vertex> _vertices;
 
         private bool _updatedVertices = true;
@@ -34,7 +37,11 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
         public PrimitiveType RenderType = PrimitiveType.Triangles;
 
-        private VO64GraphicsElement(int vaIndex, int vbIndex, int ibIndex)
+        public bool Enabled { get; set; }
+
+        public string Name { get; set; }
+
+        protected VO64GraphicsElement(int vaIndex, int vbIndex, int ibIndex)
         {
             _vertices = new List<IVO64Vertex>();
             _indices = new List<IVO64Triangle>();
@@ -46,6 +53,8 @@ namespace Cereal64.VisObj64.Data.OpenGL
             _texture = null;
 
             Selected = false;
+            Enabled = true;
+            Name = "Element";
         }
 
         public static VO64GraphicsElement CreateNewElement()
@@ -81,6 +90,12 @@ namespace Cereal64.VisObj64.Data.OpenGL
         {
             _texture = texture;
             _updatedTexture = true;
+        }
+
+        public void UpdateVertices()
+        {
+            _updatedVertices = true;
+            _updatedIndices = true;
         }
 
         public void UpdateBuffers()
@@ -175,6 +190,9 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
         public void Draw()
         {
+            if (!Enabled)
+                return;
+
             //Double check the buffers are up to date
             UpdateBuffers();
 

@@ -50,6 +50,8 @@
     <Compile Include="F3DEX\Controls\F3DEXEditor.Designer.cs">
       <DependentUpon>F3DEXEditor.cs</DependentUpon>
     </Compile>
+    <Compile Include="F3DEX\DataElements\TMem.cs" />
+    <Compile Include="F3DEX\F3DEXReader.cs" />
     <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_DL.cs" />
     <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_MoveMem.cs" />
     <Compile Include="F3DEX\DataElements\Commands\0x0\F3DEX_G_Mtx.cs" />
@@ -108,11 +110,9 @@
     <Compile Include="F3DEX\DataElements\Palette.cs" />
     <Compile Include="F3DEX\DataElements\Texture.cs" />
     <Compile Include="F3DEX\DataElements\TextureConversion.cs" />
-    <Compile Include="F3DEX\DataElements\TMem.cs" />
     <Compile Include="F3DEX\DataElements\Vertex.cs" />
     <Compile Include="F3DEX\DataElements\VertexCollection.cs" />
     <Compile Include="F3DEX\F3DEXContainer.cs" />
-    <Compile Include="F3DEX\F3DEXReader.cs" />
     <Compile Include="F3DZEX\Controls\F3DZEXEditor.cs">
       <SubType>UserControl</SubType>
     </Compile>

@@ -16,8 +16,14 @@ namespace Cereal64.VisObj64.Data.OpenGL.Wrappers.F3DEX
         public F3DEX_G_SetTile SetTileCommand;
         public F3DEX_G_Texture TextureCommand;
 
-        public Bitmap Image {
-            get { return (F3DImage == null ? null : F3DImage.Image); } 
+        public Bitmap Image
+        {
+            get 
+            { 
+                if(F3DImage == null)
+                    return null;
+                return F3DImage.Image;
+            } 
             set
             { //Finish this later
             //    byte[] rawData = TextureConversion.CI4ToBinary(value, F3DTexture.ImagePalette, F3DTexture.PaletteIndex, true);

@@ -45,6 +45,7 @@ namespace Cereal64.Microcodes.F3DEX
         private static List<Vertex> _vertexBuffer = new List<Vertex>();
 
         private static Stack<int> _dlPointerStack = new Stack<int>();
+        private static Stack<RomFile> _dlFileStack = new Stack<RomFile>();
         //Can this work without the RomProject backing? Probably best not to use this
         //public static void ParseF3DEXCommands(IList<F3DEXCommand> commands)
         //{
@@ -82,8 +83,9 @@ namespace Cereal64.Microcodes.F3DEX
             _lastSetTileSize = null;
             _lastLoadBlock = null;
             _lastLoadTLut = null;
-
+            
             _dlPointerStack.Clear();
+            _dlFileStack.Clear();
         }
 
         public static F3DEXReaderPackage ReadF3DEXAt(RomFile file, int offset)
@@ -105,12 +107,14 @@ namespace Cereal64.Microcodes.F3DEX
 
             //A bit backwards to add it in here and then immediately pop it off, but it'll help structurally later
             _dlPointerStack.Push(offset);
+            _dlFileStack.Push(file);
 
             //OPTIMIZE THIS BY FINDING THE F3DEXCOMMANDCOLLECTION ONCE ONLY
 
             while (_dlPointerStack.Count > 0)
             {
                 offset = _dlPointerStack.Pop();
+                file = _dlFileStack.Pop();
 
                 while (offset < data.Length && offset >= 0)
                 {
@@ -147,7 +151,7 @@ namespace Cereal64.Microcodes.F3DEX
                     //Increment before so the DL jump code doesn't get confusing
                     offset += 8;
 
-                    ParseCommand(f3Command, ref offset, file);
+                    ParseCommand(f3Command, ref offset, ref file);
 
                     if (f3Command is F3DEX_G_EndDL || f3Command is F3DEX_G_MK64_EndDL) //Need to handle other end types too, like MK64EndType?
                         break;
@@ -272,7 +276,7 @@ namespace Cereal64.Microcodes.F3DEX
             return package;
         }
 
-        private static void ParseCommand(F3DEXCommand command, ref int dlOffset, RomFile refFile)
+        private static void ParseCommand(F3DEXCommand command, ref int dlOffset, ref RomFile refFile)
         {
             TileDescriptor tile;
             N64DataElement el;
@@ -290,15 +294,18 @@ namespace Cereal64.Microcodes.F3DEX
 
                     RomProject.Instance.FindRamOffset(dlCommand.DLAddress, out file, out offset);
 
-                    if (file != refFile)
-                        offset = -1;
-
                     _dlPointerStack.Push(dlOffset);
+                    _dlFileStack.Push(refFile);
 
                     dlOffset = offset;
+                    refFile = file;
 
                     if (dlCommand.ForceJump)
+                    {
                         _dlPointerStack.Clear();
+                        _dlFileStack.Clear();
+                    }
+
                     break;
                 case F3DEXCommandID.F3DEX_G_ENDDL:
                 case F3DEXCommandID.F3DEX_G_MK64_ENDDL:
@@ -354,7 +361,7 @@ namespace Cereal64.Microcodes.F3DEX
                     break;
                 case F3DEXCommandID.F3DEX_G_LOADBLOCK:
                     _lastLoadBlock = (F3DEX_G_LoadBlock)command;
-
+                    //_lastLoadBlock.ImageReference = null;
                     TMEM.LoadBlockIntoTMem(_lastLoadBlock);
                     break;
                 case F3DEXCommandID.F3DEX_G_LOADTLUT:
@@ -417,15 +424,12 @@ namespace Cereal64.Microcodes.F3DEX
                     if (TMEM.TileDescriptors[DefaultTextureTile].SettingsChanged)
                     {
                         LoadCurrentImage();
-
-                        //////////
-
+                        _lastLoadBlock.ImageReference = _currentImage;
                         TMEM.TileDescriptors[0].SettingsChanged = false;
                     }
                     if (command.CommandID == F3DEXCommandID.F3DEX_G_TRI1)
                     {
                         F3DEX_G_Tri1 tri = (F3DEX_G_Tri1)command;
-                        tri.ImageReference = _currentImage;
 
                         tri.Vertex1Reference = _vertexBuffer[tri.Vertex1];
                         tri.Vertex2Reference = _vertexBuffer[tri.Vertex2];
@@ -434,7 +438,6 @@ namespace Cereal64.Microcodes.F3DEX
                     else if (command.CommandID == F3DEXCommandID.F3DEX_G_TRI2)
                     {
                         F3DEX_G_Tri2 tri = (F3DEX_G_Tri2)command;
-                        tri.ImageReference = _currentImage;
 
                         tri.Vertex1Reference = _vertexBuffer[tri.Vertex1];
                         tri.Vertex2Reference = _vertexBuffer[tri.Vertex2];

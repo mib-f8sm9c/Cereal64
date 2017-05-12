@@ -20,10 +20,25 @@ namespace Cereal64.VisObj64.Data.OpenGL
         }
         private List<VO64GraphicsCollection> _collections;
 
-        public VO64GraphicsCollection()
+        public List<VO64GraphicsElement> GetAllElements()
+        {
+            List<VO64GraphicsElement> elements = new List<VO64GraphicsElement>();
+            elements.AddRange(_elements);
+            foreach (VO64GraphicsCollection coll in _collections)
+                elements.AddRange(coll.GetAllElements());
+            return elements;
+        }
+
+        public bool Enabled { get; set; }
+
+        public string Name { get; set; }
+
+        public VO64GraphicsCollection(string name = "Collection")
         {
             _elements = new List<VO64GraphicsElement>();
             _collections = new List<VO64GraphicsCollection>();
+            Enabled = true;
+            Name = name;
         }
 
         public void Add(VO64GraphicsElement element)
@@ -52,6 +67,9 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
         public void Draw()
         {
+            if (!Enabled)
+                return;
+
             //Draw all elements
             foreach (VO64GraphicsElement element in _elements)
                 element.Draw();
