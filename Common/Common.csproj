@@ -64,6 +64,12 @@
     <Compile Include="Controls\N64DataElementVisualizer.Designer.cs">
       <DependentUpon>N64DataElementVisualizer.cs</DependentUpon>
     </Compile>
+    <Compile Include="Controls\NumericSliderInput.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Controls\NumericSliderInput.Designer.cs">
+      <DependentUpon>NumericSliderInput.cs</DependentUpon>
+    </Compile>
     <Compile Include="Controls\WatermarkTextBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -115,6 +121,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\N64DataElementVisualizer.resx">
       <DependentUpon>N64DataElementVisualizer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Controls\NumericSliderInput.resx">
+      <DependentUpon>NumericSliderInput.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>

@@ -11,6 +11,13 @@ namespace Cereal64.VisObj64.Data.OpenGL
     public class VO64GraphicsElement
     {
         //TO DO: PROPERLY DISPOSE POST-USE
+        public enum ShadingMode
+        {
+            None,
+            AlphaOnly,
+            ColorOnly,
+            Full
+        }
 
         private int _vaoIndex; //vertex array object (handy handle for everything)
         private int _vboIndex; //vertex buffer object (vertex information)
@@ -41,6 +48,10 @@ namespace Cereal64.VisObj64.Data.OpenGL
 
         public string Name { get; set; }
 
+        public Color ShadingColor { get; set; }
+
+        public ShadingMode ShadeMode { get; set; }
+
         protected VO64GraphicsElement(int vaIndex, int vbIndex, int ibIndex)
         {
             _vertices = new List<IVO64Vertex>();
@@ -55,6 +66,7 @@ namespace Cereal64.VisObj64.Data.OpenGL
             Selected = false;
             Enabled = true;
             Name = "Element";
+            ShadingColor = Color.White;
         }
 
         public static VO64GraphicsElement CreateNewElement()
@@ -209,7 +221,47 @@ namespace Cereal64.VisObj64.Data.OpenGL
                 GL.Enable(EnableCap.Texture2D);
             }
 
+            //Blending settings
+            bool useShading = ShadeMode != ShadingMode.None;
+            bool forceBlendEnabled = !(GL.IsEnabled(EnableCap.Blend));
+            BlendingFactorSrc src = BlendingFactorSrc.SrcAlpha;
+            BlendingFactorDest dest = BlendingFactorDest.OneMinusSrcAlpha;
+
+            if (useShading)
+            {
+                if (forceBlendEnabled)
+                    GL.Enable(EnableCap.Blend);
+
+                if (ShadeMode == ShadingMode.ColorOnly)
+                    GL.BlendColor((float)ShadingColor.R / 255, (float)ShadingColor.G / 255, (float)ShadingColor.B / 255, 1.0f);
+                else
+                    GL.BlendColor(ShadingColor);
+
+                src = (BlendingFactorSrc)GL.GetInteger(GetPName.BlendSrcAlpha);
+                dest = (BlendingFactorDest)GL.GetInteger(GetPName.BlendDstAlpha);
+
+                switch (ShadeMode)
+                {
+                    case ShadingMode.AlphaOnly:
+                        GL.BlendFunc(BlendingFactorSrc.ConstantAlpha, BlendingFactorDest.OneMinusConstantAlpha);
+                        break;
+                    case ShadingMode.ColorOnly:
+                    case ShadingMode.Full:
+                        GL.BlendFunc(BlendingFactorSrc.ConstantColor, BlendingFactorDest.OneMinusConstantColor);
+                        break;
+                }
+            }
+
             GL.DrawElements(RenderType, _indices.Count * 3, DrawElementsType.UnsignedShort, IntPtr.Zero);
+
+            //Reset blending settings
+            if (useShading)
+            {
+                GL.BlendFunc(src, dest);
+
+                if (forceBlendEnabled)
+                    GL.Disable(EnableCap.Blend);
+            }
 
             if (_textureID != 0)
                 GL.Disable(EnableCap.Texture2D);

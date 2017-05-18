@@ -34,11 +34,9 @@ namespace VisObj64.Visualization.OpenGL
         }
         private List<VO64GraphicsElement> _selectedElements;
 
-        private float _minSelectBoxX, _minSelectBoxY, _minSelectBoxZ, _maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ;
-
         private bool CanDisplaySelectBox()
         {
-            return !(_minSelectBoxX == _maxSelectBoxX || _minSelectBoxY == _maxSelectBoxY || _minSelectBoxZ == _maxSelectBoxZ);
+            return _selectedElements != null && _selectedElements.Count > 0;
         }
 
         public ICamera Camera
@@ -47,6 +45,8 @@ namespace VisObj64.Visualization.OpenGL
             set { if (_camera != null) _camera.CameraUpdated -= Camera_CameraUpdated; _camera = value; _camera.CameraUpdated += Camera_CameraUpdated; }
         }
         private ICamera _camera;
+
+        public event EventHandler SelectedElementsChanged = delegate { };
 
         [CategoryAttribute("Appearance"),
         DescriptionAttribute("Color that the OpenGL control uses to represent empty space")]
@@ -124,6 +124,7 @@ namespace VisObj64.Visualization.OpenGL
             MakeCurrent();
 
             GL.ClearColor(ClearColor);
+
             gl_DrawScene();
 
             GL.Enable(EnableCap.ColorArray);
@@ -179,6 +180,7 @@ namespace VisObj64.Visualization.OpenGL
 
             float t, minEl = float.MaxValue;
             VO64GraphicsElement selectedEl = null;
+            VO64GraphicsCollection selectedColl = null;
 
             while (graphicsObjects.Count > 0)
             {
@@ -203,6 +205,7 @@ namespace VisObj64.Visualization.OpenGL
                                 {
                                     minEl = t;
                                     selectedEl = el;
+                                    selectedColl = coll;
                                 }
                                 break;
                             }
@@ -211,39 +214,18 @@ namespace VisObj64.Visualization.OpenGL
                 }
             }
 
-            if (selectedEl != null)
+            if (selectedColl != null)
             {
                 if(!addSelection)
                     this.ClearSelectedElements();
-                this._selectedElements.Add(selectedEl);
 
-                //Handle the select box
-                ClearSelectBox();
+                this._selectedElements.Union(selectedColl.GetAllElements());
 
-                float minX = float.MaxValue, maxX = float.MinValue, minZ = float.MaxValue, maxZ = float.MinValue, minY = float.MaxValue, maxY = float.MinValue;
-
-                foreach (VO64GraphicsElement el in _selectedElements)
-                {
-                    foreach (IVO64Vertex vtx in el.Vertices)
-                    {
-                        if (minX > vtx.X)
-                            minX = vtx.X;
-                        if (maxX < vtx.X)
-                            maxX = vtx.X;
-                        if (minY > vtx.Y)
-                            minY = vtx.Y;
-                        if (maxY < vtx.Y)
-                            maxY = vtx.Y;
-                        if (minZ > vtx.Z)
-                            minZ = vtx.Z;
-                        if (maxZ < vtx.Z)
-                            maxZ = vtx.Z;
-                    }
-                }
-
-                SetSelectBox(minX, minY, minZ, maxX, maxY, maxZ);
                 //ReRender();
                 RefreshGraphics();
+
+                //need to add in a selection event so we can listen in
+                SelectedElementsChanged(this, new EventArgs());
             }
         }
 
@@ -347,26 +329,6 @@ namespace VisObj64.Visualization.OpenGL
                 _selectedElements.Remove(element);
                 element.Selected = false;
             }
-        }
-
-        public void SetSelectBox(float minX, float minY, float minZ, float maxX, float maxY, float maxZ)
-        {
-            _minSelectBoxX = minX;
-            _minSelectBoxY = minY;
-            _minSelectBoxZ = minZ;
-            _maxSelectBoxX = maxX;
-            _maxSelectBoxY = maxY;
-            _maxSelectBoxZ = maxZ;
-        }
-
-        public void ClearSelectBox()
-        {
-            _minSelectBoxX = 0;
-            _minSelectBoxY = 0;
-            _minSelectBoxZ = 0;
-            _maxSelectBoxX = 0;
-            _maxSelectBoxY = 0;
-            _maxSelectBoxZ = 0;
         }
 
         private void OpenGLControl_Resize(object sender, EventArgs e)
@@ -516,8 +478,8 @@ namespace VisObj64.Visualization.OpenGL
             GL.ColorMaterial(MaterialFace.FrontAndBack, ColorMaterialParameter.AmbientAndDiffuse);
             GL.Enable(EnableCap.ColorMaterial);
 
-	        //GL.Enable(EnableCap.Blend);
-	        //GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
             GL.AlphaFunc(AlphaFunction.Gequal, 0.5f);
             GL.Enable(EnableCap.AlphaTest);
@@ -569,42 +531,25 @@ namespace VisObj64.Visualization.OpenGL
 
         private void DrawSelectBox()
         {
+            GL.PushAttrib(AttribMask.PolygonBit);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-            GL.Begin(BeginMode.Quads);
+            GL.Begin(PrimitiveType.Triangles);
 
             GL.Color3((byte)255, (byte)255, (byte)0);
-            GL.Vertex3(_minSelectBoxX, _minSelectBoxY, _minSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _minSelectBoxY, _minSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
-            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
 
-            GL.Vertex3(_minSelectBoxX, _minSelectBoxY, _maxSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _minSelectBoxY, _maxSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
-            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
-
-            GL.Vertex3(_minSelectBoxX, _minSelectBoxY, _minSelectBoxZ);
-            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
-            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
-            GL.Vertex3(_minSelectBoxX, _minSelectBoxY, _maxSelectBoxZ);
-
-            GL.Vertex3(_maxSelectBoxX, _minSelectBoxY, _minSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _minSelectBoxY, _maxSelectBoxZ);
-
-            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
-            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
-
-            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
-            GL.Vertex3(_minSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _maxSelectBoxZ);
-            GL.Vertex3(_maxSelectBoxX, _maxSelectBoxY, _minSelectBoxZ);
+            foreach (VO64GraphicsElement el in _selectedElements)
+            {
+                foreach (IVO64Triangle tri in el.Triangles)
+                {
+                    GL.Vertex3(el.Vertices[tri.T1].X, el.Vertices[tri.T1].Y, el.Vertices[tri.T1].Z);
+                    GL.Vertex3(el.Vertices[tri.T2].X, el.Vertices[tri.T2].Y, el.Vertices[tri.T2].Z);
+                    GL.Vertex3(el.Vertices[tri.T3].X, el.Vertices[tri.T3].Y, el.Vertices[tri.T3].Z);
+                    //GL.Vertex3(el.Vertices[tri.T1].X, el.Vertices[tri.T1].Y, el.Vertices[tri.T1].Z);
+                }
+            }
 
             GL.End();
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.PopAttrib();
         }
 
         #endregion

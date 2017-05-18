@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Collections.ObjectModel;
+using System.Drawing;
 
 namespace Cereal64.VisObj64.Data.OpenGL
 {
@@ -91,6 +92,44 @@ namespace Cereal64.VisObj64.Data.OpenGL
                 collection.Dispose();
 
             _collections.Clear();
+        }
+
+        //Shading functions
+        public void SetTransparency(float transparency)
+        {
+            foreach (VO64GraphicsCollection collection in _collections)
+                collection.SetTransparency(transparency);
+
+            foreach (VO64GraphicsElement element in _elements)
+            {
+                element.ShadeMode = VO64GraphicsElement.ShadingMode.AlphaOnly;
+                element.ShadingColor = Color.FromArgb((int)Math.Round(transparency * 255), element.ShadingColor);
+            }
+        }
+
+        public void ShadeColor(Color color, bool includeTransparency)
+        {
+            foreach (VO64GraphicsCollection collection in _collections)
+                collection.ShadeColor(color, includeTransparency);
+
+            foreach (VO64GraphicsElement element in _elements)
+            {
+                if (includeTransparency)
+                    element.ShadeMode = VO64GraphicsElement.ShadingMode.Full;
+                else
+                    element.ShadeMode = VO64GraphicsElement.ShadingMode.ColorOnly;
+
+                element.ShadingColor = color;
+            }
+        }
+        
+        public void ClearShading()
+        {
+            foreach (VO64GraphicsCollection collection in _collections)
+                collection.ClearShading();
+
+            foreach (VO64GraphicsElement element in _elements)
+                element.ShadeMode = VO64GraphicsElement.ShadingMode.None;
         }
     }
 }
