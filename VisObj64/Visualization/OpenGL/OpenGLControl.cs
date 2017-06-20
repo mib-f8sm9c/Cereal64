@@ -219,7 +219,7 @@ namespace VisObj64.Visualization.OpenGL
                 if(!addSelection)
                     this.ClearSelectedElements();
 
-                this._selectedElements.Union(selectedColl.GetAllElements());
+                _selectedElements = _selectedElements.Union(selectedColl.GetAllElements()).ToList();
 
                 //ReRender();
                 RefreshGraphics();
